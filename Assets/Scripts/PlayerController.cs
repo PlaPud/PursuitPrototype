@@ -4,25 +4,36 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Rigidbody2D playerRigidBody;
-    private Animator playerAnimator;
+    [SerializeField] float walkSpeed;
+    [SerializeField] float sprintSpeed;
+    [SerializeField] float jumpSpeed;
+    private Rigidbody2D _playerRigidBody;
+    private Animator _playerAnimator;
     // Start is called before the first frame update
     void Start()
     {
-        playerRigidBody = GetComponent<Rigidbody2D>();
-        playerAnimator = GetComponent<Animator>(); 
+        _playerRigidBody = GetComponent<Rigidbody2D>();
+        _playerAnimator = GetComponent<Animator>(); 
     }
 
     // Update is called once per frame
     void Update()
     {
         float walkInput = Input.GetAxis("Horizontal");
-        playerRigidBody.velocity = new Vector2(
-                walkInput * 5.0f,
-                playerRigidBody.velocity.y
-            );
-        playerAnimator.SetFloat("walkSpeed", Mathf.Abs(walkInput));
+        bool isJump = Input.GetKeyDown(KeyCode.Space);
+        bool isSprint = Input.GetKey(KeyCode.LeftShift); 
 
+        _playerRigidBody.velocity = new Vector2(
+                walkInput * (isSprint ? sprintSpeed : walkSpeed),
+                isJump ? jumpSpeed : _playerRigidBody.velocity.y
+            );
+        _playerAnimator.SetFloat("walkSpeed", Mathf.Abs(_playerRigidBody.velocity.x));
+        _playerAnimator.SetFloat("jumpSpeed", _playerRigidBody.velocity.y);
+        HandleFlipSprite();
+    }
+
+    private void HandleFlipSprite()
+    {
         if (Input.GetAxis("Horizontal") > Mathf.Epsilon)
         {
             transform.localScale = Vector3.one;
@@ -31,6 +42,5 @@ public class PlayerController : MonoBehaviour
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
-        
     }
 }
