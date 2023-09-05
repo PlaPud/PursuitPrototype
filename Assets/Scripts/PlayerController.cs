@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -7,8 +8,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float walkSpeed;
     [SerializeField] float sprintSpeed;
     [SerializeField] float jumpSpeed;
+
+    [Header("RayCast Ground")]
+    [SerializeField] Vector2 boxSize;
+    [SerializeField] float castDistance;
+    [SerializeField] LayerMask groundLayer;
+
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -42,5 +50,25 @@ public class PlayerController : MonoBehaviour
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
+    }
+
+    private bool isGrounded() 
+    {
+        if (Physics2D.BoxCast(
+                transform.position, boxSize, 0,
+                -transform.up, groundLayer
+           ))
+        {
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
     }
 }
