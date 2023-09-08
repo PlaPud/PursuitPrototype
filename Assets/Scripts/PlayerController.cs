@@ -8,14 +8,21 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float walkSpeed;
     [SerializeField] float sprintSpeed;
     [SerializeField] float jumpSpeed;
+    [SerializeField] float crouchSpeed;
+
+    [SerializeField] LayerMask groundLayer;
 
     [Header("RayCast Ground")]
     [SerializeField] Vector2 boxSize;
     [SerializeField] float castDistance;
-    [SerializeField] LayerMask groundLayer;
+
+    [Header("BoxCast Ceiling")]
+    [SerializeField] Vector2 boxSizeAbove;
+    [SerializeField] float aboveCastDistance;
 
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
+    private bool isCrouch = false;
 
     // Start is called before the first frame update
     void Start()
@@ -28,16 +35,31 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         float walkInput = Input.GetAxis("Horizontal");
-        bool isJump = Input.GetKeyDown(KeyCode.Space);
-        bool isSprint = Input.GetKey(KeyCode.LeftShift); 
-
+        bool isJump = Input.GetKeyDown(KeyCode.Space) && isGrounded();
+        bool isSprint = Input.GetKey(KeyCode.LeftShift) && !isCrouch; 
+        
         _playerRigidBody.velocity = new Vector2(
-                walkInput * (isSprint ? sprintSpeed : walkSpeed),
+                walkInput * (
+                isSprint ? 
+                sprintSpeed 
+                : isCrouch ? 
+                crouchSpeed 
+                : walkSpeed),
                 isJump ? jumpSpeed : _playerRigidBody.velocity.y
             );
         _playerAnimator.SetFloat("walkSpeed", Mathf.Abs(_playerRigidBody.velocity.x));
         _playerAnimator.SetFloat("jumpSpeed", _playerRigidBody.velocity.y);
         HandleFlipSprite();
+
+        if (!isJump && !isSprint && Input.GetKeyDown(KeyCode.C)) 
+        {
+            if (isCrouch && !isSpaceAbove()) return; 
+            isCrouch = !isCrouch;
+            _playerAnimator.SetBool("isCrouch", isCrouch);
+        }
+
+        Debug.Log(isGrounded());
+
     }
 
     private void HandleFlipSprite()
@@ -56,7 +78,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Physics2D.BoxCast(
                 transform.position, boxSize, 0,
-                -transform.up, groundLayer
+                -transform.up, castDistance, groundLayer
            ))
         {
             return true;
@@ -67,8 +89,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private bool isSpaceAbove() 
+    {
+        if (Physics2D.BoxCast(
+                transform.position, boxSizeAbove, 0,
+                transform.up, aboveCastDistance, groundLayer
+            ))
+        {
+            return false;
+        }
+        else 
+        {
+            return true;
+        }
+    }
+
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
+        //Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
+        Gizmos.DrawWireCube(transform.position + transform.up * aboveCastDistance, boxSizeAbove);
     }
 }
