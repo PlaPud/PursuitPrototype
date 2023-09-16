@@ -20,9 +20,21 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector2 boxSizeAbove;
     [SerializeField] float aboveCastDistance;
 
+    [Header("Wall Jump")]
+    [SerializeField] float wallJumpTime;
+    [SerializeField] float wallSlideSpeed;
+    [SerializeField] float wallDistance;
+    [SerializeField] float jumpTime;
+
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
-    private bool isCrouch = false;
+    private float walkInput = 0f;
+    private bool _isCrouch = false;
+    private bool _isWallSliding = false;
+    private bool _isSprinting = false;
+    private bool _isJump = false;
+
+    private RaycastHit2D _wallCheckhit;
 
     // Start is called before the first frame update
     void Start()
@@ -34,32 +46,76 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float walkInput = Input.GetAxis("Horizontal");
-        bool isJump = Input.GetKeyDown(KeyCode.Space) && isGrounded();
-        bool isSprint = Input.GetKey(KeyCode.LeftShift) && !isCrouch; 
+        walkInput = Input.GetAxis("Horizontal");
+        _isJump = Input.GetKeyDown(KeyCode.Space) && isGrounded();
+        _isSprinting = Input.GetKey(KeyCode.LeftShift) && !_isCrouch; 
         
         _playerRigidBody.velocity = new Vector2(
                 walkInput * (
-                isSprint ? 
+                _isSprinting ? 
                 sprintSpeed 
-                : isCrouch ? 
+                : _isCrouch ? 
                 crouchSpeed 
                 : walkSpeed),
-                isJump ? jumpSpeed : _playerRigidBody.velocity.y
+                _isJump ? jumpSpeed : _playerRigidBody.velocity.y
             );
         _playerAnimator.SetFloat("walkSpeed", Mathf.Abs(_playerRigidBody.velocity.x));
         _playerAnimator.SetFloat("jumpSpeed", _playerRigidBody.velocity.y);
+        
         HandleFlipSprite();
 
-        if (!isJump && !isSprint && Input.GetKeyDown(KeyCode.C)) 
+        HandleCrouching();
+
+        HandleWallSlide();
+
+    }
+
+    private void HandleWallSlide() 
+    {
+        bool isFacingRight = transform.localScale.x == 1;
+
+        _wallCheckhit = Physics2D.Raycast(
+                transform.position,
+                new Vector2(
+                        isFacingRight ? 
+                        wallDistance : -wallDistance , 0
+                    ),
+                wallDistance,
+                groundLayer
+            );
+        Debug.DrawRay(transform.position, new Vector2(wallDistance, 0), Color.blue);
+
+        if (_wallCheckhit && !isGrounded() && Mathf.Abs(walkInput) > 0.5f)
         {
-            if (isCrouch && !isSpaceAbove()) return; 
-            isCrouch = !isCrouch;
-            _playerAnimator.SetBool("isCrouch", isCrouch);
+            _isWallSliding = true;
+            jumpTime = Time.time + wallJumpTime;
+        }
+        else if (jumpTime < Time.time) 
+        {
+            _isWallSliding = false;
         }
 
-        Debug.Log(isGrounded());
+        if (_isWallSliding) 
+        {
+            _playerRigidBody.velocity = new Vector2(
+                    _playerRigidBody.velocity.x,
+                    Mathf.Clamp(
+                            _playerRigidBody.velocity.y,
+                            wallSlideSpeed,
+                            float.MaxValue 
+                        )
+                );
+        }
+    }
 
+    private void HandleCrouching() 
+    {
+        if (!_isJump && !_isSprinting && Input.GetKeyDown(KeyCode.C))
+        {
+            if (_isCrouch && !isSpaceAbove()) return;
+            _isCrouch = !_isCrouch;
+            _playerAnimator.SetBool("isCrouch", _isCrouch);
+        }
     }
 
     private void HandleFlipSprite()
