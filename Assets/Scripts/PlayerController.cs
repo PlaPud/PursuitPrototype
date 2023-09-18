@@ -20,6 +20,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector2 boxSizeAbove;
     [SerializeField] float aboveCastDistance;
 
+    [Header("RopePoint Detection")]
+    [SerializeField] float detectRadius;
+    [SerializeField] LayerMask ropePointLayer;
+    [SerializeField] float ropeBoxWidth;
+
     [Header("Wall Jump")]
     [SerializeField] float wallJumpTime;
     [SerializeField] float wallJumpForceX;
@@ -32,8 +37,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float fallMultiplier;
     [SerializeField] float lowJumpMultiplier;
 
+
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
+    
 
     private bool _cannotWalk = false;
 
@@ -41,21 +48,30 @@ public class PlayerController : MonoBehaviour
     private bool _isJumpPressed = false;
     private bool _isSprintPressed = false;
     private bool _isCrouchPressed = false;
+    private bool _isSwingPressed = false;
 
     private bool _isCrouch = false;
     private bool _isWallSliding = false;
     private bool _isSprinting = false;
     private bool _isGroundJump = false;
+    
     private bool _isGrounded = false;
     private bool _isSpaceAbove = true;
-
     private RaycastHit2D _isTouchWall;
+    private RaycastHit2D _frontRopePointHit;
+
+    public RaycastHit2D FrontRopePointHit { get { return _frontRopePointHit; } }
+    public bool IsSwingPressed { get { return _isSwingPressed; } set { _isSwingPressed = value; } }
+    private void Awake()
+    {
+        _playerRigidBody = GetComponent<Rigidbody2D>();
+        _playerAnimator = GetComponent<Animator>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        _playerRigidBody = GetComponent<Rigidbody2D>();
-        _playerAnimator = GetComponent<Animator>();
+
     }
 
     // Update is called once per frame
@@ -66,13 +82,25 @@ public class PlayerController : MonoBehaviour
         _isSprinting = _isSprintPressed && !_isCrouch;
 
         _isGrounded = Physics2D.BoxCast(
-                transform.position, boxSize, 0,
-                -transform.up, castDistance, groundLayer
+                origin: transform.position, size: boxSize, angle: 0,
+                direction: -transform.up, distance: castDistance, 
+                layerMask: groundLayer
            );
         _isSpaceAbove = !Physics2D.BoxCast(
-                transform.position, boxSizeAbove, 0,
-                transform.up, aboveCastDistance, groundLayer
+                origin: transform.position, size: boxSizeAbove, angle: 0f,
+                direction: transform.up, distance: aboveCastDistance, 
+                layerMask: groundLayer
             );
+        
+        _frontRopePointHit = Physics2D.BoxCast(
+                origin: transform.position, 
+                size: new Vector2(ropeBoxWidth, 2 * detectRadius),
+                angle: 0f, 
+                direction: new Vector2(transform.localScale.x, 0f), 
+                distance: detectRadius,
+                layerMask: ropePointLayer
+            );
+
 
         OnJump();
 
@@ -81,6 +109,8 @@ public class PlayerController : MonoBehaviour
         OnWalk();
 
         OnCrouch();
+
+        OnSwing();
          
         HandleHorizontalMoves();
 
@@ -94,11 +124,14 @@ public class PlayerController : MonoBehaviour
 
         HandleGravity();
 
+
         _playerAnimator.SetFloat("walkSpeed", Mathf.Abs(_playerRigidBody.velocity.x));
         _playerAnimator.SetFloat("jumpSpeed", _playerRigidBody.velocity.y);
         _playerAnimator.SetBool("isWallSlide", _isWallSliding);
         _playerAnimator.SetBool("isCrouch", _isCrouch);
     }
+
+    
 
     private void HandleHorizontalMoves()
     {
@@ -172,6 +205,11 @@ public class PlayerController : MonoBehaviour
         _isCrouchPressed = Input.GetKeyDown(KeyCode.C);
     }
 
+    private void OnSwing() 
+    {
+        _isSwingPressed = Input.GetKey(KeyCode.LeftControl);
+    }
+
     private void HandleWallSlide()
     {
         bool isFacingRight = transform.localScale.x == 1;
@@ -242,5 +280,10 @@ public class PlayerController : MonoBehaviour
     {
         //Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
         Gizmos.DrawWireCube(transform.position + transform.up * aboveCastDistance, boxSizeAbove);
+        Gizmos.DrawWireSphere(transform.position, detectRadius);
+        Gizmos.DrawWireCube(
+                    center: transform.position + new Vector3 (transform.localScale.x, 0f, 0f) * (detectRadius),
+                    size: new Vector2 (ropeBoxWidth, 2 * detectRadius)
+                );
     }
 }
