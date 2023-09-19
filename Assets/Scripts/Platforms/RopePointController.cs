@@ -5,8 +5,7 @@ using UnityEngine;
 
 public class RopePoint : MonoBehaviour
 {
-    private LineRenderer _ropeLR;
-    private SpringJoint2D _ropeDJ;
+    
     private PlayerController _playerController;
 
     private Collider2D _playerNear;
@@ -18,30 +17,30 @@ public class RopePoint : MonoBehaviour
 
     private void Awake()
     {
-        _ropeLR = GetComponent<LineRenderer>();
-        _ropeDJ = GetComponent<SpringJoint2D>();
+        
     }
 
     void Start()
     {
-        _ropeDJ.enabled = false;
-        _ropeLR.enabled = false;
+       
     }
 
     void Update()
     {
         _playerNear = Physics2D.OverlapCircle(
                 point: transform.position,
-                radius: detectRadius,
+                radius: target.PlayerRopeRadius,
                 layerMask: playerLayer
             );
+        
         HandleRopePoint();
     }
 
     private void HandleRopePoint()
     {
         bool canShootRope = _playerNear
-                            && !_isUsing;
+                            && target.PlayerRopeJoint
+                            && !target.PlayerRopeJoint.enabled;
 
         bool isPlayerFacingThis = target.FrontRopePointHit &&
             target.FrontRopePointHit.transform.position == transform.position;
@@ -51,25 +50,25 @@ public class RopePoint : MonoBehaviour
             if (canShootRope && isPlayerFacingThis || _isUsing) 
             {
                 _isUsing = true;
-                _ropeDJ.connectedAnchor = target.transform.position;
-                _ropeDJ.enabled = true;
-                _ropeLR.SetPosition(1, transform.position);
-                _ropeLR.SetPosition(0, target.transform.position);
-                _ropeLR.enabled = true;
+                target.PlayerRopeJoint.connectedAnchor = transform.position;
+                target.PlayerRopeJoint.enabled = true;
+                target.PlayerRopeRenderer.SetPosition(0, transform.position);
+                target.PlayerRopeRenderer.SetPosition(1, target.transform.position);
+                target.PlayerRopeRenderer.enabled = true;
                 return;
             }
         }
         else
         {
             _isUsing = false;
-            _ropeDJ.enabled = false;
-            _ropeLR.enabled = false;
+            target.PlayerRopeJoint.enabled = false;
+            target.PlayerRopeRenderer.enabled = false;
         }
 
     }
     private void OnDrawGizmos()
     {
         //Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
-        Gizmos.DrawWireSphere(transform.position, detectRadius);
+        Gizmos.DrawWireSphere(transform.position, target.PlayerRopeRadius);
     }
 }

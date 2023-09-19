@@ -20,10 +20,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector2 boxSizeAbove;
     [SerializeField] float aboveCastDistance;
 
-    [Header("RopePoint Detection")]
-    [SerializeField] float detectRadius;
+    [Header("RopePoints")]
+    [SerializeField] float playerRopeRadius;
     [SerializeField] LayerMask ropePointLayer;
     [SerializeField] float ropeBoxWidth;
+    [SerializeField] float swingForce;
 
     [Header("Wall Jump")]
     [SerializeField] float wallJumpTime;
@@ -40,9 +41,11 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
-    
+    private LineRenderer _playerRopeRenderer;
+    private DistanceJoint2D _playerRopeJoint;
 
-    private bool _cannotWalk = false;
+
+    private bool _disableX = false;
 
     private float _walkInput = 0f;
     private bool _isJumpPressed = false;
@@ -54,24 +57,33 @@ public class PlayerController : MonoBehaviour
     private bool _isWallSliding = false;
     private bool _isSprinting = false;
     private bool _isGroundJump = false;
-    
+
     private bool _isGrounded = false;
     private bool _isSpaceAbove = true;
     private RaycastHit2D _isTouchWall;
     private RaycastHit2D _frontRopePointHit;
 
+
     public RaycastHit2D FrontRopePointHit { get { return _frontRopePointHit; } }
     public bool IsSwingPressed { get { return _isSwingPressed; } set { _isSwingPressed = value; } }
+    public LineRenderer PlayerRopeRenderer { get { return _playerRopeRenderer; } set { _playerRopeRenderer = value; } }
+    public DistanceJoint2D PlayerRopeJoint { get { return _playerRopeJoint; } set { _playerRopeJoint = value; } }
+    public float PlayerRopeRadius { get { return playerRopeRadius; } }
+
     private void Awake()
     {
+
         _playerRigidBody = GetComponent<Rigidbody2D>();
         _playerAnimator = GetComponent<Animator>();
+        _playerRopeJoint = GetComponent<DistanceJoint2D>();
+        _playerRopeRenderer = GetComponent<LineRenderer>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-
+        _playerRopeJoint.enabled = false;
+        _playerRopeRenderer.enabled = false;
     }
 
     // Update is called once per frame
@@ -83,47 +95,37 @@ public class PlayerController : MonoBehaviour
 
         _isGrounded = Physics2D.BoxCast(
                 origin: transform.position, size: boxSize, angle: 0,
-                direction: -transform.up, distance: castDistance, 
+                direction: -transform.up, distance: castDistance,
                 layerMask: groundLayer
            );
         _isSpaceAbove = !Physics2D.BoxCast(
                 origin: transform.position, size: boxSizeAbove, angle: 0f,
-                direction: transform.up, distance: aboveCastDistance, 
+                direction: transform.up, distance: aboveCastDistance,
                 layerMask: groundLayer
             );
-        
+
         _frontRopePointHit = Physics2D.BoxCast(
-                origin: transform.position, 
-                size: new Vector2(ropeBoxWidth, 2 * detectRadius),
-                angle: 0f, 
-                direction: new Vector2(transform.localScale.x, 0f), 
-                distance: detectRadius,
+                origin: transform.position,
+                size: new Vector2(ropeBoxWidth, 2 * playerRopeRadius),
+                angle: 0f,
+                direction: new Vector2(transform.localScale.x, 0f),
+                distance: playerRopeRadius,
                 layerMask: ropePointLayer
             );
 
-
         OnJump();
-
         OnSprint();
-
         OnWalk();
-
         OnCrouch();
-
         OnSwing();
-         
+
         HandleHorizontalMoves();
-
         HandleJump();
-
         HandleFlipSprite();
-
         HandleCrouching();
-
         HandleWallSlide();
-
         HandleGravity();
-
+        HandleOnSwing();
 
         _playerAnimator.SetFloat("walkSpeed", Mathf.Abs(_playerRigidBody.velocity.x));
         _playerAnimator.SetFloat("jumpSpeed", _playerRigidBody.velocity.y);
@@ -131,11 +133,11 @@ public class PlayerController : MonoBehaviour
         _playerAnimator.SetBool("isCrouch", _isCrouch);
     }
 
-    
+
 
     private void HandleHorizontalMoves()
     {
-        if (_cannotWalk) return;
+        if (_disableX || _playerRopeJoint.enabled ) return;
         _playerRigidBody.velocity = new Vector2(
                         _walkInput * (
                             _isSprinting ?
@@ -146,6 +148,22 @@ public class PlayerController : MonoBehaviour
                         ),
                         _playerRigidBody.velocity.y
                     );
+    }
+
+    private void HandleOnSwing() 
+    {
+        if (_playerRopeJoint.enabled) 
+        {
+            if (_walkInput > 0.5)
+            {
+                _playerRigidBody.velocity += new Vector2 (swingForce * Time.deltaTime, 0f);
+            }
+            else if (_walkInput < -0.5) 
+            {
+                _playerRigidBody.velocity -= new Vector2(swingForce * Time.deltaTime, 0f);
+            }
+        };
+
     }
 
     private void HandleGravity() 
@@ -207,7 +225,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnSwing() 
     {
-        _isSwingPressed = Input.GetKey(KeyCode.LeftControl);
+        _isSwingPressed = Input.GetKey(KeyCode.Mouse0);
     }
 
     private void HandleWallSlide()
@@ -258,11 +276,11 @@ public class PlayerController : MonoBehaviour
 
     private void HandleFlipSprite()
     {
-        if (_walkInput > Mathf.Epsilon)
+        if (_playerRigidBody.velocity.x > Mathf.Epsilon)
         {
             transform.localScale = Vector3.one;
         }
-        if (_walkInput < -Mathf.Epsilon)
+        if (_playerRigidBody.velocity.x < -Mathf.Epsilon)
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
@@ -270,20 +288,19 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator CancelWalkCoroutine()
     {
-        _cannotWalk = true;
+        _disableX = true;
         _playerRigidBody.velocity = new Vector2(0f, 0f);
-        yield return new WaitForSeconds(.2f);
-        _cannotWalk = false;
+        yield return new WaitForSeconds(.3f);
+        _disableX = false;
     }
 
     private void OnDrawGizmos()
     {
         //Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
         Gizmos.DrawWireCube(transform.position + transform.up * aboveCastDistance, boxSizeAbove);
-        Gizmos.DrawWireSphere(transform.position, detectRadius);
         Gizmos.DrawWireCube(
-                    center: transform.position + new Vector3 (transform.localScale.x, 0f, 0f) * (detectRadius),
-                    size: new Vector2 (ropeBoxWidth, 2 * detectRadius)
+                    center: transform.position + new Vector3 (transform.localScale.x, 0f, 0f) * (playerRopeRadius),
+                    size: new Vector2 (ropeBoxWidth, 2 * playerRopeRadius)
                 );
     }
 }
