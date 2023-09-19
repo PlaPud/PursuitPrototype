@@ -33,6 +33,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float wallSlideSpeed;
     [SerializeField] float wallDistance;
     [SerializeField] float jumpTime;
+    [SerializeField] LayerMask slidableLayer;
 
     [Header("Gravity")]
     [SerializeField] float fallMultiplier;
@@ -66,6 +67,7 @@ public class PlayerController : MonoBehaviour
 
     public RaycastHit2D FrontRopePointHit { get { return _frontRopePointHit; } }
     public bool IsSwingPressed { get { return _isSwingPressed; } set { _isSwingPressed = value; } }
+    public bool IsGrounded { get { return _isGrounded; } }
     public LineRenderer PlayerRopeRenderer { get { return _playerRopeRenderer; } set { _playerRopeRenderer = value; } }
     public DistanceJoint2D PlayerRopeJoint { get { return _playerRopeJoint; } set { _playerRopeJoint = value; } }
     public float PlayerRopeRadius { get { return playerRopeRadius; } }
@@ -89,29 +91,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        _isGroundJump = _isJumpPressed && _isGrounded;
-        _isSprinting = _isSprintPressed && !_isCrouch;
-
-        _isGrounded = Physics2D.BoxCast(
-                origin: transform.position, size: boxSize, angle: 0,
-                direction: -transform.up, distance: castDistance,
-                layerMask: groundLayer
-           );
-        _isSpaceAbove = !Physics2D.BoxCast(
-                origin: transform.position, size: boxSizeAbove, angle: 0f,
-                direction: transform.up, distance: aboveCastDistance,
-                layerMask: groundLayer
-            );
-
-        _frontRopePointHit = Physics2D.BoxCast(
-                origin: transform.position,
-                size: new Vector2(ropeBoxWidth, 2 * playerRopeRadius),
-                angle: 0f,
-                direction: new Vector2(transform.localScale.x, 0f),
-                distance: playerRopeRadius,
-                layerMask: ropePointLayer
-            );
+        BoolStatusCheck();
 
         OnJump();
         OnSprint();
@@ -131,9 +111,38 @@ public class PlayerController : MonoBehaviour
         _playerAnimator.SetFloat("jumpSpeed", _playerRigidBody.velocity.y);
         _playerAnimator.SetBool("isWallSlide", _isWallSliding);
         _playerAnimator.SetBool("isCrouch", _isCrouch);
+        _playerAnimator.SetBool("isGrounded", _isGrounded);
     }
 
+    private void BoolStatusCheck()
+    {
+        _isGroundJump = _isJumpPressed && _isGrounded;
+        _isSprinting = _isSprintPressed && !_isCrouch;
+        CastCheck();
+    }
 
+    private void CastCheck()
+    {
+        _isGrounded = Physics2D.BoxCast(
+                        origin: transform.position, size: boxSize, angle: 0,
+                        direction: -transform.up, distance: castDistance,
+                        layerMask: groundLayer
+                   );
+        _isSpaceAbove = !Physics2D.BoxCast(
+                origin: transform.position, size: boxSizeAbove, angle: 0f,
+                direction: transform.up, distance: aboveCastDistance,
+                layerMask: groundLayer
+            );
+
+        _frontRopePointHit = Physics2D.BoxCast(
+                origin: transform.position,
+                size: new Vector2(ropeBoxWidth, 2 * playerRopeRadius),
+                angle: 0f,
+                direction: new Vector2(transform.localScale.x, 0f),
+                distance: playerRopeRadius,
+                layerMask: ropePointLayer
+            );
+    }
 
     private void HandleHorizontalMoves()
     {
@@ -184,7 +193,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJump()
     {
-        if (_isGroundJump)
+        if (_isGroundJump && !_isCrouch)
         {
             _playerRigidBody.velocity = new Vector2(
                         _playerRigidBody.velocity.x,
@@ -192,13 +201,18 @@ public class PlayerController : MonoBehaviour
                     );
         } else if (_isJumpPressed && _isWallSliding)
         {
-            _ = StartCoroutine("CancelWalkCoroutine");
+            _ = StartCoroutine("WallJumpCoroutine");
             _playerRigidBody.AddForce(
                     new Vector2 (
-                            - transform.localScale.x * wallJumpForceX,
+                            -transform.localScale.x
+                            * wallJumpForceX,
                             wallJumpForceY
                         ),
                     ForceMode2D.Impulse
+                );
+            _playerRigidBody.velocity += new Vector2 (
+                    _walkInput * walkSpeed ,
+                    _walkInput * walkSpeed 
                 );
         }
     }
@@ -239,14 +253,15 @@ public class PlayerController : MonoBehaviour
                         wallDistance : -wallDistance, 0
                     ),
                 wallDistance,
-                groundLayer
+                slidableLayer
             );
+
         Debug.DrawRay(transform.position, new Vector2(wallDistance, 0), Color.blue);
 
         if (_isTouchWall &&
             !_isGrounded &&
-            _playerRigidBody.velocity.y < -0.5 &&
-            Mathf.Abs(_walkInput) > 0.5f)
+            _playerRigidBody.velocity.y < -0.5
+            )
         {
             _isWallSliding = true;
         }
@@ -286,7 +301,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    IEnumerator CancelWalkCoroutine()
+    IEnumerator WallJumpCoroutine()
     {
         _disableX = true;
         _playerRigidBody.velocity = new Vector2(0f, 0f);
@@ -296,7 +311,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        //Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
+        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
         Gizmos.DrawWireCube(transform.position + transform.up * aboveCastDistance, boxSizeAbove);
         Gizmos.DrawWireCube(
                     center: transform.position + new Vector3 (transform.localScale.x, 0f, 0f) * (playerRopeRadius),

@@ -45,7 +45,7 @@ public class RopePoint : MonoBehaviour
         bool isPlayerFacingThis = target.FrontRopePointHit &&
             target.FrontRopePointHit.transform.position == transform.position;
 
-        if (target.IsSwingPressed)
+        if (target.IsSwingPressed && !target.IsGrounded)
         {
             if (canShootRope && isPlayerFacingThis || _isUsing) 
             {
