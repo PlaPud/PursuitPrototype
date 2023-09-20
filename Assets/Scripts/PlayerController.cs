@@ -39,12 +39,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float fallMultiplier;
     [SerializeField] float lowJumpMultiplier;
 
-
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
     private LineRenderer _playerRopeRenderer;
     private DistanceJoint2D _playerRopeJoint;
-
 
     private bool _disableX = false;
 
@@ -64,13 +62,23 @@ public class PlayerController : MonoBehaviour
     private RaycastHit2D _isTouchWall;
     private RaycastHit2D _frontRopePointHit;
 
-
     public RaycastHit2D FrontRopePointHit { get { return _frontRopePointHit; } }
     public bool IsSwingPressed { get { return _isSwingPressed; } set { _isSwingPressed = value; } }
     public bool IsGrounded { get { return _isGrounded; } }
     public LineRenderer PlayerRopeRenderer { get { return _playerRopeRenderer; } set { _playerRopeRenderer = value; } }
     public DistanceJoint2D PlayerRopeJoint { get { return _playerRopeJoint; } set { _playerRopeJoint = value; } }
     public float PlayerRopeRadius { get { return playerRopeRadius; } }
+
+    private const string PLAYER_IDLE = "PlayerIdle";
+    private const string PLAYER_WALK = "PlayerWalk";
+    private const string PLAYER_JUMP = "PlayerJump";
+    private const string PLAYER_DROP = "PlayerDrop";
+    private const string PLAYER_RUN = "PlayerRun";
+    private const string PLAYER_CROUCH = "PlayerCrouchMove";
+    private const string PLAYER_CROUCH_MOVE = "PlayerCrouchMoving";
+    private const string PLAYER_WALL_SLIDE = "PlayerWallSlide";
+
+    private string _currentAnimationState = PLAYER_IDLE;
 
     private void Awake()
     {
@@ -99,6 +107,7 @@ public class PlayerController : MonoBehaviour
         OnCrouch();
         OnSwing();
 
+        HandleIdle();
         HandleHorizontalMoves();
         HandleJump();
         HandleFlipSprite();
@@ -107,11 +116,6 @@ public class PlayerController : MonoBehaviour
         HandleGravity();
         HandleOnSwing();
 
-        _playerAnimator.SetFloat("walkSpeed", Mathf.Abs(_playerRigidBody.velocity.x));
-        _playerAnimator.SetFloat("jumpSpeed", _playerRigidBody.velocity.y);
-        _playerAnimator.SetBool("isWallSlide", _isWallSliding);
-        _playerAnimator.SetBool("isCrouch", _isCrouch);
-        _playerAnimator.SetBool("isGrounded", _isGrounded);
     }
 
     private void BoolStatusCheck()
@@ -144,6 +148,16 @@ public class PlayerController : MonoBehaviour
             );
     }
 
+    private void HandleIdle() 
+    {
+        bool isNotInAir = !(Mathf.Abs(_playerRigidBody.velocity.y) > 0.5);
+       
+        if (_walkInput == 0 && isNotInAir) 
+        {
+            ChangeAnimationState(PLAYER_IDLE);
+        } 
+    }
+
     private void HandleHorizontalMoves()
     {
         if (_disableX || _playerRopeJoint.enabled ) return;
@@ -157,6 +171,16 @@ public class PlayerController : MonoBehaviour
                         ),
                         _playerRigidBody.velocity.y
                     );
+        if (_isGrounded && Mathf.Abs(_walkInput) > 0.5) 
+        {
+            ChangeAnimationState(
+                    _isSprinting ? 
+                    PLAYER_RUN 
+                    : _isCrouch ?
+                    PLAYER_CROUCH_MOVE
+                    : PLAYER_WALK
+                );
+        }
     }
 
     private void HandleOnSwing() 
@@ -199,7 +223,8 @@ public class PlayerController : MonoBehaviour
                         _playerRigidBody.velocity.x,
                         jumpSpeed
                     );
-        } else if (_isJumpPressed && _isWallSliding)
+        } 
+        else if (_isJumpPressed && _isWallSliding)
         {
             _ = StartCoroutine("WallJumpCoroutine");
             _playerRigidBody.AddForce(
@@ -215,6 +240,16 @@ public class PlayerController : MonoBehaviour
                     _walkInput * walkSpeed 
                 );
         }
+
+        if (!_isGrounded && _playerRigidBody.velocity.y > 1f)
+        {
+            ChangeAnimationState(PLAYER_JUMP);
+        }
+        else if (!_isGrounded && _playerRigidBody.velocity.y < -1f && !_isWallSliding) 
+        {
+            ChangeAnimationState(PLAYER_DROP);
+        }
+
     }
 
     private void OnWalk()
@@ -276,6 +311,7 @@ public class PlayerController : MonoBehaviour
                     _playerRigidBody.velocity.x,
                     -wallSlideSpeed
                 );
+            ChangeAnimationState(PLAYER_WALL_SLIDE);
         }
 
     }
@@ -286,6 +322,7 @@ public class PlayerController : MonoBehaviour
         {
             if (_isCrouch && !_isSpaceAbove) return;
             _isCrouch = !_isCrouch;
+            ChangeAnimationState(_isCrouch ? PLAYER_CROUCH : PLAYER_IDLE);
         }
     }
 
@@ -318,4 +355,14 @@ public class PlayerController : MonoBehaviour
                     size: new Vector2 (ropeBoxWidth, 2 * playerRopeRadius)
                 );
     }
+
+    private void ChangeAnimationState(string newAnimationState) 
+    {
+        if (_currentAnimationState == newAnimationState) return;
+
+        _playerAnimator.Play(newAnimationState);
+
+        _currentAnimationState = newAnimationState;
+    }
+
 }
