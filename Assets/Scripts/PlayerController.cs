@@ -5,14 +5,16 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] bool isDisable;
+
+    [Header("Controlling")]
     [SerializeField] float walkSpeed;
     [SerializeField] float sprintSpeed;
     [SerializeField] float jumpSpeed;
     [SerializeField] float crouchSpeed;
 
-    [SerializeField] LayerMask groundLayer;
-
     [Header("RayCast Ground")]
+    [SerializeField] LayerMask groundLayer;
     [SerializeField] Vector2 boxSize;
     [SerializeField] float castDistance;
 
@@ -33,7 +35,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float wallSlideSpeed;
     [SerializeField] float wallDistance;
     [SerializeField] float jumpTime;
-    [SerializeField] LayerMask slidableLayer;
 
     [Header("Gravity")]
     [SerializeField] float fallMultiplier;
@@ -59,7 +60,7 @@ public class PlayerController : MonoBehaviour
 
     private bool _isGrounded = false;
     private bool _isSpaceAbove = true;
-    private RaycastHit2D _isTouchWall;
+    private bool _isTouchWall = false;
     private RaycastHit2D _frontRopePointHit;
 
     public RaycastHit2D FrontRopePointHit { get { return _frontRopePointHit; } }
@@ -116,7 +117,12 @@ public class PlayerController : MonoBehaviour
         HandleGravity();
         HandleOnSwing();
 
+        AnimationStateMachineHandler();
+
+        HandleDisable();
     }
+
+
 
     private void BoolStatusCheck()
     {
@@ -148,15 +154,7 @@ public class PlayerController : MonoBehaviour
             );
     }
 
-    private void HandleIdle() 
-    {
-        bool isNotInAir = !(Mathf.Abs(_playerRigidBody.velocity.y) > 0.5);
-       
-        if (_walkInput == 0 && isNotInAir) 
-        {
-            ChangeAnimationState(PLAYER_IDLE);
-        } 
-    }
+    private void HandleIdle() { }
 
     private void HandleHorizontalMoves()
     {
@@ -171,16 +169,6 @@ public class PlayerController : MonoBehaviour
                         ),
                         _playerRigidBody.velocity.y
                     );
-        if (_isGrounded && Mathf.Abs(_walkInput) > 0.5) 
-        {
-            ChangeAnimationState(
-                    _isSprinting ? 
-                    PLAYER_RUN 
-                    : _isCrouch ?
-                    PLAYER_CROUCH_MOVE
-                    : PLAYER_WALK
-                );
-        }
     }
 
     private void HandleOnSwing() 
@@ -226,7 +214,7 @@ public class PlayerController : MonoBehaviour
         } 
         else if (_isJumpPressed && _isWallSliding)
         {
-            _ = StartCoroutine("WallJumpCoroutine");
+            _ = StartCoroutine(WallJumpCoroutine());
             _playerRigidBody.AddForce(
                     new Vector2 (
                             -transform.localScale.x
@@ -240,16 +228,6 @@ public class PlayerController : MonoBehaviour
                     _walkInput * walkSpeed 
                 );
         }
-
-        if (!_isGrounded && _playerRigidBody.velocity.y > 1f)
-        {
-            ChangeAnimationState(PLAYER_JUMP);
-        }
-        else if (!_isGrounded && _playerRigidBody.velocity.y < -1f && !_isWallSliding) 
-        {
-            ChangeAnimationState(PLAYER_DROP);
-        }
-
     }
 
     private void OnWalk()
@@ -269,7 +247,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCrouch()
     {
-        _isCrouchPressed = Input.GetKeyDown(KeyCode.C);
+        _isCrouchPressed = Input.GetKeyDown(KeyCode.LeftControl);
     }
 
     private void OnSwing() 
@@ -281,14 +259,17 @@ public class PlayerController : MonoBehaviour
     {
         bool isFacingRight = transform.localScale.x == 1;
 
-        _isTouchWall = Physics2D.Raycast(
+        RaycastHit2D hitGround = Physics2D.Raycast(
                 transform.position,
                 new Vector2(
                         isFacingRight ?
                         wallDistance : -wallDistance, 0
                     ),
                 wallDistance,
-                slidableLayer
+                groundLayer
+            );
+        _isTouchWall = hitGround && (
+                hitGround.transform.gameObject.CompareTag("Climbable")
             );
 
         Debug.DrawRay(transform.position, new Vector2(wallDistance, 0), Color.blue);
@@ -311,18 +292,15 @@ public class PlayerController : MonoBehaviour
                     _playerRigidBody.velocity.x,
                     -wallSlideSpeed
                 );
-            ChangeAnimationState(PLAYER_WALL_SLIDE);
         }
 
     }
-
     private void HandleCrouching()
     {
         if (!_isGroundJump && !_isSprinting && _isCrouchPressed)
         {
             if (_isCrouch && !_isSpaceAbove) return;
             _isCrouch = !_isCrouch;
-            ChangeAnimationState(_isCrouch ? PLAYER_CROUCH : PLAYER_IDLE);
         }
     }
 
@@ -365,4 +343,106 @@ public class PlayerController : MonoBehaviour
         _currentAnimationState = newAnimationState;
     }
 
+    private void HandleDisable()
+    {
+        gameObject.SetActive(!isDisable);
+    }
+    private void AnimationStateMachineHandler()
+    {
+        if (_isGrounded)
+        {
+            switch (_currentAnimationState)
+            {
+                case PLAYER_IDLE:
+                    if (_isCrouch)
+                    {
+                        ChangeAnimationState(PLAYER_CROUCH);
+                    }
+                    if (Mathf.Abs(_walkInput) > 0.5f)
+                    {
+                        ChangeAnimationState(PLAYER_WALK);
+                    }
+                    break;
+                case PLAYER_CROUCH:
+                    if (Mathf.Abs(_walkInput) > 0.5f)
+                    {
+                        ChangeAnimationState(PLAYER_CROUCH_MOVE);
+                    }
+                    if (!_isCrouch)
+                    {
+                        ChangeAnimationState(PLAYER_IDLE);
+                    }
+                    break;
+                case PLAYER_CROUCH_MOVE:
+                    if (!_isCrouch)
+                    {
+                        ChangeAnimationState(PLAYER_IDLE);
+                    }
+                    if (_walkInput == 0)
+                    {
+                        ChangeAnimationState(PLAYER_CROUCH);
+                    }
+                    break;
+                case PLAYER_WALK:
+                    if (_walkInput == 0)
+                    {
+                        ChangeAnimationState(PLAYER_IDLE);
+                    }
+                    if (_isCrouch)
+                    {
+                        ChangeAnimationState(PLAYER_CROUCH);
+                    }
+                    if (_isSprintPressed)
+                    {
+                        ChangeAnimationState(PLAYER_RUN);
+                    }
+                    break;
+                case PLAYER_RUN:
+                    if (!_isSprintPressed)
+                    {
+                        ChangeAnimationState(PLAYER_WALK);
+                    }
+                    break;
+                default:
+                    ChangeAnimationState(PLAYER_IDLE);
+                    break;
+            }
+        }
+        else
+        {
+            switch (_currentAnimationState)
+            {
+                case PLAYER_DROP:
+                    if (_playerRigidBody.velocity.y > 1f)
+                    {
+                        ChangeAnimationState(PLAYER_JUMP);
+                    }
+                    if (_isWallSliding)
+                    {
+                        ChangeAnimationState(PLAYER_WALL_SLIDE);
+                    }
+                    break;
+                case PLAYER_JUMP:
+                    if (_playerRigidBody.velocity.y < -1f)
+                    {
+                        ChangeAnimationState(PLAYER_DROP);
+                    }
+                    if (_isWallSliding)
+                    {
+                        ChangeAnimationState(PLAYER_WALL_SLIDE);
+                    }
+                    break;
+                case PLAYER_WALL_SLIDE:
+                    if (!_isWallSliding)
+                    {
+                        ChangeAnimationState(PLAYER_DROP);
+                    }
+                    break;
+                default:
+                    ChangeAnimationState(PLAYER_DROP);
+                    break;
+
+            }
+        }
+    }
 }
