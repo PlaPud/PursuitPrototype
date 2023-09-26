@@ -806,7 +806,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12ad7c020062e0146a6cdc0fc13e51fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isDisable: 0
+  isDisable: 1
   walkSpeed: 5
   sprintSpeed: 8.5
   jumpSpeed: 15
@@ -2654,7 +2654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd14df7482a00de43afa9d3e9725b618, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 237877227}
+  target: {fileID: 1625487936}
 --- !u!1 &643371009
 GameObject:
   m_ObjectHideFlags: 0
@@ -5538,7 +5538,7 @@ Transform:
   m_GameObject: {fileID: 1625487933}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1, y: -1.8, z: 0}
+  m_LocalPosition: {x: -0.1, y: -1.39, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5584,14 +5584,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 15
-  jumpSpeed: 25
+  jumpSpeed: 10
   lowJumpMultiplier: 3
   fallMultiplier: 3
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   boxSize: {x: 0.6, y: 0.1}
-  castDistance: 0.09
+  castDistanceGround: 0.58
+  castDistanceCeil: 0.54
+  castDistanceWall: 0.57
 --- !u!61 &1625487939
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5624,10 +5626,10 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.0019700527, y: 0.4895444}
+  m_Offset: {x: -0.0019700527, y: -0.01633349}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0}
+    pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 0.875, y: 1}
     newSize: {x: 0.5833333, y: 0.6666667}
     adaptiveTilingThreshold: 0.5
@@ -5635,7 +5637,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.6390412, y: 0.97908926}
+  m_Size: {x: 0.6390412, y: 0.9783525}
   m_EdgeRadius: 0
 --- !u!1 &1729813912
 GameObject:
