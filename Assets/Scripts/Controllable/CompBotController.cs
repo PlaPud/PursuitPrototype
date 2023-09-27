@@ -23,12 +23,13 @@ public class CompBotController : MonoBehaviour
     
     [Header("Raycast")]
     [SerializeField] LayerMask groundLayer;
-    [SerializeField] Vector2 boxSize;
     [SerializeField] float castDistance;
 
     private float _walkInput;
     private bool _isJumpPressed;
     private bool _isGrounded;
+    private bool _isSwingPressed;
+
     
     private RaycastHit2D _groundHit;
     
@@ -58,7 +59,7 @@ public class CompBotController : MonoBehaviour
         _compBotRigidBody.gravityScale = 0;
         _currentPlane = ClimbPlane.Ground; 
     }
-
+    
     void Update()
     {
         BoolStatusCheck();
@@ -66,7 +67,7 @@ public class CompBotController : MonoBehaviour
         OnWalk();
         OnJump();
 
-        CheckGravityDirection();
+        HandleGravityState();
         HandleIdle();
         HandleWalk();
         HandleJump();
@@ -80,7 +81,7 @@ public class CompBotController : MonoBehaviour
     {
     }
 
-    private void CheckGravityDirection()
+    private void HandleGravityState()
     {
         Vector2[] directions = new Vector2[4];
         directions[0] = Vector2.right;
@@ -90,7 +91,26 @@ public class CompBotController : MonoBehaviour
 
         foreach (Vector2 dir in directions) 
         {
-            if (Physics2D.Raycast(transform.position, dir, castDistance, groundLayer));
+            if (!_isGrounded && Physics2D.Raycast(transform.position, dir, castDistance, groundLayer)) 
+            {
+                _gravityDirection = dir;
+                if (dir == Vector2.up && !_isGrounded) 
+                {
+                    _currentPlane = ClimbPlane.Ceiling;
+                }
+                else if (dir == Vector2.down) 
+                {
+                    _currentPlane = ClimbPlane.Ground;
+                }
+                else if (dir == Vector2.right) 
+                {
+                    _currentPlane = ClimbPlane.RightWall;
+                }
+                else if (dir == Vector2.left) 
+                {
+                    _currentPlane= ClimbPlane.LeftWall;
+                }
+            }
         }
     }
 
@@ -98,13 +118,14 @@ public class CompBotController : MonoBehaviour
     {
         _groundHit = Physics2D.Raycast(
                         origin: transform.position,
-                        direction: -transform.up, distance: castDistance,
+                        direction: _gravityDirection, distance: castDistance,
                         layerMask: groundLayer
                    );
         _isGrounded = _groundHit;
         
         Debug.DrawRay(transform.position, new Vector2(castDistance, 0), Color.blue);
-        Debug.DrawRay(transform.position, new Vector2(0, castDistance), Color.red);
+        Debug.DrawRay(transform.position, new Vector2(-castDistance, 0), Color.yellow);
+        Debug.DrawRay(transform.position, new Vector2(0, -castDistance), Color.red);
         Debug.DrawRay(transform.position, new Vector2(0, castDistance), Color.green);
 
     }
@@ -168,36 +189,76 @@ public class CompBotController : MonoBehaviour
 
     private void HandleIdle()
     {
-        bool isNotInAir = !(Mathf.Abs(_compBotRigidBody.velocity.y) > 0.5);
-
-        if (_walkInput == 0 && isNotInAir)
+        if (_walkInput == 0 && _isGrounded)
         {
             ChangeAnimationState(COMPBOT_IDLE);
         }
     }
-    private void HandleGravity()
-    {
-        if (_compBotRigidBody.velocity.y < 0)
-        {
-            _compBotRigidBody.velocity +=
-                Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1)
-                * Time.deltaTime;
-        }
-        else if (_compBotRigidBody.velocity.y > 0 && !Input.GetButton("Jump"))
-        {
-            _compBotRigidBody.velocity +=
-                Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1)
-                * Time.deltaTime;
-        }
-    }
+   
     private void HandleFlipSprite()
     {
-        
+        switch (_currentPlane) 
+        {
+            case ClimbPlane.Ground: 
+                {
+                    transform.localScale =
+                        _compBotRigidBody.velocity.x > 0.5f ?
+                        Vector3.one : _compBotRigidBody.velocity.x < -0.5f ?
+                        new Vector3(-1, 1, 1) : transform.localScale;
+                    break; 
+                }
+            case ClimbPlane.Ceiling: 
+                {
+                    transform.localScale =
+                        _compBotRigidBody.velocity.x > 0.5f ?
+                        new Vector3(-1, 1, 1) : _compBotRigidBody.velocity.x < -0.5f ?
+                        Vector3.one: transform.localScale;
+                    break; 
+                }
+            case ClimbPlane.LeftWall: 
+                {
+                    transform.localScale =
+                        _compBotRigidBody.velocity.y > 0.5f ?
+                        new Vector3(-1, 1, 1) : _compBotRigidBody.velocity.y < -0.5f ?
+                        Vector3.one : transform.localScale;
+                    break; 
+                }
+            case ClimbPlane.RightWall: 
+                {
+                    transform.localScale =
+                            _compBotRigidBody.velocity.y > 0.5f ?
+                            Vector3.one : _compBotRigidBody.velocity.y < -0.5f ?
+                            new Vector3(-1, 1, 1) : transform.localScale;
+                    break; 
+                }
+        }
     }
 
     private void HandleSpriteRotate() 
     {
-        
+        switch (_currentPlane) 
+        {
+            case ClimbPlane.Ground: 
+                {
+                    transform.rotation = Quaternion.Euler(0, 0, 0);
+                    break; 
+                }
+            case ClimbPlane.Ceiling: 
+                {
+                    transform.rotation = Quaternion.Euler(0, 0, 180);
+                    break; 
+                }
+            case ClimbPlane.LeftWall: 
+                { 
+                    transform.rotation = Quaternion.Euler(0, 0, 270);
+                    break; 
+                }
+            case ClimbPlane.RightWall: 
+                { 
+                    transform.rotation = Quaternion.Euler(0, 0, 90);
+                    break; 
+                }
+        }
     }
 
     private void OnWalk()
@@ -227,33 +288,4 @@ public class CompBotController : MonoBehaviour
         _currentAnimationState = newAnimationState;
     }
 
-    private void OnDrawGizmos()
-    {
-        //Gizmos.DrawLine(transform.position, new Vector3(
-        //        transform.position.x + castDistanceWall, 
-        //        transform.position.y,
-        //        transform.position.z
-        //    ));
-        //Gizmos.DrawLine(transform.position, new Vector3(
-        //        transform.position.x - castDistanceWall, 
-        //        transform.position.y,
-        //        transform.position.z
-        //    ));
-        //Gizmos.DrawLine(transform.position, new Vector3(
-        //        transform.position.x, 
-        //        transform.position.y + castDistanceCeil,
-        //        transform.position.z
-        //    ));
-        //Gizmos.DrawLine(transform.position, new Vector3(
-        //        transform.position.x,
-        //        transform.position.y - castDistanceGround,
-        //        transform.position.z
-        //    ));
-    }
-
-    IEnumerator DisableInputCoroutine()
-    {
-        _compBotRigidBody.velocity = Vector2.zero;
-        yield return new WaitForSeconds(.4f);
-    }
 }
