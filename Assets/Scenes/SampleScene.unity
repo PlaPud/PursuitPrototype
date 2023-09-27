@@ -807,10 +807,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDisable: 1
-  walkSpeed: 5
-  sprintSpeed: 8.5
-  jumpSpeed: 15
-  crouchSpeed: 2
+  walkSpeed: 10
+  sprintSpeed: 15
+  jumpSpeed: 17
+  crouchSpeed: 8
+  maxAccelerate: 7
+  maxDeccelerate: 8
+  velocityPower: 0.9
+  frictionAmount: 0.5
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -827,7 +831,7 @@ MonoBehaviour:
   wallJumpTime: 0.2
   wallJumpForceX: 17
   wallJumpForceY: 15
-  wallSlideSpeed: 3
+  wallSlideSpeed: 1
   wallDistance: 1
   jumpTime: 0
   fallMultiplier: 3
@@ -2654,7 +2658,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd14df7482a00de43afa9d3e9725b618, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 1625487936}
+  target: {fileID: 237877227}
 --- !u!1 &643371009
 GameObject:
   m_ObjectHideFlags: 0
@@ -4442,7 +4446,7 @@ GameObject:
   - component: {fileID: 1205508526}
   m_Layer: 6
   m_Name: Square (12)
-  m_TagString: Untagged
+  m_TagString: Climbable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5538,7 +5542,7 @@ Transform:
   m_GameObject: {fileID: 1625487933}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1, y: -1.39, z: 0}
+  m_LocalPosition: {x: -8.97, y: -0.58, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5583,7 +5587,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e47512824ab14f34c80e70fcd4cb8a50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 15
+  walkSpeed: 20
+  maxAccelerate: 8
+  maxDeccelerate: 8
+  frictionAmount: 0.8
+  velocityPower: 0.9
   jumpSpeed: 10
   lowJumpMultiplier: 3
   fallMultiplier: 3

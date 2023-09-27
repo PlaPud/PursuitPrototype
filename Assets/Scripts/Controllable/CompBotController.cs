@@ -11,6 +11,10 @@ public class CompBotController : MonoBehaviour
 
     [Header("Controlling")]
     [SerializeField] float walkSpeed;
+    [SerializeField] float maxAccelerate;
+    [SerializeField] float maxDeccelerate;
+    [SerializeField] float frictionAmount;
+    [SerializeField] float velocityPower;
     [SerializeField] float jumpSpeed;
 
     [Header("Gravity")]
@@ -20,17 +24,13 @@ public class CompBotController : MonoBehaviour
     [Header("Raycast")]
     [SerializeField] LayerMask groundLayer;
     [SerializeField] Vector2 boxSize;
-    [SerializeField] float castDistanceGround;
-    [SerializeField] float castDistanceCeil;
-    [SerializeField] float castDistanceWall;
+    [SerializeField] float castDistance;
 
     private float _walkInput;
     private bool _isJumpPressed;
     private bool _isGrounded;
-    private bool _isTouchCeil;
-    private bool _isTouchWall;
-    private bool _isSwingPressed;
     
+    private RaycastHit2D _groundHit;
     
     private Rigidbody2D _compBotRigidBody;
     private Animator _compBotAnimator;
@@ -41,7 +41,7 @@ public class CompBotController : MonoBehaviour
     private const String COMPBOT_JUMP = "CompBotJump";
 
     private float _gravityScale;
-    private Vector2 _gravityForce;
+    private Vector2 _gravityDirection = Vector2.down;
 
     private ClimbPlane _currentPlane = ClimbPlane.Ground;
 
@@ -66,114 +66,46 @@ public class CompBotController : MonoBehaviour
         OnWalk();
         OnJump();
 
+        CheckGravityDirection();
         HandleIdle();
-        HandleFlipSprite();
-        HandleSpriteRotate();
         HandleWalk();
         HandleJump();
-        HandleSwing();
-        //HandleGravity();
+        HandleSpriteRotate();
+        HandleFlipSprite();
+        
+        _compBotRigidBody.AddForce(_gravityDirection * _gravityScale);
     }
 
     private void FixedUpdate()
     {
-        ChangeGravityDirection();
-        _compBotRigidBody.AddForce(_gravityForce);
     }
 
-    private void ChangeGravityDirection()
+    private void CheckGravityDirection()
     {
-        Debug.Log(transform.localEulerAngles.z);
-        switch (_currentPlane)
+        Vector2[] directions = new Vector2[4];
+        directions[0] = Vector2.right;
+        directions[1] = Vector2.up;
+        directions[2] = Vector2.left;
+        directions[3] = Vector2.down;
+
+        foreach (Vector2 dir in directions) 
         {
-            case ClimbPlane.Ground:
-                _gravityForce = new Vector2(0, -3 * _gravityScale);
-                if (transform.localEulerAngles.z == 90) 
-                {
-                    _currentPlane = ClimbPlane.RightWall;
-                }
-                if (transform.localEulerAngles.z == 270)
-                {
-                    _currentPlane = ClimbPlane.LeftWall;
-                    StartCoroutine(DisableInputCoroutine());
-                }
-                if (transform.localEulerAngles.z == 180)
-                { 
-                    _currentPlane = ClimbPlane.Ceiling;
-                }
-                break;
-            case ClimbPlane.LeftWall:
-                _gravityForce = new Vector2(-3 * _gravityScale, 0);
-                if (transform.localEulerAngles.z == 90)
-                {
-                    _currentPlane = ClimbPlane.Ground;
-                }
-                if (transform.localEulerAngles.z == -90)
-                {
-                    _currentPlane = ClimbPlane.Ceiling;
-                }
-                if (transform.localEulerAngles.z == 180)
-                {
-                    _currentPlane = ClimbPlane.RightWall;
-                }
-                break;
-            case ClimbPlane.RightWall:
-                _gravityForce = new Vector2(3 * _gravityScale, 0);
-                if (transform.localEulerAngles.z == 90)
-                {
-                    _currentPlane = ClimbPlane.Ceiling;
-                }
-                if (transform.localEulerAngles.z == -90)
-                {
-                    _currentPlane = ClimbPlane.Ground;
-                }
-                if (transform.localEulerAngles.z == 180)
-                {
-                    _currentPlane = ClimbPlane.LeftWall;
-                }
-                break;
-            case ClimbPlane.Ceiling:
-                _gravityForce = new Vector2(0, 3 * _gravityScale);
-                if (transform.localEulerAngles.z == 90)
-                {
-                    _currentPlane = ClimbPlane.LeftWall;
-                }
-                if (transform.localEulerAngles.z == -90)
-                {
-                    _currentPlane = ClimbPlane.RightWall;
-                }
-                if (transform.localEulerAngles.z == 180)
-                {
-                    _currentPlane = ClimbPlane.Ground;
-                }
-                break;
+            if (Physics2D.Raycast(transform.position, dir, castDistance, groundLayer));
         }
     }
 
     private void BoolStatusCheck()
     {
-        _isGrounded = Physics2D.Raycast(
+        _groundHit = Physics2D.Raycast(
                         origin: transform.position,
-                        direction: -transform.up, distance: castDistanceGround,
+                        direction: -transform.up, distance: castDistance,
                         layerMask: groundLayer
                    );
-        _isTouchCeil = Physics2D.Raycast(
-                origin: transform.position,
-                direction: transform.up, distance: castDistanceCeil,
-                layerMask: groundLayer
-            );
-        _isTouchWall = Physics2D.Raycast(
-                transform.position,
-                new Vector2(
-                        transform.localScale.x == 1 ?
-                        castDistanceWall : -castDistanceWall, 0
-                    ),
-                castDistanceWall,
-                groundLayer
-            ); ;
-        Debug.DrawRay(transform.position, new Vector2(castDistanceWall, 0), Color.blue);
-        Debug.DrawRay(transform.position, new Vector2(0, castDistanceCeil), Color.blue);
-        Debug.DrawRay(transform.position, new Vector2(0, castDistanceGround), Color.blue);
+        _isGrounded = _groundHit;
+        
+        Debug.DrawRay(transform.position, new Vector2(castDistance, 0), Color.blue);
+        Debug.DrawRay(transform.position, new Vector2(0, castDistance), Color.red);
+        Debug.DrawRay(transform.position, new Vector2(0, castDistance), Color.green);
 
     }
 
@@ -186,9 +118,10 @@ public class CompBotController : MonoBehaviour
     {
         if (_isGrounded && _isJumpPressed)
         {
-            _compBotRigidBody.AddForce(new Vector2(
-                    0, jumpSpeed
-                ), ForceMode2D.Impulse);
+            _compBotRigidBody.AddForce(
+                    _groundHit.normal.normalized * jumpSpeed, 
+                    ForceMode2D.Impulse
+                );
         }
 
         if (!_isGrounded)
@@ -200,14 +133,37 @@ public class CompBotController : MonoBehaviour
     private void HandleWalk()
     {
         //if (_disableX || _playerRopeJoint.enabled) return;
-        _compBotRigidBody.velocity = new Vector2(
-                        _walkInput * walkSpeed,
-                        _compBotRigidBody.velocity.y
-                    );
-        if (_isGrounded && Mathf.Abs(_compBotRigidBody.velocity.x) > 0.5f) 
+        float resultSpeed = _walkInput * walkSpeed;
+
+        if (_currentPlane == ClimbPlane.Ground || _currentPlane == ClimbPlane.Ceiling)
         {
-            ChangeAnimationState(COMPBOT_WALK);
+            float accel = (Mathf.Abs(resultSpeed) > .01f ? maxAccelerate : maxDeccelerate);
+            float speedDif = resultSpeed - _compBotRigidBody.velocity.x;
+
+            float movement = Mathf.Pow(
+                    Mathf.Abs(speedDif) * accel, velocityPower
+                ) * Mathf.Sign(speedDif);
+            _compBotRigidBody.AddForce(movement * Vector2.right);
+            if (_isGrounded && Mathf.Abs(_compBotRigidBody.velocity.x) > 0.5f)
+            {
+                ChangeAnimationState(COMPBOT_WALK);
+            }
         }
+        else 
+        {
+            float accel = (Mathf.Abs(resultSpeed) > .01f ? maxAccelerate : maxDeccelerate);
+            float speedDif = resultSpeed - _compBotRigidBody.velocity.y;
+
+            float movement = Mathf.Pow(
+                    Mathf.Abs(speedDif) * accel, velocityPower
+                ) * Mathf.Sign(speedDif);
+            _compBotRigidBody.AddForce(movement * Vector2.up);
+            if (_isGrounded && Mathf.Abs(_compBotRigidBody.velocity.y) > 0.5f)
+            {
+                ChangeAnimationState(COMPBOT_WALK);
+            }
+        }
+        
     }
 
     private void HandleIdle()
@@ -236,35 +192,21 @@ public class CompBotController : MonoBehaviour
     }
     private void HandleFlipSprite()
     {
-        if (_compBotRigidBody.velocity.x > Mathf.Epsilon)
-        {
-            transform.localScale = Vector3.one;
-        }
-        if (_compBotRigidBody.velocity.x < -Mathf.Epsilon)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
+        
     }
 
     private void HandleSpriteRotate() 
     {
-
-        if (_isTouchWall && transform.localScale.x == -1) 
-        {
-            transform.localRotation = Quaternion.Euler(0, 0, -90);
-        }
-        if (_isTouchWall && transform.localScale.x == 1) 
-        {
-            transform.localRotation = Quaternion.Euler(0, 0, 90);
-        }
-        if (_isTouchCeil && !_isTouchWall) 
-        {
-            transform.localRotation = Quaternion.Euler(0, 0, 180);
-        }
+        
     }
 
     private void OnWalk()
     {
+        if (_currentPlane == ClimbPlane.LeftWall || _currentPlane == ClimbPlane.RightWall)
+        {
+            _walkInput = Input.GetAxis("Vertical");
+            return;
+        }
         _walkInput = Input.GetAxis("Horizontal");
     }
     private void OnJump()
@@ -287,28 +229,26 @@ public class CompBotController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawLine(transform.position, new Vector3(
-                transform.position.x + castDistanceWall, 
-                transform.position.y,
-                transform.position.z
-            ));
-        Gizmos.DrawLine(transform.position, new Vector3(
-                transform.position.x - castDistanceWall, 
-                transform.position.y,
-                transform.position.z
-            ));
-        Gizmos.DrawLine(transform.position, new Vector3(
-                transform.position.x, 
-                transform.position.y + castDistanceCeil,
-                transform.position.z
-            ));
-        Gizmos.DrawLine(transform.position, new Vector3(
-                transform.position.x,
-                transform.position.y - castDistanceGround,
-                transform.position.z
-            ));
-        Gizmos.DrawWireCube(transform.position - transform.up * castDistanceGround, boxSize);
-        Gizmos.DrawWireCube(transform.position + transform.up * castDistanceCeil, boxSize);
+        //Gizmos.DrawLine(transform.position, new Vector3(
+        //        transform.position.x + castDistanceWall, 
+        //        transform.position.y,
+        //        transform.position.z
+        //    ));
+        //Gizmos.DrawLine(transform.position, new Vector3(
+        //        transform.position.x - castDistanceWall, 
+        //        transform.position.y,
+        //        transform.position.z
+        //    ));
+        //Gizmos.DrawLine(transform.position, new Vector3(
+        //        transform.position.x, 
+        //        transform.position.y + castDistanceCeil,
+        //        transform.position.z
+        //    ));
+        //Gizmos.DrawLine(transform.position, new Vector3(
+        //        transform.position.x,
+        //        transform.position.y - castDistanceGround,
+        //        transform.position.z
+        //    ));
     }
 
     IEnumerator DisableInputCoroutine()

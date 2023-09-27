@@ -12,6 +12,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float sprintSpeed;
     [SerializeField] float jumpSpeed;
     [SerializeField] float crouchSpeed;
+    [SerializeField] float maxAccelerate;
+    [SerializeField] float maxDeccelerate;
+    [SerializeField] float velocityPower;
+    [SerializeField] float frictionAmount;
 
     [Header("RayCast Ground")]
     [SerializeField] LayerMask groundLayer;
@@ -115,6 +119,7 @@ public class PlayerController : MonoBehaviour
         HandleCrouching();
         HandleWallSlide();
         HandleGravity();
+        HandleFriction();
         HandleOnSwing();
 
         AnimationStateMachineHandler();
@@ -122,7 +127,10 @@ public class PlayerController : MonoBehaviour
         HandleDisable();
     }
 
-
+    private void FixedUpdate()
+    {
+        
+    }
 
     private void BoolStatusCheck()
     {
@@ -158,17 +166,21 @@ public class PlayerController : MonoBehaviour
 
     private void HandleHorizontalMoves()
     {
-        if (_disableX || _playerRopeJoint.enabled ) return;
-        _playerRigidBody.velocity = new Vector2(
-                        _walkInput * (
-                            _isSprinting ?
-                            sprintSpeed
-                            : _isCrouch ?
-                            crouchSpeed
-                            : walkSpeed
-                        ),
-                        _playerRigidBody.velocity.y
-                    );
+        if (_disableX || _playerRopeJoint.enabled) return;
+
+        float resultSpeed = _walkInput * (
+                _isSprinting ? sprintSpeed
+                : _isCrouch ? crouchSpeed
+                : walkSpeed
+            );
+        
+        float accel = (Mathf.Abs(resultSpeed) > .01f ? maxAccelerate : maxDeccelerate);
+        float speedDif = resultSpeed - _playerRigidBody.velocity.x;
+
+        float movement = Mathf.Pow(
+                Mathf.Abs(speedDif) * accel, velocityPower
+            ) * Mathf.Sign(speedDif);
+        _playerRigidBody.AddForce(movement * Vector2.right);
     }
 
     private void HandleOnSwing() 
@@ -207,27 +219,27 @@ public class PlayerController : MonoBehaviour
     {
         if (_isGroundJump && !_isCrouch)
         {
-            _playerRigidBody.velocity = new Vector2(
-                        _playerRigidBody.velocity.x,
-                        jumpSpeed
-                    );
-        } 
+            //_playerRigidBody.velocity = new Vector2(
+            //            _playerRigidBody.velocity.x,
+            //            jumpSpeed
+            //        );
+            _playerRigidBody.AddForce(
+                    Vector2.up * jumpSpeed, ForceMode2D.Impulse
+                );
+        }
         else if (_isJumpPressed && _isWallSliding)
         {
             _ = StartCoroutine(WallJumpCoroutine());
             _playerRigidBody.AddForce(
-                    new Vector2 (
+                    new Vector2(
                             -transform.localScale.x
                             * wallJumpForceX,
                             wallJumpForceY
                         ),
                     ForceMode2D.Impulse
                 );
-            _playerRigidBody.velocity += new Vector2 (
-                    _walkInput * walkSpeed ,
-                    _walkInput * walkSpeed 
-                );
         }
+        
     }
 
     private void OnWalk()
@@ -306,13 +318,25 @@ public class PlayerController : MonoBehaviour
 
     private void HandleFlipSprite()
     {
-        if (_playerRigidBody.velocity.x > Mathf.Epsilon)
+        if (_playerRigidBody.velocity.x > 0.5f)
         {
             transform.localScale = Vector3.one;
         }
-        if (_playerRigidBody.velocity.x < -Mathf.Epsilon)
+        if (_playerRigidBody.velocity.x < -0.5f)
         {
             transform.localScale = new Vector3(-1, 1, 1);
+        }
+    }
+
+    private void HandleFriction() 
+    {
+        if (_isGrounded && Mathf.Abs(_walkInput) < .01f) 
+        {
+            float appliedFriction = Mathf.Min(
+                    Mathf.Abs(_playerRigidBody.velocity.x),
+                    frictionAmount   
+                ) * Mathf.Sign(_playerRigidBody.velocity.x);
+            _playerRigidBody.AddForce(Vector2.right * -appliedFriction, ForceMode2D.Impulse);
         }
     }
 
