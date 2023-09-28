@@ -2901,7 +2901,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 8.5
+  orthographic size: 6
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -6486,7 +6486,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e47512824ab14f34c80e70fcd4cb8a50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 12
+  walkSpeed: 10
   maxAccelerate: 8
   maxDeccelerate: 8
   frictionAmount: 0.8
@@ -6499,11 +6499,12 @@ MonoBehaviour:
     m_Bits: 64
   castDistance: 0.3
   _aimingController: {fileID: 2084694752}
-  maxDistance: 10
+  maxDistance: 3
   grapplingSpeed: 50
-  resolution: 5
-  amplitudeCounts: 6
-  animationSpeed: 5
+  resolution: 60
+  wobbleCounts: 4
+  waveSize: 1
+  animationSpeed: 2
 --- !u!61 &1625487939
 BoxCollider2D:
   m_ObjectHideFlags: 0
