@@ -9,6 +9,7 @@ public class CompBotController : MonoBehaviour
         Ceiling, Ground, LeftWall, RightWall
     }
 
+
     [Header("Controlling")]
     [SerializeField] float walkSpeed;
     [SerializeField] float maxAccelerate;
@@ -25,16 +26,36 @@ public class CompBotController : MonoBehaviour
     [SerializeField] LayerMask groundLayer;
     [SerializeField] float castDistance;
 
+    [Header("Grappling Hook")]
+    [SerializeField] AimingController _aimingController;
+    [SerializeField] float maxDistance;
+    [SerializeField] float grapplingSpeed;
+
+    [Header("Rope Animation")]
+    [SerializeField] int resolution;
+    [SerializeField] int amplitudeCounts;
+    [SerializeField] float animationSpeed;
+
     private float _walkInput;
     private bool _isJumpPressed;
     private bool _isGrounded;
     private bool _isSwingPressed;
+    private bool _isShootPressed;
 
+    private bool _toJump;
+    private bool _toShoot;
     
     private RaycastHit2D _groundHit;
+
+    private Vector2 _hookDirection;
+    private Vector2 _hookPosition;
+    private bool _isOnHook;
+    private RaycastHit2D grapplerRayHit;
+    private bool _isHit;
     
     private Rigidbody2D _compBotRigidBody;
     private Animator _compBotAnimator;
+    private LineRenderer _compBotLineRenderer;
 
     private String _currentAnimationState;
     private const String COMPBOT_IDLE = "CompBotIdle";
@@ -50,6 +71,7 @@ public class CompBotController : MonoBehaviour
     {
         _compBotRigidBody = GetComponent<Rigidbody2D>();
         _compBotAnimator = GetComponent<Animator>();
+        _compBotLineRenderer = GetComponent<LineRenderer>();
     }
 
     void Start()
@@ -66,19 +88,22 @@ public class CompBotController : MonoBehaviour
         
         OnWalk();
         OnJump();
+        OnShootHook();
+
+        HandleShootHook();
 
         HandleGravityState();
-        HandleIdle();
-        HandleWalk();
-        HandleJump();
         HandleSpriteRotate();
         HandleFlipSprite();
         
-        _compBotRigidBody.AddForce(_gravityDirection * _gravityScale);
     }
 
     private void FixedUpdate()
     {
+        HandleIdle();
+        HandleWalk();
+        HandleJump();
+        _compBotRigidBody.AddForce(_gravityDirection * _gravityScale);
     }
 
     private void HandleGravityState()
@@ -129,20 +154,54 @@ public class CompBotController : MonoBehaviour
         Debug.DrawRay(transform.position, new Vector2(0, castDistance), Color.green);
 
     }
-
-    private void HandleSwing()
+    private void OnShootHook()
     {
-        
+        _isShootPressed = Input.GetKeyDown(KeyCode.Mouse0);
+        Debug.DrawRay(transform.position, _aimingController.AimingCircleDirection, color: Color.magenta);
+        if (_isShootPressed && !_toShoot)
+        {
+            _hookPosition = _aimingController.AimingPositionGlobal;
+            _hookDirection = _aimingController.AimingCircleDirection;
+            _toShoot = true;
+        }
+    }
+    private void HandleShootHook()
+    {
+        grapplerRayHit = Physics2D.Raycast(
+                origin: transform.position,
+                direction: _hookDirection.normalized,
+                distance: maxDistance,
+                layerMask: groundLayer
+            );
+        _isHit = grapplerRayHit;
+
+        if (grapplerRayHit && _toShoot) 
+        {
+            Vector2 target = _hookPosition;
+            //StartCoroutine(RopeAnimationCoroutine());
+            _compBotRigidBody.MovePosition(
+                    Vector2.MoveTowards(
+                            current: transform.position,
+                            target: target,
+                            Time.deltaTime * grapplingSpeed
+                        )
+                );
+            if (Vector3.Distance(transform.position, target) < 0.6f) 
+            {
+                _toShoot = false;
+            }
+        }
     }
 
     private void HandleJump()
     {
-        if (_isGrounded && _isJumpPressed)
+        if (_isGrounded && _toJump)
         {
             _compBotRigidBody.AddForce(
                     _groundHit.normal.normalized * jumpSpeed, 
                     ForceMode2D.Impulse
                 );
+            _toJump = false;
         }
 
         if (!_isGrounded)
@@ -153,7 +212,6 @@ public class CompBotController : MonoBehaviour
 
     private void HandleWalk()
     {
-        //if (_disableX || _playerRopeJoint.enabled) return;
         float resultSpeed = _walkInput * walkSpeed;
 
         if (_currentPlane == ClimbPlane.Ground || _currentPlane == ClimbPlane.Ceiling)
@@ -273,11 +331,12 @@ public class CompBotController : MonoBehaviour
     private void OnJump()
     {
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
+        if (_isJumpPressed && _isGrounded) 
+        {
+            _toJump = true;
+        }
     }
-    private void OnSwing()
-    {
-        _isSwingPressed = Input.GetKey(KeyCode.Mouse0);
-    }
+    
 
     private void ChangeAnimationState(string newAnimationState)
     {
@@ -288,4 +347,42 @@ public class CompBotController : MonoBehaviour
         _currentAnimationState = newAnimationState;
     }
 
+    private IEnumerator RopeAnimationCoroutine() 
+    {
+        _compBotLineRenderer.positionCount = resolution;
+
+        float counter = 0;
+        while (counter <= 1f)
+        {
+            counter += Time.deltaTime * animationSpeed;
+            SetPoints(_hookPosition, counter);
+            yield return null;
+        }
+        SetPoints(_hookPosition, counter);
+
+    }
+    private void SetPoints(Vector3 dir, float percent)
+    {
+
+        Vector3 ropeEndPosition = Vector3.Lerp(
+                a: transform.position, 
+                b: dir.normalized * maxDistance,
+                t: percent
+            );
+
+        for (int i = 0; i < resolution; i++) 
+        {
+            float xPos = (float)(i / resolution) * maxDistance;
+
+            float amplitude = Mathf.Sin((1 - percent) * amplitudeCounts * Mathf.PI);
+
+            float yPos = Mathf.Sin((float)(amplitudeCounts * i / resolution) * 2 * Mathf.PI * (1 - percent)) * amplitude;
+
+            _compBotLineRenderer.SetPosition(i, new Vector2 (xPos, yPos));
+        }
+        
+    }
+    private void OnDrawGizmos()
+    {
+    }
 }

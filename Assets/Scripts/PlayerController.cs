@@ -57,10 +57,12 @@ public class PlayerController : MonoBehaviour
     private bool _isCrouchPressed = false;
     private bool _isSwingPressed = false;
 
-    private bool _isCrouch = false;
+    private bool _isCrouching = false;
     private bool _isWallSliding = false;
     private bool _isSprinting = false;
-    private bool _isGroundJump = false;
+
+    private bool _toJump = false;
+    private bool _toToggleCrouch = false;
 
     private bool _isGrounded = false;
     private bool _isSpaceAbove = true;
@@ -112,15 +114,7 @@ public class PlayerController : MonoBehaviour
         OnCrouch();
         OnSwing();
 
-        HandleIdle();
-        HandleHorizontalMoves();
-        HandleJump();
         HandleFlipSprite();
-        HandleCrouching();
-        HandleWallSlide();
-        HandleGravity();
-        HandleFriction();
-        HandleOnSwing();
 
         AnimationStateMachineHandler();
 
@@ -129,13 +123,19 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        
+        HandleIdle();
+        HandleHorizontalMoves();
+        HandleJump();
+        HandleCrouching();
+        HandleWallSlide();
+        HandleGravity();
+        HandleFriction();
+        HandleOnSwing();
     }
 
     private void BoolStatusCheck()
     {
-        _isGroundJump = _isJumpPressed && _isGrounded;
-        _isSprinting = _isSprintPressed && !_isCrouch;
+        _isSprinting = _isSprintPressed && !_isCrouching;
         CastCheck();
     }
 
@@ -170,7 +170,7 @@ public class PlayerController : MonoBehaviour
 
         float resultSpeed = _walkInput * (
                 _isSprinting ? sprintSpeed
-                : _isCrouch ? crouchSpeed
+                : _isCrouching ? crouchSpeed
                 : walkSpeed
             );
         
@@ -187,13 +187,14 @@ public class PlayerController : MonoBehaviour
     {
         if (_playerRopeJoint.enabled) 
         {
+            
             if (_walkInput > 0.5)
             {
                 _playerRigidBody.velocity += new Vector2 (swingForce * Time.deltaTime, 0f);
             }
             else if (_walkInput < -0.5) 
             {
-                _playerRigidBody.velocity -= new Vector2(swingForce * Time.deltaTime, 0f);
+                _playerRigidBody.velocity -= new Vector2 (swingForce * Time.deltaTime, 0f);
             }
         };
 
@@ -217,17 +218,14 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJump()
     {
-        if (_isGroundJump && !_isCrouch)
+        if (_isGrounded && _toJump && !_isCrouching)
         {
-            //_playerRigidBody.velocity = new Vector2(
-            //            _playerRigidBody.velocity.x,
-            //            jumpSpeed
-            //        );
             _playerRigidBody.AddForce(
                     Vector2.up * jumpSpeed, ForceMode2D.Impulse
                 );
+            _toJump = false;
         }
-        else if (_isJumpPressed && _isWallSliding)
+        else if (_toJump && _isWallSliding)
         {
             _ = StartCoroutine(WallJumpCoroutine());
             _playerRigidBody.AddForce(
@@ -238,6 +236,7 @@ public class PlayerController : MonoBehaviour
                         ),
                     ForceMode2D.Impulse
                 );
+            _toJump = false;
         }
         
     }
@@ -255,11 +254,19 @@ public class PlayerController : MonoBehaviour
     private void OnJump()
     {
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
+        if (_isJumpPressed && !_toJump) 
+        {
+            _toJump = true;
+        }
     }
 
     private void OnCrouch()
     {
         _isCrouchPressed = Input.GetKeyDown(KeyCode.LeftControl);
+        if (_isCrouchPressed && !_toToggleCrouch) 
+        {
+            _toToggleCrouch = true;
+        }
     }
 
     private void OnSwing() 
@@ -309,10 +316,11 @@ public class PlayerController : MonoBehaviour
     }
     private void HandleCrouching()
     {
-        if (!_isGroundJump && !_isSprinting && _isCrouchPressed)
+        if (_isGrounded && !_isSprinting && _toToggleCrouch)
         {
-            if (_isCrouch && !_isSpaceAbove) return;
-            _isCrouch = !_isCrouch;
+            _toToggleCrouch = false;
+            if (!_isSpaceAbove) return;
+            _isCrouching = !_isCrouching;
         }
     }
 
@@ -348,16 +356,6 @@ public class PlayerController : MonoBehaviour
         _disableX = false;
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
-        Gizmos.DrawWireCube(transform.position + transform.up * aboveCastDistance, boxSizeAbove);
-        Gizmos.DrawWireCube(
-                    center: transform.position + new Vector3 (transform.localScale.x, 0f, 0f) * (playerRopeRadius),
-                    size: new Vector2 (ropeBoxWidth, 2 * playerRopeRadius)
-                );
-    }
-
     private void ChangeAnimationState(string newAnimationState) 
     {
         if (_currentAnimationState == newAnimationState) return;
@@ -378,7 +376,7 @@ public class PlayerController : MonoBehaviour
             switch (_currentAnimationState)
             {
                 case PLAYER_IDLE:
-                    if (_isCrouch)
+                    if (_isCrouching)
                     {
                         ChangeAnimationState(PLAYER_CROUCH);
                     }
@@ -392,13 +390,13 @@ public class PlayerController : MonoBehaviour
                     {
                         ChangeAnimationState(PLAYER_CROUCH_MOVE);
                     }
-                    if (!_isCrouch)
+                    if (!_isCrouching)
                     {
                         ChangeAnimationState(PLAYER_IDLE);
                     }
                     break;
                 case PLAYER_CROUCH_MOVE:
-                    if (!_isCrouch)
+                    if (!_isCrouching)
                     {
                         ChangeAnimationState(PLAYER_IDLE);
                     }
@@ -412,7 +410,7 @@ public class PlayerController : MonoBehaviour
                     {
                         ChangeAnimationState(PLAYER_IDLE);
                     }
-                    if (_isCrouch)
+                    if (_isCrouching)
                     {
                         ChangeAnimationState(PLAYER_CROUCH);
                     }
@@ -469,4 +467,14 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
+        Gizmos.DrawWireCube(transform.position + transform.up * aboveCastDistance, boxSizeAbove);
+        Gizmos.DrawWireCube(
+                    center: transform.position + new Vector3(transform.localScale.x, 0f, 0f) * (playerRopeRadius),
+                    size: new Vector2(ropeBoxWidth, 2 * playerRopeRadius)
+                );
+    }
+
 }
