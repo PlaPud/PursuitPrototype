@@ -6500,7 +6500,7 @@ MonoBehaviour:
   castDistance: 0.3
   _aimingController: {fileID: 2084694752}
   maxDistance: 3
-  grapplingSpeed: 50
+  grapplingSpeed: 20
   resolution: 60
   wobbleCounts: 4
   waveSize: 1

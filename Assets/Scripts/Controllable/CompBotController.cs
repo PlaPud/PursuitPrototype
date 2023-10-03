@@ -45,6 +45,7 @@ public class CompBotController : MonoBehaviour
     private bool _isGrounded;
     private bool _isSwingPressed;
     private bool _isShootPressed;
+    private bool _isLandingNewGround;
 
     private bool _toJump;
     private bool _toShoot;
@@ -173,7 +174,7 @@ public class CompBotController : MonoBehaviour
     {
 
         _isShootPressed = Input.GetKeyDown(KeyCode.Mouse0);
-        if (_isShootPressed && !_toShoot)
+        if (_isShootPressed && !_toShoot && grapplerHitObject)
         {
             _hookPosition = _aimingController.AimingPositionGlobal;
             _hookDirection = _aimingController.AimingCircleDirection;
@@ -187,13 +188,13 @@ public class CompBotController : MonoBehaviour
             grapplerHitObject = _grapplerHit;
             _isHit = grapplerHitObject;
             _shootAngle = _aimingController.AimingAngle;
+            _isLandingNewGround = false;
         }
 
         if (grapplerHitObject && _toShoot)
         {
             _enableInput = false;
             Vector2 target = grapplerHitObject.point;
-            //StartCoroutine(RopeAnimationCoroutine(hitPoint: target));
             _compBotLineRenderer.SetPosition(0, transform.position);
             _compBotLineRenderer.SetPosition(1, target);
             _compBotRigidBody.MovePosition(
@@ -203,7 +204,8 @@ public class CompBotController : MonoBehaviour
                             maxDistanceDelta: Time.deltaTime * grapplingSpeed
                         )
                 );
-            if (_isGrounded)
+            StartCoroutine(GrapplerStartCoroutine());
+            if (_isGrounded && _isLandingNewGround)
             {
                 _enableInput = true;
                 _toShoot = false;
@@ -267,7 +269,7 @@ public class CompBotController : MonoBehaviour
 
     private void HandleIdle()
     {
-        if (_walkInput == 0 && _isGrounded)
+        if (Vector3.Magnitude(_compBotRigidBody.velocity) < 0.5f  && _isGrounded)
         {
             ChangeAnimationState(COMPBOT_IDLE);
         }
@@ -370,5 +372,11 @@ public class CompBotController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(transform.position, 3);
+    }
+
+    IEnumerator GrapplerStartCoroutine() 
+    {
+        yield return new WaitForSeconds(.1f);
+        _isLandingNewGround = true;
     }
 }
