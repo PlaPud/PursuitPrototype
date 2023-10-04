@@ -31,6 +31,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask ropePointLayer;
     [SerializeField] float ropeBoxWidth;
     [SerializeField] float swingForce;
+    [SerializeField] float maxSwingSpeed;
 
     [Header("Wall Jump")]
     [SerializeField] float wallJumpTime;
@@ -106,7 +107,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        BoolStatusCheck();
+        BoolAndRayCheck();
 
         OnJump();
         OnSprint();
@@ -133,7 +134,7 @@ public class PlayerController : MonoBehaviour
         HandleOnSwing();
     }
 
-    private void BoolStatusCheck()
+    private void BoolAndRayCheck()
     {
         _isSprinting = _isSprintPressed && !_isCrouching;
         CastCheck();
@@ -185,7 +186,8 @@ public class PlayerController : MonoBehaviour
 
     private void HandleOnSwing() 
     {
-        if (_playerRopeJoint.enabled) 
+
+        if (_playerRopeJoint.enabled && Vector3.Magnitude(_playerRigidBody.velocity) < maxSwingSpeed) 
         {
             
             if (_walkInput > 0.5)
@@ -202,6 +204,12 @@ public class PlayerController : MonoBehaviour
 
     private void HandleGravity() 
     {
+        if (_isSwingPressed && _playerRopeJoint.enabled) 
+        {
+            _playerRigidBody.AddForce(Vector2.down * 50f);
+            return;
+        };
+
         if (_playerRigidBody.velocity.y < 0)
         {
             _playerRigidBody.velocity +=
@@ -227,7 +235,6 @@ public class PlayerController : MonoBehaviour
         }
         else if (_toJump && _isWallSliding)
         {
-            _ = StartCoroutine(WallJumpCoroutine());
             _playerRigidBody.AddForce(
                     new Vector2(
                             -transform.localScale.x
@@ -254,7 +261,7 @@ public class PlayerController : MonoBehaviour
     private void OnJump()
     {
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
-        if (_isJumpPressed && !_toJump) 
+        if (_isJumpPressed && !_toJump && (_isGrounded || _isTouchWall)) 
         {
             _toJump = true;
         }

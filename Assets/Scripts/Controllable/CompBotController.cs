@@ -93,14 +93,10 @@ public class CompBotController : MonoBehaviour
     {
         BoolStatusCheck();
 
-        if (_enableInput)
-        {
-            OnWalk();
-            OnJump();
-            OnShootHook();
-        }
+        OnWalk();
+        OnJump();
+        OnShootHook();
 
-        HandleShootHook();
 
         HandleGravityState();
         HandleSpriteRotate();
@@ -113,6 +109,7 @@ public class CompBotController : MonoBehaviour
         HandleIdle();
         HandleWalk();
         HandleJump();
+        HandleShootHook();
         _compBotRigidBody.AddForce(_gravityDirection * _gravityScale);
     }
 
@@ -172,6 +169,7 @@ public class CompBotController : MonoBehaviour
     }
     private void OnShootHook()
     {
+        if (!_enableInput) return;
 
         _isShootPressed = Input.GetKeyDown(KeyCode.Mouse0);
         if (_isShootPressed && !_toShoot && grapplerHitObject)
@@ -343,6 +341,8 @@ public class CompBotController : MonoBehaviour
 
     private void OnWalk()
     {
+        if (!_enableInput) return;
+
         if (_currentPlane == ClimbPlane.LeftWall || _currentPlane == ClimbPlane.RightWall)
         {
             _walkInput = Input.GetAxis("Vertical");
@@ -352,6 +352,8 @@ public class CompBotController : MonoBehaviour
     }
     private void OnJump()
     {
+        if (!_enableInput) return;
+
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
         if (_isJumpPressed && _isGrounded)
         {
