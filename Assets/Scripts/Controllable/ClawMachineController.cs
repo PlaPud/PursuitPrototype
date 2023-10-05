@@ -6,17 +6,22 @@ using UnityEngine;
 public class ClawMachineController : MonoBehaviour
 {
     [SerializeField] private float moveSpeed;
+    [SerializeField] private float detectionRadius;
     [SerializeField] private GameObject clawBody;
+    [SerializeField] Transform holdingPoint;
+    [SerializeField] private LayerMask movableLayer;
 
     private float _moveX;
     private float _moveY;
     private bool _isHolding;
+
     private GameObject _holdingObject;
 
-    private bool _toHold;
+    private bool _toToggleHold;
 
     private Rigidbody2D _clawBodyRB;
     private Animator _clawBodyAnimator;
+    private Collider2D _enteredMovable;
 
     string _currentAnimationState = CLAW_EMPTY;
 
@@ -36,6 +41,7 @@ public class ClawMachineController : MonoBehaviour
 
     void Update()
     {
+        RayCheck();
         OnMove();
         OnToggleHold();
     }
@@ -47,6 +53,15 @@ public class ClawMachineController : MonoBehaviour
         HandleHolding();
     }
 
+    private void RayCheck() 
+    {
+        _enteredMovable = Physics2D.OverlapCircle(
+                point: holdingPoint.position,
+                radius: detectionRadius,
+                layerMask: movableLayer
+            );
+    }
+
     private void OnMove() 
     {
         _moveX = Input.GetAxisRaw("Horizontal");
@@ -55,12 +70,8 @@ public class ClawMachineController : MonoBehaviour
 
     private void OnToggleHold() 
     {
-        bool _isToggleHold = Input.GetKey(KeyCode.E);
-        if (_isToggleHold) _toHold = true;
-        //if (_isToggleHold && _isObjectNear) 
-        //{
-        //    _toHold = true;
-        //}
+        bool _isToggleHold = Input.GetKeyDown(KeyCode.E);
+        if (_isToggleHold) _toToggleHold = true;
     }
 
     private void HandleMove() 
@@ -78,19 +89,45 @@ public class ClawMachineController : MonoBehaviour
 
     private void HandleHolding() 
     {
-        if (!_toHold) 
+        if (_toToggleHold && _enteredMovable && !_holdingObject) 
         {
+            _toToggleHold = false;
+            _isHolding = true;
+            Debug.Log(_isHolding);
+            ChangeAnimationState(CLAW_HOLD);
+            _enteredMovable.transform.SetParent(holdingPoint);
+            _enteredMovable.transform.position = holdingPoint.position;
+            _holdingObject = _enteredMovable.gameObject;
+            Rigidbody2D holdingRB = _enteredMovable.GetComponent<Rigidbody2D>();
+            holdingRB.gravityScale = 0;
+            return;
+        }
+
+        if (_toToggleHold && _holdingObject)
+        {
+            _toToggleHold = false;
+            Rigidbody2D holdingRB = _holdingObject.GetComponent<Rigidbody2D>();
+            holdingRB.gravityScale = 1;
+            _holdingObject.transform.parent = null;
             ChangeAnimationState(CLAW_EMPTY);
             return;
         }
 
-        ChangeAnimationState(CLAW_HOLD);
+        if (_isHolding) 
+        {
+            _holdingObject.transform.localPosition = Vector3.zero;
+        }
     }
-
+        
     void ChangeAnimationState(string newState) 
     {
         if (_currentAnimationState == newState) return;
         _currentAnimationState = newState;
         _clawBodyAnimator.Play(newState);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(holdingPoint.position, detectionRadius);
     }
 }
