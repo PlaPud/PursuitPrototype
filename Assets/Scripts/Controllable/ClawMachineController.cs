@@ -8,6 +8,7 @@ public class ClawMachineController : MonoBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float detectionRadius;
     [SerializeField] private GameObject clawBody;
+    [SerializeField] private GameObject clawTop;
     [SerializeField] private Transform holdingPoint;
     [SerializeField] private Transform wirePoint;
     [SerializeField] private LayerMask movableLayer;
@@ -25,7 +26,9 @@ public class ClawMachineController : MonoBehaviour
     private bool _toToggleHold;
 
     private Rigidbody2D _clawBodyRB;
+    private Rigidbody2D _clawTopRB;
     private Animator _clawBodyAnimator;
+    private Collider2D _clawBodyCD;
     private Collider2D[] _allEnteredMovables;
     private RaycastHit2D _hitCeiling;
 
@@ -39,6 +42,7 @@ public class ClawMachineController : MonoBehaviour
         _wireLR = clawBody.GetComponent<LineRenderer>();
         _clawBodyRB = clawBody.GetComponent<Rigidbody2D>();
         _clawBodyAnimator = clawBody.GetComponent<Animator>();
+        _clawTopRB = clawTop.GetComponent<Rigidbody2D>();
     }
 
     void Start()
@@ -63,9 +67,10 @@ public class ClawMachineController : MonoBehaviour
 
     private void RayCheck() 
     {
-        _allEnteredMovables = Physics2D.OverlapCircleAll(
+        _allEnteredMovables = Physics2D.OverlapBoxAll(
                 point: holdingPoint.position,
-                radius: detectionRadius,
+                size: Vector2.one * detectionRadius,
+                angle: 0,
                 layerMask: movableLayer
             );
 
@@ -91,10 +96,22 @@ public class ClawMachineController : MonoBehaviour
 
     private void HandleMove() 
     {
-        _clawBodyRB.velocity = new Vector2(
+        //if (_holdingObject && _holdingObject.GetComponent<Collider2D>()) 
+
+        Vector2 appliedVelocity = new Vector2(
                     _moveX * moveSpeed,
                     _moveY * moveSpeed
                 );
+        
+        _clawTopRB.velocity = Vector2.right * appliedVelocity.x;
+        _clawBodyRB.velocity = Vector2.up * appliedVelocity.y;
+        clawBody.transform.position =
+            new Vector3(
+                    clawTop.transform.position.x,
+                    clawBody.transform.position.y,
+                    0f
+                );
+
     }
 
     private void HandleIdle() 
@@ -138,7 +155,7 @@ public class ClawMachineController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(holdingPoint.position, detectionRadius);
+        Gizmos.DrawWireCube(holdingPoint.position, Vector2.one * detectionRadius);
     }
 
     private Collider2D _NearestMovable() 
