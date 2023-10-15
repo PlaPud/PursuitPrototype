@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Climbable
+  - PlayerCat
+  - PlayerCompBot
   layers:
   - Default
   - TransparentFX
@@ -14,10 +16,10 @@ TagManager:
   - UI
   - Ground
   - RopePoint
-  - PlayerMain
+  - Player
   - Movable
   - ClawMachine
-  - 
+  - ClawMachineRail
   - 
   - 
   - 

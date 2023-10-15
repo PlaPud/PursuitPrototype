@@ -14,6 +14,11 @@ public class TempCameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ChangeTarget();
+    }
+
+    private void ChangeTarget() 
+    {
         
     }
 

@@ -83,7 +83,6 @@ public class CompBotController : MonoBehaviour
 
     void Start()
     {
-        //gameObject.SetActive(false);
         _gravityScale = _compBotRigidBody.gravityScale;
         _compBotRigidBody.gravityScale = 0;
         _currentPlane = ClimbPlane.Ground;
@@ -93,10 +92,12 @@ public class CompBotController : MonoBehaviour
     {
         BoolStatusCheck();
 
-        OnWalk();
-        OnJump();
-        OnShootHook();
-
+        if (ControllingManager.instance.CurrentControl == ControllingManager.Control.CompBot) 
+        {
+            OnWalk();
+            OnJump();
+            OnShootHook();
+        }
 
         HandleGravityState();
         HandleSpriteRotate();

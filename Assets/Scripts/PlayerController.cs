@@ -10,12 +10,18 @@ public class PlayerController : MonoBehaviour
     [Header("Controlling")]
     [SerializeField] float walkSpeed;
     [SerializeField] float sprintSpeed;
-    [SerializeField] float jumpSpeed;
     [SerializeField] float crouchSpeed;
+    [SerializeField] float jumpSpeed;
+
+    [Header("Coyote Jump")]
+    [SerializeField] float coyoteJumpTime;
+
+    [Header("Force and Accelaration")]
+    [SerializeField] float frictionAmount;
     [SerializeField] float maxAccelerate;
     [SerializeField] float maxDeccelerate;
     [SerializeField] float velocityPower;
-    [SerializeField] float frictionAmount;
+
 
     [Header("RayCast Ground")]
     [SerializeField] LayerMask groundLayer;
@@ -39,7 +45,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float wallJumpForceY;
     [SerializeField] float wallSlideSpeed;
     [SerializeField] float wallDistance;
-    [SerializeField] float jumpTime;
 
     [Header("Gravity")]
     [SerializeField] float fallMultiplier;
@@ -79,7 +84,10 @@ public class PlayerController : MonoBehaviour
     private const string PLAYER_CROUCH_MOVE = "PlayerCrouchMoving";
     private const string PLAYER_WALL_SLIDE = "PlayerWallSlide";
 
+    private const float MAGIC_COYOTEJUMP_NUMBER = 1.095f;
+
     private string _currentAnimationState = PLAYER_IDLE;
+    private float _coyoteTimer;
 
     private void Awake()
     {
@@ -89,23 +97,25 @@ public class PlayerController : MonoBehaviour
         PlayerRopeRenderer = GetComponent<LineRenderer>();
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         PlayerRopeJoint.enabled = false;
         PlayerRopeRenderer.enabled = false;
+        _coyoteTimer = coyoteJumpTime;
     }
 
-    // Update is called once per frame
     void Update()
     {
         BoolAndRayCheck();
 
-        OnJump();
-        OnSprint();
-        OnWalk();
-        OnCrouch();
-        OnSwing();
+        if (ControllingManager.instance.CurrentControl == ControllingManager.Control.PlayerMain) 
+        { 
+            OnJump();
+            OnSprint();
+            OnWalk();
+            OnCrouch();
+            OnSwing();
+        }
 
         HandleFlipSprite();
 
@@ -166,8 +176,9 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump()
     {
+        _coyoteTimer = IsGrounded ? coyoteJumpTime : _coyoteTimer - Time.deltaTime;
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
-        if (_isJumpPressed && !_toJump && (IsGrounded || _isTouchWall))
+        if (_isJumpPressed && !_toJump && (IsGrounded || _isTouchWall || _coyoteTimer > 0))
         {
             _toJump = true;
         }
@@ -248,11 +259,14 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJump()
     {
-        if (IsGrounded && _toJump && !_isCrouching)
+        if ((IsGrounded || _coyoteTimer > 0) && _toJump && !_isCrouching)
         {
+            Debug.Log(IsGrounded);
             _playerRigidBody.AddForce(
-                    Vector2.up * jumpSpeed, ForceMode2D.Impulse
+                    Vector2.up * jumpSpeed * (IsGrounded ? 1f : MAGIC_COYOTEJUMP_NUMBER), 
+                    ForceMode2D.Impulse
                 );
+            _coyoteTimer = 0;
             _toJump = false;
         }
         else if (_toJump && _isWallSliding)
@@ -408,9 +422,13 @@ public class PlayerController : MonoBehaviour
                     }
                     break;
                 case PLAYER_RUN:
-                    if (!_isSprintPressed)
+                    if (!_isSprintPressed && Mathf.Abs(_walkInput) > 0.5f)
                     {
                         ChangeAnimationState(PLAYER_WALK);
+                    }
+                    if (_walkInput == 0) 
+                    {
+                        ChangeAnimationState(PLAYER_IDLE);
                     }
                     break;
                 default:
