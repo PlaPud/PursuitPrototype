@@ -1,54 +1,50 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : IControllableOnGround
 {
+    
+    [Header("Disable")]
     [SerializeField] bool isDisable;
 
     [Header("Controlling")]
-    [SerializeField] float walkSpeed;
-    [SerializeField] float sprintSpeed;
-    [SerializeField] float crouchSpeed;
-    [SerializeField] float jumpSpeed;
+    [SerializeField] private float walkSpeed;
+    [SerializeField] private float sprintSpeed;
+    [SerializeField] private float crouchSpeed;
+    [SerializeField] private float jumpSpeed;
 
     [Header("Coyote Jump")]
-    [SerializeField] float coyoteJumpTime;
+    [SerializeField] private float coyoteJumpTime;
 
     [Header("Force and Accelaration")]
-    [SerializeField] float frictionAmount;
-    [SerializeField] float maxAccelerate;
-    [SerializeField] float maxDeccelerate;
-    [SerializeField] float velocityPower;
-
-
-    [Header("RayCast Ground")]
-    [SerializeField] LayerMask groundLayer;
-    [SerializeField] Vector2 boxSize;
-    [SerializeField] float castDistance;
+    [SerializeField] private float frictionAmount;
+    [SerializeField] private float maxAccelerate;
+    [SerializeField] private float maxDeccelerate;
+    [SerializeField] private float velocityPower;
 
     [Header("BoxCast Ceiling")]
-    [SerializeField] Vector2 boxSizeAbove;
-    [SerializeField] float aboveCastDistance;
+    [SerializeField] private Vector2 boxSizeAbove;
+    [SerializeField] private float aboveCastDistance;
 
     [field: Header("RopePoints")]
     [field: SerializeField] public float PlayerRopeRadius { get; private set; }
-    [SerializeField] LayerMask ropePointLayer;
-    [SerializeField] float ropeBoxWidth;
-    [SerializeField] float swingForce;
-    [SerializeField] float maxSwingSpeed;
+    [SerializeField] private LayerMask ropePointLayer;
+    [SerializeField] private float ropeBoxWidth;
+    [SerializeField] private float swingForce;
+    [SerializeField] private float maxSwingSpeed;
 
     [Header("Wall Jump")]
-    [SerializeField] float wallJumpTime;
-    [SerializeField] float wallJumpForceX;
-    [SerializeField] float wallJumpForceY;
-    [SerializeField] float wallSlideSpeed;
-    [SerializeField] float wallDistance;
+    [SerializeField] private float wallJumpTime;
+    [SerializeField] private float wallJumpForceX;
+    [SerializeField] private float wallJumpForceY;
+    [SerializeField] private float wallSlideSpeed;
+    [SerializeField] private float wallDistance;
 
     [Header("Gravity")]
-    [SerializeField] float fallMultiplier;
-    [SerializeField] float lowJumpMultiplier;
+    [SerializeField] private float fallMultiplier;
+    [SerializeField] private float lowJumpMultiplier;
+
+    [SerializeField] private PlayerPushPull _playerPushPull;
+
 
     private Rigidbody2D _playerRigidBody;
     private Animator _playerAnimator;
@@ -72,7 +68,6 @@ public class PlayerController : MonoBehaviour
 
     private bool _isSpaceAbove = true;
     private bool _isTouchWall = false;
-    public bool IsGrounded { get; private set; } = false;
     public RaycastHit2D FrontRopePointHit { get; private set; }
 
     private const string PLAYER_IDLE = "PlayerIdle";
@@ -110,9 +105,9 @@ public class PlayerController : MonoBehaviour
 
         if (ControllingManager.instance.CurrentControl == ControllingManager.Control.PlayerMain) 
         { 
+            OnWalk();
             OnJump();
             OnSprint();
-            OnWalk();
             OnCrouch();
             OnSwing();
         }
@@ -139,16 +134,13 @@ public class PlayerController : MonoBehaviour
     private void BoolAndRayCheck()
     {
         _isSprinting = _isSprintPressed && !_isCrouching;
-        CastCheck();
+        RayCheck();
     }
 
-    private void CastCheck()
+    override public void RayCheck()
     {
-        IsGrounded = Physics2D.BoxCast(
-                        origin: transform.position, size: boxSize, angle: 0,
-                        direction: -transform.up, distance: castDistance,
-                        layerMask: groundLayer
-                   );
+
+        base.RayCheck();
         _isSpaceAbove = !Physics2D.BoxCast(
                 origin: transform.position, size: boxSizeAbove, angle: 0f,
                 direction: transform.up, distance: aboveCastDistance,
@@ -215,23 +207,25 @@ public class PlayerController : MonoBehaviour
         float movement = Mathf.Pow(
                 Mathf.Abs(speedDif) * accel, velocityPower
             ) * Mathf.Sign(speedDif);
+
         _playerRigidBody.AddForce(movement * Vector2.right);
     }
 
     private void HandleOnSwing() 
     {
-        if (PlayerRopeJoint.enabled && Vector3.Magnitude(_playerRigidBody.velocity) < maxSwingSpeed) 
-        {
+        bool isSwingSpeedExceed = PlayerRopeJoint.enabled && Vector3.Magnitude(_playerRigidBody.velocity) < maxSwingSpeed;
+
+        if (!isSwingSpeedExceed) return;
+        
             
-            if (_walkInput > 0.5)
-            {
-                _playerRigidBody.velocity += new Vector2 (swingForce * Time.deltaTime, 0f);
-            }
-            else if (_walkInput < -0.5) 
-            {
-                _playerRigidBody.velocity -= new Vector2 (swingForce * Time.deltaTime, 0f);
-            }
-        };
+        if (_walkInput > 0.5)
+        {
+            _playerRigidBody.velocity += new Vector2 (swingForce * Time.deltaTime, 0f);
+        }
+        else if (_walkInput < -0.5) 
+        {
+            _playerRigidBody.velocity -= new Vector2 (swingForce * Time.deltaTime, 0f);
+        }
 
     }
 
@@ -261,24 +255,23 @@ public class PlayerController : MonoBehaviour
     {
         if ((IsGrounded || _coyoteTimer > 0) && _toJump && !_isCrouching)
         {
-            Debug.Log(IsGrounded);
             _playerRigidBody.AddForce(
-                    Vector2.up * jumpSpeed * (IsGrounded ? 1f : MAGIC_COYOTEJUMP_NUMBER), 
-                    ForceMode2D.Impulse
-                );
+                Vector2.up * jumpSpeed * (IsGrounded ? 1f : MAGIC_COYOTEJUMP_NUMBER), 
+                ForceMode2D.Impulse
+            );
             _coyoteTimer = 0;
             _toJump = false;
         }
         else if (_toJump && _isWallSliding)
         {
             _playerRigidBody.AddForce(
-                    new Vector2(
-                            -transform.localScale.x
-                            * wallJumpForceX,
-                            wallJumpForceY
-                        ),
-                    ForceMode2D.Impulse
-                );
+                new Vector2(
+                        -transform.localScale.x
+                        * wallJumpForceX,
+                        wallJumpForceY
+                    ),
+                ForceMode2D.Impulse
+            );
             _toJump = false;
         }
         
@@ -301,7 +294,6 @@ public class PlayerController : MonoBehaviour
                 hitGround.transform.gameObject.CompareTag("Climbable")
             );
 
-        Debug.DrawRay(transform.position, new Vector2(wallDistance, 0), Color.blue);
 
         if (_isTouchWall &&
             !IsGrounded &&
@@ -336,6 +328,8 @@ public class PlayerController : MonoBehaviour
 
     private void HandleFlipSprite()
     {
+        if (_playerPushPull.IsGrabbing) return;
+
         if (_playerRigidBody.velocity.x > 0.5f)
         {
             transform.localScale = Vector3.one;

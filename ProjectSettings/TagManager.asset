@@ -7,6 +7,7 @@ TagManager:
   - Climbable
   - PlayerCat
   - PlayerCompBot
+  - Moveable
   layers:
   - Default
   - TransparentFX
@@ -44,9 +45,18 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 2579082525
+    locked: 0
+  - name: SceneProps
+    uniqueID: 2799403693
+    locked: 0
   - name: Ground
     uniqueID: 1757585653
     locked: 0
   - name: PlayerControllable
     uniqueID: 1242880349
+    locked: 0
+  - name: GroundOverlay
+    uniqueID: 833932929
     locked: 0

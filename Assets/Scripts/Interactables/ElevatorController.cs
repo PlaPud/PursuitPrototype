@@ -4,9 +4,20 @@ using UnityEngine;
 
 public class ElevatorController : MonoBehaviour
 {
+
+    [SerializeField] private Transform lowerPos;
+    [SerializeField] private Transform upperPos;
+    [SerializeField] private float moveSpeed;
+
     public enum ElevatorState { Ready, GoingUp, GoingDown }
-    
+    public enum ElevatorIdlePos { Top, Bottom }
+
     public ElevatorState CurrentState = ElevatorState.Ready;
+    public ElevatorIdlePos currentPos = ElevatorIdlePos.Bottom;
+
+    public bool IsReachedTop => Vector2.Distance(transform.position, upperPos.position) < 0.05f;
+    public bool IsReachedBottom => Vector2.Distance(transform.position, lowerPos.position) < 0.05f;
+
 
     private string currentAnimationState = ELEVATOR_IDLE;
 
@@ -14,9 +25,11 @@ public class ElevatorController : MonoBehaviour
     const string ELEVATOR_UP = "ElevatorUp";
     const string ELEVATOR_DOWN = "ElevatorDown";
 
+    private Animator _anim;
+
     void Start()
     {
-        
+        _anim = GetComponent<Animator>();
     }
 
     void Update()
@@ -27,7 +40,7 @@ public class ElevatorController : MonoBehaviour
                 HandleReady();
                 break;
             case ElevatorState.GoingUp:
-                HandleGoingDown();
+                HandleGoingUp();
                 break;
             case ElevatorState.GoingDown:
                 HandleGoingDown();
@@ -37,22 +50,57 @@ public class ElevatorController : MonoBehaviour
 
     private void HandleReady() 
     {
-        
+        _ChangeAnimationState(ELEVATOR_IDLE);
+        _RepositionElevator();
     }
 
     private void HandleGoingDown() 
     {
-    
+        if (currentPos == ElevatorIdlePos.Bottom) return;
+        _ChangeAnimationState(ELEVATOR_DOWN);
+        _MoveElevator(to: lowerPos, isReach: IsReachedBottom, pos: ElevatorIdlePos.Bottom);
     }
 
     private void HandleGoingUp() 
     {
-    
+        if (currentPos == ElevatorIdlePos.Top) return;
+        _ChangeAnimationState(ELEVATOR_UP);
+        _MoveElevator(to: upperPos, isReach: IsReachedTop, pos: ElevatorIdlePos.Top);
     }
 
-    private void ChangeAnimationState(string newAnimState) 
+    private void _MoveElevator(Transform to, bool isReach, ElevatorIdlePos pos) 
     {
-        
+        transform.position = Vector2.MoveTowards(
+                transform.position,
+                to.position,
+                moveSpeed * Time.deltaTime
+            );
+
+        if (!isReach) return;
+
+        CurrentState = ElevatorState.Ready;
+        currentPos = pos;
+    }
+
+    private void _RepositionElevator() 
+    {
+        if (CurrentState != ElevatorState.Ready) return;
+        switch (currentPos) 
+        {
+            case ElevatorIdlePos.Top:
+                transform.position = upperPos.position;
+                break;
+            case ElevatorIdlePos.Bottom:
+                transform.position = lowerPos.position;
+                break;
+        }
+    }
+
+    private void _ChangeAnimationState(string newAnimState) 
+    {
+        if (newAnimState == currentAnimationState) return;
+        currentAnimationState = newAnimState;
+        _anim.Play(currentAnimationState);
     }
 
 }

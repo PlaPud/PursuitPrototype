@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -17,7 +19,7 @@ public class ClawMachineController : MonoBehaviour
     [SerializeField] private GameObject clawMiddle;
     [SerializeField] private Transform  holdingPoint;
     [SerializeField] private Transform  wirePoint;
-    [SerializeField] private LayerMask  movableLayer;
+    [SerializeField] private LayerMask  layerToGrab;
     [SerializeField] private LayerMask  railLayer;
 
 
@@ -34,7 +36,8 @@ public class ClawMachineController : MonoBehaviour
 
     private Rigidbody2D  _clawBodyRB;
     private Collider2D   _clawBodyCD;
-    private Collider2D[] _allEnteredMovables;
+    [NonSerialized] private List<Collider2D> _allEnteredCollider = new List<Collider2D>();
+    [NonSerialized] private List<Collider2D> _filteredMoveables = new List<Collider2D>();
     private RaycastHit2D _hitRailMid;
     private RaycastHit2D _hitRailLeft;
     private RaycastHit2D _hitRailRight;
@@ -56,12 +59,13 @@ public class ClawMachineController : MonoBehaviour
 
     void Start()
     {
-     
+        
     }
 
     void Update()
     {
         RayCheck();
+        FilteringMoveable();
 
         if (ClawMachineManager.instance.IsControlClaw && panel.IsControllingThis) 
         {
@@ -88,7 +92,7 @@ public class ClawMachineController : MonoBehaviour
     private void OnToggleHold() 
     {
         bool _isToggleHold = Input.GetKeyDown(KeyCode.Mouse0);
-        if (_isToggleHold && _allEnteredMovables.Length > 0) _toToggleHold = true;
+        if (_isToggleHold && _filteredMoveables.Count > 0) _toToggleHold = true;
     }
 
     private void HandleMove() 
@@ -115,7 +119,7 @@ public class ClawMachineController : MonoBehaviour
 
     private void HandleHolding() 
     {
-        if (_toToggleHold && _allEnteredMovables.Length > 0 && !_holdingObject)
+        if (_toToggleHold && _filteredMoveables.Count > 0 && !_holdingObject)
         {
             Collider2D closestMovable = _NearestMovable();
             _toToggleHold = false;
@@ -148,12 +152,12 @@ public class ClawMachineController : MonoBehaviour
     }
     private void RayCheck()
     {
-        _allEnteredMovables = Physics2D.OverlapBoxAll(
+        _allEnteredCollider = Physics2D.OverlapBoxAll(
                 point: holdingPoint.position,
                 size: Vector2.one * detectionRadius,
                 angle: 0,
-                layerMask: movableLayer
-            );
+                layerMask: layerToGrab
+            ).ToList();
 
         _hitRailMid = Physics2D.Raycast(
                         clawBody.transform.position + Vector3.up * clawEndOffset,
@@ -181,15 +185,31 @@ public class ClawMachineController : MonoBehaviour
         Gizmos.DrawLine(clawBody.transform.position + Vector3.right * railCheckDistance, clawBody.transform.position + Vector3.right * railCheckDistance + Vector3.up * 10f);
         Gizmos.DrawLine(clawBody.transform.position - Vector3.right * railCheckDistance, clawBody.transform.position - Vector3.right * railCheckDistance + Vector3.up * 10f);
     }
+
+    private void FilteringMoveable()
+    {
+        if (_allEnteredCollider.Count <= 0) 
+        {
+            if (_filteredMoveables.Count > 0) _filteredMoveables.Clear();
+            return;
+        }
+        _filteredMoveables = (
+            from collision in _allEnteredCollider
+            where collision.CompareTag("Moveable")
+            select collision
+        ).ToList();
+
+    }
+
     private Collider2D _NearestMovable() 
     {
-        Collider2D closestCollision = _allEnteredMovables[0];
+        Collider2D closestMoveable = _filteredMoveables[0];
         float minDist = Vector2.Distance(
                 holdingPoint.transform.position,
-                _allEnteredMovables[0].transform.position
+                _filteredMoveables[0].transform.position
             );
         float dist;
-        foreach (Collider2D collision in _allEnteredMovables) 
+        foreach (Collider2D collision in _filteredMoveables) 
         {
             dist = Vector2.Distance(
                     holdingPoint.transform.position,
@@ -197,11 +217,11 @@ public class ClawMachineController : MonoBehaviour
                 );
             if (dist < minDist) 
             {
-                closestCollision = collision;
+                closestMoveable = collision;
                 minDist = dist;
             }
         }
-        return closestCollision;
+        return closestMoveable;
     }
     private void _ReleaseMovable()
     {
@@ -209,6 +229,7 @@ public class ClawMachineController : MonoBehaviour
         Rigidbody2D holdingRB = _holdingObject.GetComponent<Rigidbody2D>();
         holdingRB.gravityScale = _objectGravityScale;
         _holdingObject = null;
+        _filteredMoveables.Clear(); 
     }
 
     private void _GrabMovable(Collider2D closestMovable)

@@ -1,15 +1,12 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
-public class CompBotController : MonoBehaviour
+public class CompBotController : IControllableOnGround
 {
     enum ClimbPlane {
         Ceiling, Ground, LeftWall, RightWall
     }
-
 
     [Header("Controlling")]
     [SerializeField] float walkSpeed;
@@ -22,10 +19,6 @@ public class CompBotController : MonoBehaviour
     [Header("Gravity")]
     [SerializeField] float lowJumpMultiplier;
     [SerializeField] float fallMultiplier;
-
-    [Header("Raycast")]
-    [SerializeField] LayerMask groundLayer;
-    [SerializeField] float castDistance;
 
     [Header("Grappling Hook")]
     [SerializeField] AimingController _aimingController;
@@ -42,8 +35,6 @@ public class CompBotController : MonoBehaviour
 
     private float _walkInput;
     private bool _isJumpPressed;
-    private bool _isGrounded;
-    private bool _isSwingPressed;
     private bool _isShootPressed;
     private bool _isLandingNewGround;
 
@@ -90,7 +81,7 @@ public class CompBotController : MonoBehaviour
 
     void Update()
     {
-        BoolStatusCheck();
+        RayCheck();
 
         if (ControllingManager.instance.CurrentControl == ControllingManager.Control.CompBot) 
         {
@@ -124,10 +115,10 @@ public class CompBotController : MonoBehaviour
 
         foreach (Vector2 dir in directions)
         {
-            if (!_isGrounded && Physics2D.Raycast(transform.position, dir, castDistance, groundLayer))
+            if (!IsGrounded && Physics2D.Raycast(transform.position, dir, castDistance, groundLayer))
             {
                 _gravityDirection = dir;
-                if (dir == Vector2.up && !_isGrounded)
+                if (dir == Vector2.up && !IsGrounded)
                 {
                     _currentPlane = ClimbPlane.Ceiling;
                 }
@@ -147,7 +138,7 @@ public class CompBotController : MonoBehaviour
         }
     }
 
-    private void BoolStatusCheck()
+    override public void RayCheck()
     {
         _groundHit = Physics2D.Raycast(
                         origin: transform.position,
@@ -160,13 +151,8 @@ public class CompBotController : MonoBehaviour
                     distance: maxDistance,
                     layerMask: groundLayer
                 );
-        _isGrounded = _groundHit;
 
-        Debug.DrawRay(transform.position, new Vector2(castDistance, 0), Color.blue);
-        Debug.DrawRay(transform.position, new Vector2(-castDistance, 0), Color.yellow);
-        Debug.DrawRay(transform.position, new Vector2(0, -castDistance), Color.red);
-        Debug.DrawRay(transform.position, new Vector2(0, castDistance), Color.green);
-
+        IsGrounded = _groundHit;
     }
     private void OnShootHook()
     {
@@ -204,7 +190,7 @@ public class CompBotController : MonoBehaviour
                         )
                 );
             StartCoroutine(GrapplerStartCoroutine());
-            if (_isGrounded && _isLandingNewGround)
+            if (IsGrounded && _isLandingNewGround)
             {
                 _enableInput = true;
                 _toShoot = false;
@@ -216,7 +202,7 @@ public class CompBotController : MonoBehaviour
 
     private void HandleJump()
     {
-        if (_isGrounded && _toJump)
+        if (IsGrounded && _toJump)
         {
             _compBotRigidBody.AddForce(
                     _groundHit.normal.normalized * jumpSpeed,
@@ -225,7 +211,7 @@ public class CompBotController : MonoBehaviour
             _toJump = false;
         }
 
-        if (!_isGrounded)
+        if (!IsGrounded)
         {
             ChangeAnimationState(COMPBOT_JUMP);
         }
@@ -244,7 +230,7 @@ public class CompBotController : MonoBehaviour
                     Mathf.Abs(speedDif) * accel, velocityPower
                 ) * Mathf.Sign(speedDif);
             _compBotRigidBody.AddForce(movement * Vector2.right);
-            if (_isGrounded && Mathf.Abs(_compBotRigidBody.velocity.x) > 0.5f)
+            if (IsGrounded && Mathf.Abs(_compBotRigidBody.velocity.x) > 0.5f)
             {
                 ChangeAnimationState(COMPBOT_WALK);
             }
@@ -258,7 +244,7 @@ public class CompBotController : MonoBehaviour
                     Mathf.Abs(speedDif) * accel, velocityPower
                 ) * Mathf.Sign(speedDif);
             _compBotRigidBody.AddForce(movement * Vector2.up);
-            if (_isGrounded && Mathf.Abs(_compBotRigidBody.velocity.y) > 0.5f)
+            if (IsGrounded && Mathf.Abs(_compBotRigidBody.velocity.y) > 0.5f)
             {
                 ChangeAnimationState(COMPBOT_WALK);
             }
@@ -268,7 +254,7 @@ public class CompBotController : MonoBehaviour
 
     private void HandleIdle()
     {
-        if (Vector3.Magnitude(_compBotRigidBody.velocity) < 0.5f  && _isGrounded)
+        if (Vector3.Magnitude(_compBotRigidBody.velocity) < 0.5f  && IsGrounded)
         {
             ChangeAnimationState(COMPBOT_IDLE);
         }
@@ -356,7 +342,7 @@ public class CompBotController : MonoBehaviour
         if (!_enableInput) return;
 
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
-        if (_isJumpPressed && _isGrounded)
+        if (_isJumpPressed && IsGrounded)
         {
             _toJump = true;
         }
