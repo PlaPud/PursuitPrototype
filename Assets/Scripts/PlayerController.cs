@@ -45,30 +45,32 @@ public class PlayerController : IControllableOnGround
 
     [SerializeField] private PlayerPushPull _playerPushPull;
 
-
-    private Rigidbody2D _playerRigidBody;
-    private Animator _playerAnimator;
-
     public LineRenderer PlayerRopeRenderer { get; private set; }
     public DistanceJoint2D PlayerRopeJoint { get; private set; }
 
-    private float _walkInput = 0f;
+    public float WalkInput { get; private set; } = 0f;
+    public RaycastHit2D FrontRopePointHit { get; private set; }
+
+
+    public bool IsSwingPressed { get; private set; } = false;
+
+    public bool IsCrouching { get; private set; } = false;
+    public bool IsWallSliding { get; private set; } = false;
+    public bool IsSprinting { get; private set; } = false;
+    public bool IsSpaceAbove { get; private set; } = true;
+    public bool IsTouchWall { get; private set; } = false;
+
     private bool _disableX = false;
     private bool _isJumpPressed = false;
     private bool _isSprintPressed = false;
     private bool _isCrouchPressed = false;
-    public bool IsSwingPressed { get; private set; } = false;
-
-    private bool _isCrouching = false;
-    private bool _isWallSliding = false;
-    private bool _isSprinting = false;
 
     private bool _toJump = false;
     private bool _toToggleCrouch = false;
 
-    private bool _isSpaceAbove = true;
-    private bool _isTouchWall = false;
-    public RaycastHit2D FrontRopePointHit { get; private set; }
+    private Rigidbody2D _playerRigidBody;
+    private Animator _playerAnimator;
+
 
     private const string PLAYER_IDLE = "PlayerIdle";
     private const string PLAYER_WALK = "PlayerWalk";
@@ -133,7 +135,7 @@ public class PlayerController : IControllableOnGround
 
     private void BoolAndRayCheck()
     {
-        _isSprinting = _isSprintPressed && !_isCrouching;
+        IsSprinting = _isSprintPressed && !IsCrouching;
         RayCheck();
     }
 
@@ -141,7 +143,7 @@ public class PlayerController : IControllableOnGround
     {
 
         base.RayCheck();
-        _isSpaceAbove = !Physics2D.BoxCast(
+        IsSpaceAbove = !Physics2D.BoxCast(
                 origin: transform.position, size: boxSizeAbove, angle: 0f,
                 direction: transform.up, distance: aboveCastDistance,
                 layerMask: groundLayer
@@ -158,7 +160,7 @@ public class PlayerController : IControllableOnGround
     }
     private void OnWalk()
     {
-        _walkInput = Input.GetAxis("Horizontal");
+        WalkInput = Input.GetAxis("Horizontal");
     }
 
     private void OnSprint()
@@ -170,7 +172,7 @@ public class PlayerController : IControllableOnGround
     {
         _coyoteTimer = IsGrounded ? coyoteJumpTime : _coyoteTimer - Time.deltaTime;
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
-        if (_isJumpPressed && !_toJump && (IsGrounded || _isTouchWall || _coyoteTimer > 0))
+        if (_isJumpPressed && !_toJump && (IsGrounded || IsTouchWall || _coyoteTimer > 0))
         {
             _toJump = true;
         }
@@ -195,9 +197,9 @@ public class PlayerController : IControllableOnGround
     {
         if (_disableX || PlayerRopeJoint.enabled) return;
 
-        float resultSpeed = _walkInput * (
-                _isSprinting ? sprintSpeed
-                : _isCrouching ? crouchSpeed
+        float resultSpeed = WalkInput * (
+                IsSprinting ? sprintSpeed
+                : IsCrouching ? crouchSpeed
                 : walkSpeed
             );
         
@@ -218,11 +220,11 @@ public class PlayerController : IControllableOnGround
         if (!isSwingSpeedExceed) return;
         
             
-        if (_walkInput > 0.5)
+        if (WalkInput > 0.5)
         {
             _playerRigidBody.velocity += new Vector2 (swingForce * Time.deltaTime, 0f);
         }
-        else if (_walkInput < -0.5) 
+        else if (WalkInput < -0.5) 
         {
             _playerRigidBody.velocity -= new Vector2 (swingForce * Time.deltaTime, 0f);
         }
@@ -253,7 +255,7 @@ public class PlayerController : IControllableOnGround
 
     private void HandleJump()
     {
-        if ((IsGrounded || _coyoteTimer > 0) && _toJump && !_isCrouching)
+        if ((IsGrounded || _coyoteTimer > 0) && _toJump && !IsCrouching)
         {
             _playerRigidBody.AddForce(
                 Vector2.up * jumpSpeed * (IsGrounded ? 1f : MAGIC_COYOTEJUMP_NUMBER), 
@@ -262,7 +264,7 @@ public class PlayerController : IControllableOnGround
             _coyoteTimer = 0;
             _toJump = false;
         }
-        else if (_toJump && _isWallSliding)
+        else if (_toJump && IsWallSliding)
         {
             _playerRigidBody.AddForce(
                 new Vector2(
@@ -290,24 +292,24 @@ public class PlayerController : IControllableOnGround
                 wallDistance,
                 groundLayer
             );
-        _isTouchWall = hitGround && (
+        IsTouchWall = hitGround && (
                 hitGround.transform.gameObject.CompareTag("Climbable")
             );
 
 
-        if (_isTouchWall &&
+        if (IsTouchWall &&
             !IsGrounded &&
             _playerRigidBody.velocity.y < -0.5
             )
         {
-            _isWallSliding = true;
+            IsWallSliding = true;
         }
         else
         {
-            _isWallSliding = false;
+            IsWallSliding = false;
         }
 
-        if (_isWallSliding && _playerRigidBody.velocity.y < -wallSlideSpeed)
+        if (IsWallSliding && _playerRigidBody.velocity.y < -wallSlideSpeed)
         {
             _playerRigidBody.velocity = new Vector2(
                     _playerRigidBody.velocity.x,
@@ -318,11 +320,11 @@ public class PlayerController : IControllableOnGround
     }
     private void HandleCrouching()
     {
-        if (IsGrounded && !_isSprinting && _toToggleCrouch)
+        if (IsGrounded && !IsSprinting && _toToggleCrouch)
         {
             _toToggleCrouch = false;
-            if (!_isSpaceAbove) return;
-            _isCrouching = !_isCrouching;
+            if (!IsSpaceAbove) return;
+            IsCrouching = !IsCrouching;
         }
     }
 
@@ -342,7 +344,7 @@ public class PlayerController : IControllableOnGround
 
     private void HandleFriction() 
     {
-        if (IsGrounded && Mathf.Abs(_walkInput) < .01f) 
+        if (IsGrounded && Mathf.Abs(WalkInput) < .01f) 
         {
             float appliedFriction = Mathf.Min(
                     Mathf.Abs(_playerRigidBody.velocity.x),
@@ -372,41 +374,41 @@ public class PlayerController : IControllableOnGround
             switch (_currentAnimationState)
             {
                 case PLAYER_IDLE:
-                    if (_isCrouching)
+                    if (IsCrouching)
                     {
                         ChangeAnimationState(PLAYER_CROUCH);
                     }
-                    if (Mathf.Abs(_walkInput) > 0.5f)
+                    if (Mathf.Abs(WalkInput) > 0.5f)
                     {
                         ChangeAnimationState(PLAYER_WALK);
                     }
                     break;
                 case PLAYER_CROUCH:
-                    if (Mathf.Abs(_walkInput) > 0.5f)
+                    if (Mathf.Abs(WalkInput) > 0.5f)
                     {
                         ChangeAnimationState(PLAYER_CROUCH_MOVE);
                     }
-                    if (!_isCrouching)
+                    if (!IsCrouching)
                     {
                         ChangeAnimationState(PLAYER_IDLE);
                     }
                     break;
                 case PLAYER_CROUCH_MOVE:
-                    if (!_isCrouching)
+                    if (!IsCrouching)
                     {
                         ChangeAnimationState(PLAYER_IDLE);
                     }
-                    if (_walkInput == 0)
+                    if (WalkInput == 0)
                     {
                         ChangeAnimationState(PLAYER_CROUCH);
                     }
                     break;
                 case PLAYER_WALK:
-                    if (_walkInput == 0)
+                    if (WalkInput == 0)
                     {
                         ChangeAnimationState(PLAYER_IDLE);
                     }
-                    if (_isCrouching)
+                    if (IsCrouching)
                     {
                         ChangeAnimationState(PLAYER_CROUCH);
                     }
@@ -416,11 +418,11 @@ public class PlayerController : IControllableOnGround
                     }
                     break;
                 case PLAYER_RUN:
-                    if (!_isSprintPressed && Mathf.Abs(_walkInput) > 0.5f)
+                    if (!_isSprintPressed && Mathf.Abs(WalkInput) > 0.5f)
                     {
                         ChangeAnimationState(PLAYER_WALK);
                     }
-                    if (_walkInput == 0) 
+                    if (WalkInput == 0) 
                     {
                         ChangeAnimationState(PLAYER_IDLE);
                     }
@@ -439,7 +441,7 @@ public class PlayerController : IControllableOnGround
                     {
                         ChangeAnimationState(PLAYER_JUMP);
                     }
-                    if (_isWallSliding)
+                    if (IsWallSliding)
                     {
                         ChangeAnimationState(PLAYER_WALL_SLIDE);
                     }
@@ -449,13 +451,13 @@ public class PlayerController : IControllableOnGround
                     {
                         ChangeAnimationState(PLAYER_DROP);
                     }
-                    if (_isWallSliding)
+                    if (IsWallSliding)
                     {
                         ChangeAnimationState(PLAYER_WALL_SLIDE);
                     }
                     break;
                 case PLAYER_WALL_SLIDE:
-                    if (!_isWallSliding)
+                    if (!IsWallSliding)
                     {
                         ChangeAnimationState(PLAYER_DROP);
                     }

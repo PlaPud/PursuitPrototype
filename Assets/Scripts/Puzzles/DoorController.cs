@@ -1,6 +1,11 @@
+using PlasticPipe.Client;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("EditMode")]
+[assembly: InternalsVisibleTo("PlayMode")]
 
 public class DoorController : MonoBehaviour
 {
@@ -20,7 +25,7 @@ public class DoorController : MonoBehaviour
     public Vector2 DoorOpenPos { get; private set; }
     public Vector2 DoorClosePos { get; private set; }
 
-    void Start()
+    internal void Start()
     {
         _doorCD = GetComponentInChildren<BoxCollider2D>();
 
@@ -30,8 +35,37 @@ public class DoorController : MonoBehaviour
 
     private void Update()
     {
-        if (_isTransitioning) return;
+        if (_isTransitioning)
+        {
+            HandleDoorTransitioning();
+            return;
+        }
 
+        SetDoorPositionIdle();
+    }
+
+    private void HandleDoorTransitioning()
+    {
+        if (IsOpen)
+        {
+            DoorBody.transform.position = Vector2.MoveTowards(
+                    current: DoorBody.transform.position,
+                    target: DoorOpenPos,
+                    maxDistanceDelta: Time.deltaTime * 25f
+                );
+        }
+        else
+        {
+            DoorBody.transform.position = Vector2.MoveTowards(
+                current: DoorBody.transform.position,
+                target: DoorClosePos,
+                maxDistanceDelta: Time.deltaTime * 25f
+            );
+        }
+    }
+
+    internal void SetDoorPositionIdle()
+    {
         if (IsOpen)
         {
             DoorBody.position = DoorOpenPos;
@@ -47,13 +81,22 @@ public class DoorController : MonoBehaviour
     public void SetOpenDoor()
     {
         _doorCD.enabled = false;
+        if (!_isTransitioning) StartCoroutine(SetDoorTransitionTimer());
         IsOpen = true;
     }
 
     public void SetCloseDoor()
     {
         _doorCD.enabled = true;
+        if (!_isTransitioning) StartCoroutine(SetDoorTransitionTimer());
         IsOpen = false;
+    }
+
+    private IEnumerator SetDoorTransitionTimer() 
+    {
+        _isTransitioning = true;
+        yield return new WaitForSeconds(.5f);
+        _isTransitioning = false;
     }
 
     private Vector2 _GetDoorOpenDirection(DoorOpenDir dir)

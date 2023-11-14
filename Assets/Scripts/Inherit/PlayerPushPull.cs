@@ -109,19 +109,20 @@ public class PlayerPushPull : MonoBehaviour
     {
         if (Input.GetKeyUp(_key)) _isKeyLock = false;
     }
+
     private void _GrabMoveable()
     {
-        _moveableObject = _hitGroundForward.collider.gameObject;
+        _moveableObject = IsFoundMoveable ? _hitGroundForward.collider.gameObject : null;
         if (!_moveableObject) return;
 
         _moveableObject.GetComponent<FixedJoint2D>().enabled = true;
-        Debug.Log("Test");
         _moveableObject.GetComponent<FixedJoint2D>().connectedBody = _playerRB;
     }
 
     private void _ReleaseMoveable()
     {
         if (!IsGrabbing) return;
+
         _moveableObject.GetComponent<FixedJoint2D>().enabled = false;
         _moveableObject.GetComponent<FixedJoint2D>().connectedBody = _playerRB;
         _moveableObject = null;

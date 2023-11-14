@@ -4,35 +4,37 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class TestPressureDoor
+public class TestPlayPressureDoor
 {
-    [Test]
-    public void SetOpenDoor_IsOpen() 
+    [UnityTest]
+    public IEnumerator SetDoorPositionIdle_IsOpen_TransformPositionOpen()
     {
         GameObject testDoorObject = SetUpDoor();
         DoorController doorScript = testDoorObject.GetComponent<DoorController>();
         doorScript.Start();
         doorScript.SetOpenDoor();
-        Assert.IsTrue(doorScript.IsOpen);
+        yield return new WaitForSeconds(1f);
+        Assert.AreEqual((Vector2) doorScript.DoorBody.transform.position, doorScript.DoorOpenPos);
     }
 
-    [Test]
-    public void SetCloseDoor_IsClose()
+    [UnityTest]
+    public IEnumerator SetDoorPositionIdle_IsNotOpen_TransformPositionClose()
     {
         GameObject testDoorObject = SetUpDoor();
         DoorController doorScript = testDoorObject.GetComponent<DoorController>();
         doorScript.Start();
         doorScript.SetCloseDoor();
-        Assert.IsFalse(doorScript.IsOpen);
+        yield return new WaitForSeconds(1f);
+        Assert.AreEqual((Vector2)doorScript.DoorBody.transform.position, doorScript.DoorClosePos);
     }
 
-    private static GameObject SetUpDoor() 
+    private static GameObject SetUpDoor()
     {
         GameObject testDoorObject = new GameObject();
         GameObject doorSprite = new GameObject();
         GameObject doorCollider = new GameObject();
 
-        DoorController doorScript = testDoorObject.AddComponent<DoorController>();   
+        DoorController doorScript = testDoorObject.AddComponent<DoorController>();
         doorScript.DoorBody = doorSprite.transform;
         doorCollider.AddComponent<BoxCollider2D>();
 

@@ -25,6 +25,7 @@ public class SwitchController : MonoBehaviour
             foreach (DoorController target in toggleDoorsTarget) 
             {
                 target.SetOpenDoor();
+                //StartCoroutine(target.SetOpenDoor());
             }
             return;
         };
@@ -52,12 +53,12 @@ public class SwitchController : MonoBehaviour
     private void _ToggleDoor(DoorController targetDoor) 
     {
         if (targetDoor.IsOpen) 
-        { 
-            targetDoor.SetCloseDoor(); 
+        {
+            targetDoor.SetCloseDoor();
         } 
         else 
-        { 
-            targetDoor.SetOpenDoor(); 
+        {
+            targetDoor.SetOpenDoor();
         }
     }
 
