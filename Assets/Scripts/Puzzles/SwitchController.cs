@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SwitchController : MonoBehaviour
+public class SwitchController : Interactable
 {
 
     public bool IsPuzzleComplete;
@@ -18,64 +18,37 @@ public class SwitchController : MonoBehaviour
         
     }
 
-    void Update()
+    protected override void Update()
     {
         if (IsPuzzleComplete) 
         {
             foreach (DoorController target in toggleDoorsTarget) 
             {
                 target.SetOpenDoor();
-                //StartCoroutine(target.SetOpenDoor());
             }
             return;
         };
 
-        OnPressed();
-
-        HandlePress();
+        base.Update();
     }
 
-    void OnPressed() 
+    public override void HandleInteract()
     {
-        IsPressed = _canPress && Input.GetKeyDown(KeyCode.E);
-    }
-
-    void HandlePress() 
-    {
-        if (!IsPressed) return;
-
-        foreach (DoorController target in toggleDoorsTarget) 
+        foreach (DoorController target in toggleDoorsTarget)
         {
             _ToggleDoor(target);
         }
     }
 
-    private void _ToggleDoor(DoorController targetDoor) 
+    private void _ToggleDoor(DoorController targetDoor)
     {
-        if (targetDoor.IsOpen) 
+        if (targetDoor.IsOpen)
         {
             targetDoor.SetCloseDoor();
-        } 
-        else 
+        }
+        else
         {
             targetDoor.SetOpenDoor();
         }
     }
-
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        bool isPlayer =
-            collision.gameObject.layer == PLAYER_LAYER;
-        if (!isPlayer) return;
-        _canPress = true;
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        bool isObjectExit =
-            collision.gameObject.layer == PLAYER_LAYER;
-        if (!isObjectExit) return;
-        _canPress = false;
-    }
-
 }

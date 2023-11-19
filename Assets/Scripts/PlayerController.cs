@@ -72,6 +72,7 @@ public class PlayerController : IControllableOnGround
     private Animator _playerAnimator;
 
 
+    //TODO: Keep Animation String in ScriptableObject
     private const string PLAYER_IDLE = "PlayerIdle";
     private const string PLAYER_WALK = "PlayerWalk";
     private const string PLAYER_JUMP = "PlayerJump";

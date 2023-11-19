@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CompBotManager : MonoBehaviour
@@ -11,7 +12,8 @@ public class CompBotManager : MonoBehaviour
 
     // Temporary SerializeField (Need Level Manager To Manage Area)
     //[Header("TEMP FIELD (WILL IMPLEMENT LATER VIA LEVEL MANAGER)")]
-    //[SerializeField] GameObject areaData;
+    
+    private List<ActiveAreaCompBot> _activeAreas;
 
     public bool IsInActiveArea = false;
 
@@ -28,7 +30,8 @@ public class CompBotManager : MonoBehaviour
 
     void Start()
     {
-
+        _activeAreas = FindObjectsOfType<ActiveAreaCompBot>().ToList<ActiveAreaCompBot>();
+        Debug.Log(_activeAreas.Count);
     }
 
     void Update()
@@ -66,19 +69,31 @@ public class CompBotManager : MonoBehaviour
             switch (ControllingManager.instance.CurrentControl) 
             {
                 case ControllingManager.Control.CompBot:
-                    ControllingManager
-                        .instance
-                        .ChangeControl(ControllingManager.Control.PlayerMain);
+                    HandleBackgroundToPlayer();
+                    SwitchControl(ControllingManager.Control.PlayerMain);
                     break;
                 case ControllingManager.Control.PlayerMain:
-                    ControllingManager
-                        .instance
-                        .ChangeControl(ControllingManager.Control.CompBot);
+                    HandleBackgroundToCompBot();
+                    SwitchControl(ControllingManager.Control.CompBot);
                     break;
             }
         }
     }
 
+    private void SwitchControl(ControllingManager.Control characterToSwitch) 
+    {
+        ControllingManager.instance.ChangeControl(characterToSwitch);
+    }
+
+    private void HandleBackgroundToCompBot() 
+    {
+        
+    }
+
+    private void HandleBackgroundToPlayer() 
+    {
+        
+    }
 
     private void _LockInteractKey()
     {

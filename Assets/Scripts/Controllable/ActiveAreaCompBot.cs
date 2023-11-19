@@ -4,11 +4,18 @@ using UnityEngine;
 
 public class ActiveAreaCompBot : MonoBehaviour
 {
-    [SerializeField] LayerMask playerLayer;
+    [SerializeField] private CompBotController compBot;
+    [SerializeField] private LayerMask playerLayer;
+    [SerializeField] private Transform spawnPoint;
+
+    private Vector2 latestPos;
+
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.CompareTag("PlayerCat")) 
         {
+            //TODO: if first time enter THIS area set latestPos = spawnPoint
+            //TODO: if not first time latestPos = compBot.transform.position
             CompBotManager.instance.IsInActiveArea = true;
         }
     }
@@ -17,6 +24,7 @@ public class ActiveAreaCompBot : MonoBehaviour
     {
         if (collision.CompareTag("PlayerCat"))
         {
+            latestPos = spawnPoint.position;
             CompBotManager.instance.IsInActiveArea = false;
         }
     }

@@ -23,8 +23,12 @@ public class ClawMachineManager : MonoBehaviour
     void Update()
     {
         IsControlClaw = ControllingManager.instance.CurrentControl == ControllingManager.Control.ClawMachine;
+        AssignMachine();
+    }
 
-        foreach (ClawPanelController panel in _clawPanels) 
+    private void AssignMachine()
+    {
+        foreach (ClawPanelController panel in _clawPanels)
         {
             panel.IsControllingThis = (panel.PlayerCD != null);
         }

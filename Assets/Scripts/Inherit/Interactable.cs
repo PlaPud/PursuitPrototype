@@ -1,38 +1,61 @@
 using UnityEngine;
 
+[RequireComponent (typeof(Collider2D))]
 abstract public class Interactable : MonoBehaviour
 {
+
+    private enum Interact { HoldToInteract, PressToInteract }
+
+    [SerializeField] private KeyCode interactKey = KeyCode.E;
+    [SerializeField] private Interact typeOfInteract = Interact.PressToInteract;
+    [SerializeField] private bool compBotInteractable = false;
+
     private const float HOLD_DOWN_TIME = 1f;
 
-    protected private bool _isInteractHold;
+    protected private bool _isInteract;
     protected private bool _isReadyToInteract;
     protected private bool _isKeyLock;
     protected private float _holdTimer = HOLD_DOWN_TIME;
 
-    private KeyCode _key = KeyCode.E;
     public Collider2D PlayerCD { get; private set; }
 
     protected virtual void Update()
     {
-        OnInteract();
-
-        CountDownToInteract();
+        switch (typeOfInteract)
+        {
+            case Interact.HoldToInteract:
+                _HandleHoldToInteract();
+                _CountDownToInteract();
+                break;
+            case Interact.PressToInteract:
+                _HandlePressToInteract();
+                _TriggerInteract();
+                break;
+        }
     }
 
-    private void OnInteract()
+    private void _HandleHoldToInteract() 
     {
-        if (Input.GetKeyUp(_key)) _isKeyLock = false;
+        if (Input.GetKeyUp(interactKey)) _isKeyLock = false;
 
         if (_isKeyLock) return;
 
         if (PlayerCD && PlayerCD.CompareTag("PlayerCat"))
         {
-            _isInteractHold = Input.GetKey(_key);
+            _isInteract = Input.GetKey(interactKey);
         }
     }
-    private void CountDownToInteract() 
+
+    private void _HandlePressToInteract() 
     {
-        _holdTimer = _isInteractHold ?
+        if (PlayerCD && PlayerCD.CompareTag("PlayerCat")) 
+        {
+            _isInteract = Input.GetKeyDown(interactKey);
+        }
+    }
+    private void _CountDownToInteract() 
+    {
+        _holdTimer = _isInteract ?
             _holdTimer - Time.deltaTime : HOLD_DOWN_TIME;
         
         _isReadyToInteract = _holdTimer <= 0;
@@ -45,23 +68,31 @@ abstract public class Interactable : MonoBehaviour
         }
     }
 
+    private void _TriggerInteract() 
+    {
+        if (!_isInteract) return;
+        HandleInteract();
+    }
+
     public abstract void HandleInteract();
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (!collision.CompareTag("PlayerCat")) return;
+        bool isCompBotInteract = compBotInteractable && collision.gameObject.layer == 8;
+        if (!collision.CompareTag("PlayerCat") && !isCompBotInteract) return;
         PlayerCD = collision;
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (!collision.CompareTag("PlayerCat")) return;
+        bool isCompBotInteract = compBotInteractable && collision.gameObject.layer == 8;
+        if (!collision.CompareTag("PlayerCat") && !isCompBotInteract) return;
         PlayerCD = null;
     }
 
     private void _LockInteractKey()
     {
-        _isInteractHold = false;
+        _isInteract = false;
         _isKeyLock = true;
     }
 
