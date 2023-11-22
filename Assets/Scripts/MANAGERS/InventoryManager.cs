@@ -7,25 +7,37 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager instance;
     public int inventoryCapacity = 3; 
 
-    private List<string> _inventory = new List<string>();
+    public List<KeyItemController> Inventory { get; private set; } = new List<KeyItemController>();
 
-    public bool IsFull => inventoryCapacity == _inventory.Count;
-    public bool IsEmpty => _inventory.Count <= 0;
+    public bool IsFull => inventoryCapacity == Inventory.Count;
+    public bool IsEmpty => Inventory.Count <= 0;
 
-    public int ItemCount => _inventory.Count;  
+    public int ItemCount => Inventory.Count;
+
+    public delegate void PickUpItemHandler(KeyItemController item);
+    public event PickUpItemHandler OnPickupItem;
+
+    public delegate void UseItemHandle(KeyItemController item);
+    public event UseItemHandle OnUseItem;   
 
     private void Awake() => instance = this;
 
-    public void AddItem(string guid, KeyItemController itemCtrl)
+    public void AddItem(KeyItemController itemCtrl)
     {
-        if (itemCtrl.guid != guid || IsFull) return;
-        _inventory.Add(guid);
+        if (IsFull) return;
+        Inventory.Add(itemCtrl);
+
+        OnPickupItem?.Invoke(itemCtrl);
     }
 
-    public bool TryRemoveItem(string guid)
+    public bool TryRemoveItem(KeyItemController itemCtrl)
     {
         if (IsEmpty) return false;
-        bool isExistToRemove = _inventory.Remove(guid);
+        bool isExistToRemove = Inventory.Remove(itemCtrl);
+
+        OnUseItem?.Invoke(itemCtrl);
+        
         return isExistToRemove;
+
     }
 }

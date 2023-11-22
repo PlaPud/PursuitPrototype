@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 [assembly: InternalsVisibleTo("EditMode")]
 [assembly: InternalsVisibleTo("PlayMode")]
@@ -11,12 +11,18 @@ using UnityEngine;
 public class KeyItemController : MonoBehaviour
 {
     [field : SerializeField] public string guid { get; internal set; }
+    [field: SerializeField] public Sprite displaySprite { get; internal set; }
 
     private bool _isCollected = false;
 
+    private void Awake()
+    {
+
+    }
+
     private void Start()
     {
-        
+
     }
 
     internal void Update()
@@ -30,8 +36,11 @@ public class KeyItemController : MonoBehaviour
     internal void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.layer != 8 || InventoryManager.instance.IsFull) return;
+        
+        if (!gameObject.activeSelf) return;
 
-        InventoryManager.instance.AddItem(guid, this);
+        Debug.Log("Collected");
+        InventoryManager.instance.AddItem(this);
         _isCollected = true;
     }
 

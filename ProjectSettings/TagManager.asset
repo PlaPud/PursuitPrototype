@@ -8,6 +8,7 @@ TagManager:
   - PlayerCat
   - PlayerCompBot
   - Moveable
+  - GraphNodes
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - Movable
   - ClawMachine
   - ClawMachineRail
-  - 
+  - Enemy
   - 
   - 
   - 

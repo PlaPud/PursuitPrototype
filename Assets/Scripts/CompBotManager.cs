@@ -31,7 +31,7 @@ public class CompBotManager : MonoBehaviour
     void Start()
     {
         _activeAreas = FindObjectsOfType<ActiveAreaCompBot>().ToList<ActiveAreaCompBot>();
-        Debug.Log(_activeAreas.Count);
+        //Debug.Log(_activeAreas.Count);
     }
 
     void Update()

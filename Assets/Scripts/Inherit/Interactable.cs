@@ -1,10 +1,10 @@
+using System;
 using UnityEngine;
 
 [RequireComponent (typeof(Collider2D))]
 abstract public class Interactable : MonoBehaviour
 {
-
-    private enum Interact { HoldToInteract, PressToInteract }
+    public enum Interact { HoldToInteract, PressToInteract }
 
     [SerializeField] private KeyCode interactKey = KeyCode.E;
     [SerializeField] private Interact typeOfInteract = Interact.PressToInteract;
@@ -16,6 +16,10 @@ abstract public class Interactable : MonoBehaviour
     protected private bool _isReadyToInteract;
     protected private bool _isKeyLock;
     protected private float _holdTimer = HOLD_DOWN_TIME;
+
+    public static event Action OnEnterInteractable;
+    public static event Action OnExitInteractable;
+    public static event Action<bool, float, Interact> OnInteraction;
 
     public Collider2D PlayerCD { get; private set; }
 
@@ -76,6 +80,13 @@ abstract public class Interactable : MonoBehaviour
 
     public abstract void HandleInteract();
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        bool isCompBotInteract = compBotInteractable && collision.gameObject.layer == 8;
+        if (!collision.CompareTag("PlayerCat") && !isCompBotInteract) return;
+        OnEnterInteractable?.Invoke();
+    }
+
     private void OnTriggerStay2D(Collider2D collision)
     {
         bool isCompBotInteract = compBotInteractable && collision.gameObject.layer == 8;
@@ -88,6 +99,7 @@ abstract public class Interactable : MonoBehaviour
         bool isCompBotInteract = compBotInteractable && collision.gameObject.layer == 8;
         if (!collision.CompareTag("PlayerCat") && !isCompBotInteract) return;
         PlayerCD = null;
+        OnExitInteractable?.Invoke();
     }
 
     private void _LockInteractKey()

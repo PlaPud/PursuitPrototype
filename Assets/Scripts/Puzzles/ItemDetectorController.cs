@@ -1,20 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("EditMode")]
+[assembly: InternalsVisibleTo("PlayMode")]
 
 public class ItemDetectorController : Interactable
 {
-    [field: SerializeField] public string guid { get; private set; }
-    [field: SerializeField] public string reqKeyGuid { get; internal set; }
-    
+    [field: SerializeField] public string guid { get; internal set; }
+    [field: SerializeField] public KeyItemController reqItem { get; internal set; }
+
     [SerializeField] private Sprite LockSprite;
     [SerializeField] private Sprite UnlockedSprite;
+
+    public delegate void UnlockHandler();
+    public event UnlockHandler OnUnlock;
 
     private SpriteRenderer _detectorSR;
 
     public bool IsOpen { get; private set; } = false;
 
-    bool _IsCheckItem = false;
+    public bool IsCheckItem { get; internal set; } = false;
 
     void Start()
     {
@@ -25,19 +32,23 @@ public class ItemDetectorController : Interactable
     {
         base.Update();
 
-        TryCheckItemToUnlock(reqKeyGuid);
+        TryCheckItemToUnlock(reqItem);
         _UpdateSprite();
     }
 
-    public override void HandleInteract() => _IsCheckItem = true;
-    public void TryCheckItemToUnlock(string expectedGuid) 
+    public override void HandleInteract() => IsCheckItem = true;
+    public void TryCheckItemToUnlock(KeyItemController item) 
     {
-        if (!_IsCheckItem) return;
+        if (!IsCheckItem) return;
 
-        _IsCheckItem = false;
+        IsCheckItem = false;
 
-        bool isExistToRemove = InventoryManager.instance.TryRemoveItem(reqKeyGuid);
-        IsOpen = isExistToRemove;
+        bool isExistToRemove = InventoryManager.instance.TryRemoveItem(reqItem);
+        IsOpen = isExistToRemove ? true : IsOpen;
+
+        if (!IsOpen) return;
+        OnUnlock?.Invoke();
+
     }
 
     [ContextMenu("Generate GUID for This Key Item")]

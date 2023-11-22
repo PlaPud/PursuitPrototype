@@ -56,7 +56,9 @@ public class TestInventory
 
         inv.inventoryCapacity = capacity;
 
-        bool isExistToRemove = inv.TryRemoveItem(_GeneratedRandomGUID);
+        GameObject testItem = _GetMockItemObject(_GeneratedRandomGUID);
+
+        bool isExistToRemove = inv.TryRemoveItem(testItem.GetComponent<KeyItemController>());
 
         Assert.IsFalse(isExistToRemove);
         Assert.AreEqual(0, inv.ItemCount);
@@ -74,7 +76,9 @@ public class TestInventory
         List<GameObject> items = _GetMultipleMockKeyItems(2);
         _MoveItemsToInv(inv, items);
 
-        bool isExistToRemove = inv.TryRemoveItem(_GeneratedRandomGUID);
+        GameObject testItem = _GetMockItemObject(_GeneratedRandomGUID);
+
+        bool isExistToRemove = inv.TryRemoveItem(testItem.GetComponent<KeyItemController>());
         
         Assert.IsFalse(isExistToRemove);    
         Assert.AreEqual(2, inv.ItemCount);
@@ -94,11 +98,11 @@ public class TestInventory
         KeyItemController firstItem = items[0].GetComponent<KeyItemController>();
         _MoveItemsToInv(inv, items);
 
-        bool isExistToRemove = inv.TryRemoveItem(topItem.guid);
+        bool isExistToRemove = inv.TryRemoveItem(topItem);
         Assert.IsTrue(isExistToRemove);
         Assert.AreEqual(1, inv.ItemCount);
 
-        isExistToRemove = inv.TryRemoveItem(firstItem.guid);
+        isExistToRemove = inv.TryRemoveItem(firstItem);
         Assert.IsTrue(isExistToRemove);
         Assert.AreEqual(0, inv.ItemCount);
     }
@@ -132,9 +136,10 @@ public class TestInventory
         foreach (GameObject itemObj in items)
         {
             KeyItemController item = itemObj.GetComponent<KeyItemController>(); 
-            inv.AddItem(item.guid, item);
+            inv.AddItem(item);
         }
     }
+
     private string _GeneratedRandomGUID => System.Guid.NewGuid().ToString();
 
 }
