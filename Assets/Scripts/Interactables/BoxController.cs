@@ -25,7 +25,6 @@ public class BoxController : MonoBehaviour
         RayGroundCheck();
         HandleOffGround();
     }
-
     private void RayGroundCheck()
     {
         _hitGround = Physics2D.BoxCast(

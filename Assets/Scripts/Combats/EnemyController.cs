@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -8,12 +7,12 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
-    public enum EnemyState 
+    public enum EnemyState
     {
         Patrol,
         Chase,
-        RandomFind,
         Attack,
+        CoolDown,
         Defeated
     }
 
@@ -25,14 +24,15 @@ public class EnemyController : MonoBehaviour
     [Header("Chasing Movement")]
     [SerializeField] private float chaseSpeed;
     [SerializeField] private float jumpForce;
+    [SerializeField] private float waitForTeleportTimeLower;
+    [SerializeField] private float waitForTeleportTimeUpper;
 
     [Header("Attacking")]
-    [SerializeField] private float attackRadius;
+    [SerializeField] private float attackRange;
+    [SerializeField] private float chargeAttackTime;
     [SerializeField] private float attackLeapForce;
+    [SerializeField] private float coolDownTime;
     [SerializeField] private float avgAttackDamage;
-
-    [Header("Finding")]
-    [SerializeField] private float findingPatrolSpeed;
 
     [Header("Ray Check")]
     [SerializeField] private float groundDistance;
@@ -43,23 +43,51 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private LayerMask playerMask;
 
+    private float _changeDirTimer = 2f;
+    private float _confirmTeleportTimer;
+    private float _currentEnemySpeed;
+    private float _chargeToAttackTimer;
+    private float _coolDownTimer;
+
+    private bool _canAttack = false;
+    private bool _isAttacking = false;
+
     private Rigidbody2D _enemyRB;
     private RaycastHit2D _playerLayerHit;
     private RaycastHit2D _groundHit;
+    private RaycastHit2D _attackRangeHit;
 
-    public bool IsFoundPlayer { get; private set; } = false;
+    private Animator _enemyAnim;
+
+    public bool IsPlayerFound { get; private set; } = false;
+    public bool IsPlayerInRange { get; private set; } = false;
+
+    public bool IsChangingDir { get; private set; } = false;
     public bool IsGrounded => _groundHit;
 
+    public bool IsPlayerOnHigherGround => IsGrounded && target.transform.position.y - transform.position.y > .5f;
+
     public EnemyState CurrentState = EnemyState.Patrol;
+
+    private string _animState = ENEMY_IDLE;
+
+    private const string ENEMY_IDLE = "EnemyBotIdle";
+    private const string ENEMY_WALKING = "EnemyBotWalking";
+    private const string ENEMY_CHASING = "EnemyBotChasing";
+    private const string ENEMY_JUMP = "EnemyBotJump";
 
     private void Awake()
     {
         _enemyRB = GetComponent<Rigidbody2D>();
+        _enemyAnim = GetComponent<Animator>();
     }
 
     void Start()
     {
-        
+        _currentEnemySpeed = walkSpeed;
+        _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
+        _chargeToAttackTimer = chargeAttackTime;
+        _coolDownTimer = coolDownTime;
     }
 
     void Update()
@@ -70,46 +98,131 @@ public class EnemyController : MonoBehaviour
         _AnimationStateMachine();
     }
 
-    internal void HandlePatrol() 
+    internal void HandlePatrol()
     {
-        
+        float newChangeDirTime = Random.Range(3f, 5f);
+        _enemyRB.velocity = new Vector2(_currentEnemySpeed, _enemyRB.velocity.y);
+
+        if (_changeDirTimer > 0f)
+        {
+            _changeDirTimer -= Time.deltaTime;
+            return;
+        }
+
+        if (IsChangingDir) return;
+        StartCoroutine(ChangeTimeAndDir(newChangeDirTime));
     }
 
-    internal void HandleChase() 
+    private IEnumerator ChangeTimeAndDir(float newChangeDirTime)
     {
-        float targetDir = Mathf.Sign(target.transform.localScale.x);
-        Vector2 chaseForce = targetDir * chaseSpeed * Vector2.right;
-        _enemyRB.AddForce(chaseForce, ForceMode2D.Force);
+        float tmpWalkSpeed = _currentEnemySpeed;
+        IsChangingDir = true;
+        _currentEnemySpeed = 0;
+        yield return new WaitForSeconds(1f);
+        _changeDirTimer = newChangeDirTime;
+        _currentEnemySpeed = -tmpWalkSpeed;
+        IsChangingDir = false;
+    }
+
+
+    internal void HandleChase()
+    {
+        Debug.Log(target.transform.position.y - transform.position.y);
+        Vector2 diffDist = target.transform.position - transform.position;
+        if (Mathf.Abs(diffDist.x) > .5f)
+        {
+            float targetDir = Mathf.Sign(diffDist.x);
+            Vector2 chaseForce = targetDir * chaseSpeed * Vector2.right;
+            _enemyRB.velocity = new Vector2(targetDir * chaseSpeed, _enemyRB.velocity.y);
+        }
+        else
+        {
+            _enemyRB.velocity = new Vector2(0f, _enemyRB.velocity.y);
+        }
 
     }
 
-    internal void HandleRandomFind() 
+    internal void HandleTeleportChase()
     {
-    
+        if (!IsPlayerOnHigherGround) return;
+
+        _confirmTeleportTimer -= Time.deltaTime;
+
+        if (_confirmTeleportTimer > 0f || !target.IsGrounded) return;
+
+        transform.position = target.transform.position;
+        _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
     }
 
-    internal void HandleAttack() 
+    internal void HandleRandomFind()
     {
-    
-        
+
     }
 
-    internal void HandleDefeated() 
+    internal void HandleAttack()
+    {
+        if (!IsGrounded) return;
+
+        if (_chargeToAttackTimer > 0f)
+        {
+            _enemyRB.velocity = new Vector2(0f, _enemyRB.velocity.y);
+            _chargeToAttackTimer -= Time.deltaTime;
+            return;
+        }
+
+        if (_isAttacking) return;
+        StartCoroutine(JumpAttack());
+    }
+
+    IEnumerator JumpAttack()
+    {
+        _isAttacking = true;
+        Vector2 diffDist = target.transform.position - transform.position;
+        float targetDir = Mathf.Sign(diffDist.x);
+        _enemyRB.AddForce(new Vector2(attackLeapForce * targetDir, attackLeapForce * 1.5f), ForceMode2D.Impulse);
+
+        yield return new WaitForSeconds(.2f);
+
+        yield return new WaitUntil(() => IsGrounded);
+
+        _isAttacking = false;
+        CurrentState = EnemyState.CoolDown;
+        _chargeToAttackTimer = chargeAttackTime;
+    }
+
+    internal void HandleCoolDown()
+    {
+        _enemyRB.velocity = new Vector2(0f, _enemyRB.velocity.y);
+
+        if (_coolDownTimer > 0)
+        {
+            _coolDownTimer -= Time.deltaTime;
+            return;
+        }
+
+        _coolDownTimer = coolDownTime;
+        CurrentState = EnemyState.Patrol;
+    }
+
+    internal void HandleDefeated()
     {
         gameObject.SetActive(false);
     }
 
-    internal void _ChangeState() 
-    {   
-        switch (CurrentState) 
+    internal void _ChangeState()
+    {
+        switch (CurrentState)
         {
             case EnemyState.Patrol:
+                if (!IsPlayerFound) return;
+                CurrentState = EnemyState.Chase;
                 break;
             case EnemyState.Chase:
-                break;
-            case EnemyState.RandomFind:
+                if (!IsPlayerInRange) return;
+                CurrentState = EnemyState.Attack;
                 break;
             case EnemyState.Attack:
+
                 break;
             case EnemyState.Defeated:
                 break;
@@ -127,14 +240,15 @@ public class EnemyController : MonoBehaviour
                 break;
             case EnemyState.Chase:
                 HandleChase();
-                _ChangeState();
-                break;
-            case EnemyState.RandomFind:
-                HandleRandomFind();
+                HandleTeleportChase();
                 _ChangeState();
                 break;
             case EnemyState.Attack:
                 HandleAttack();
+                _ChangeState();
+                break;
+            case EnemyState.CoolDown:
+                HandleCoolDown();
                 _ChangeState();
                 break;
             case EnemyState.Defeated:
@@ -146,7 +260,67 @@ public class EnemyController : MonoBehaviour
 
     private void _AnimationStateMachine() 
     {
-        
+        if (!_enemyAnim) return;
+
+        switch (_animState) 
+        {
+            case ENEMY_IDLE:
+
+                if (Mathf.Abs(_enemyRB.velocity.x) <= .05f && IsGrounded) return;
+
+                if (IsGrounded) 
+                {
+                    _ChangeAnimationState(ENEMY_WALKING);
+                    return;
+                }
+
+                _ChangeAnimationState(ENEMY_JUMP);
+
+                break;
+            case ENEMY_WALKING:
+
+                if (Mathf.Abs(_enemyRB.velocity.x) <= .5f && IsGrounded) 
+                {
+                    _ChangeAnimationState(ENEMY_IDLE);
+                    return;
+                }
+
+                if (Mathf.Abs(_enemyRB.velocity.x) <= walkSpeed && IsGrounded) return;
+
+                if (IsGrounded)
+                {
+                    _ChangeAnimationState(ENEMY_CHASING);
+                    return;
+                }
+
+                _ChangeAnimationState(ENEMY_JUMP);
+
+                break;
+            case ENEMY_CHASING:
+
+                if (Mathf.Abs(_enemyRB.velocity.x) <= walkSpeed && IsGrounded) 
+                {
+                    _ChangeAnimationState(ENEMY_WALKING);
+                    return;
+                }
+
+                if (IsGrounded) return;
+
+                _ChangeAnimationState(ENEMY_JUMP);
+                break;
+            case ENEMY_JUMP:
+
+                if (!IsGrounded) return;
+                _ChangeAnimationState(ENEMY_IDLE);
+                break;
+        }
+    }
+
+    private void _ChangeAnimationState(string newState) 
+    {
+        if (newState == _animState) return;
+        _animState = newState;
+        _enemyAnim.Play(_animState);
     }
 
     private void _RayCheck()
@@ -168,12 +342,24 @@ public class EnemyController : MonoBehaviour
                 layerMask: playerMask
             );
 
+        _attackRangeHit = Physics2D.CircleCast(
+                origin: transform.position,
+                radius: attackRange,
+                distance: 0f,
+                direction: Vector2.zero,
+                layerMask: playerMask
+            );
+
+        IsPlayerFound = _playerLayerHit && _playerLayerHit.collider.CompareTag("PlayerCat");
+        IsPlayerInRange = _attackRangeHit && _attackRangeHit.collider.CompareTag("PlayerCat");
+
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireCube(transform.position + groundDistance * Vector3.down, groundCheckBox);
         Gizmos.DrawWireSphere(transform.position, playerCheckRadius);
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
 
