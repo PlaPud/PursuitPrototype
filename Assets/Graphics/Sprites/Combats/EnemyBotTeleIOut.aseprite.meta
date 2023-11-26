@@ -1,0 +1,648 @@
+fileFormatVersion: 2
+guid: d4c685e7dced26e46981c01207b998cd
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 62a9f0aa5b59740cfbadc7e5f9823bb0, type: 3}
+  textureImporterSettings:
+    alphaSource: 1
+    mipMapMode: 0
+    enableMipMap: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+    convertToNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+    swizzle: 50462976
+    isReadable: 0
+    streamingMipmaps: 0
+    streamingMipmapsPriority: 0
+    vTOnly: 0
+    ignoreMipmapLimit: 0
+    nPOTScale: 1
+    sRGBTexture: 1
+    spriteMode: 2
+    spriteExtrude: 1
+    spriteMeshType: 1
+    alignment: 0
+    spritePivot: {x: 0.5, y: 0.5}
+    spritePixelsToUnits: 16
+    spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+    spriteGenerateFallbackPhysicsShape: 0
+    generateCubemap: 6
+    cubemapConvolution: 0
+    seamlessCubemap: 0
+    alphaIsTransparency: 1
+    spriteTessellationDetail: -1
+    textureType: 8
+    textureShape: 1
+    singleChannelComponent: 0
+    flipbookRows: 0
+    flipbookColumns: 0
+    ignorePngGamma: 0
+    cookieMode: 0
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+    normalMap: 0
+    textureFormat: 0
+    maxTextureSize: 0
+    lightmap: 0
+    compressionQuality: 0
+    linearTexture: 0
+    grayScaleToAlpha: 0
+    rGBM: 0
+    cubemapConvolutionSteps: 0
+    cubemapConvolutionExponent: 0
+    maxTextureSizeSet: 0
+    compressionQualitySet: 0
+    textureFormatSet: 0
+    applyGammaDecoding: 0
+  previousAsepriteImporterSettings:
+    fileImportMode: 1
+    importHiddenLayers: 0
+    layerImportMode: 1
+    defaultPivotSpace: 0
+    defaultPivotAlignment: 0
+    customPivotPosition: {x: 0.5, y: 0.5}
+    spritePadding: 0
+    generateModelPrefab: 1
+    generateAnimationClips: 1
+    addSortingGroup: 1
+    addShadowCasters: 0
+  asepriteImporterSettings:
+    fileImportMode: 1
+    importHiddenLayers: 0
+    layerImportMode: 1
+    defaultPivotSpace: 0
+    defaultPivotAlignment: 0
+    customPivotPosition: {x: 0.5, y: 0.5}
+    spritePadding: 0
+    generateModelPrefab: 1
+    generateAnimationClips: 1
+    addSortingGroup: 1
+    addShadowCasters: 0
+  importFileNodeState: 1
+  platformSettingsDirtyTick: 638366382184521958
+  textureAssetName: 
+  singleSpriteImportData:
+  - name: 
+    originalName: 
+    pivot: {x: 0, y: 0}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    spriteID: 
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 0}
+  animatedSpriteImportData:
+  - name: EnemyBotTeleIOut_Frame_0
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 51
+      width: 14
+      height: 16
+    spriteID: 76afb8b5e4ef6724f8c52e293446a375
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 51}
+  - name: EnemyBotTeleIOut_Frame_1
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 4
+      width: 16
+      height: 16
+    spriteID: a0bc61e4bc8a69a4187737dc2517d597
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 4}
+  - name: EnemyBotTeleIOut_Frame_2
+    originalName: 
+    pivot: {x: 0.5, y: 0.4666667}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 28
+      width: 16
+      height: 15
+    spriteID: 1a5b55611818dc04281a2e978f088900
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 28}
+  - name: EnemyBotTeleIOut_Frame_3
+    originalName: 
+    pivot: {x: 0.5, y: 0.42857146}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 75
+      width: 16
+      height: 14
+    spriteID: 77ed6209287e0474994593ebb361d5d8
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 75}
+  - name: EnemyBotTeleIOut_Frame_4
+    originalName: 
+    pivot: {x: 0.5, y: 0.3846154}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 97
+      width: 16
+      height: 13
+    spriteID: b2c030d3d1006254e8dbe85ddcbaa190
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 97}
+  - name: EnemyBotTeleIOut_Frame_5
+    originalName: 
+    pivot: {x: 0.5, y: 0.33333334}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 28
+      y: 4
+      width: 16
+      height: 12
+    spriteID: 173226c9729f9c049b129d327fdf3f17
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 28, y: 4}
+  - name: EnemyBotTeleIOut_Frame_6
+    originalName: 
+    pivot: {x: 0.5, y: 0.27272728}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 28
+      y: 24
+      width: 14
+      height: 11
+    spriteID: 33673213fe69d46468ad7aa1b4d42562
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 28, y: 24}
+  - name: EnemyBotTeleIOut_Frame_7
+    originalName: 
+    pivot: {x: 0.5, y: 0.2}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 28
+      y: 60
+      width: 12
+      height: 10
+    spriteID: 04182d777387a8e4fba61523a37e57eb
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 28, y: 60}
+  - name: EnemyBotTeleIOut_Frame_8
+    originalName: 
+    pivot: {x: 0.5, y: 0.11111111}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 28
+      y: 43
+      width: 14
+      height: 9
+    spriteID: e273323763814804483412dd9fbc7319
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 28, y: 43}
+  - name: EnemyBotTeleIOut_Frame_9
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 28
+      y: 78
+      width: 14
+      height: 8
+    spriteID: 2b4434a66b4a4f74abba615415fd2d91
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 28, y: 78}
+  - name: EnemyBotTeleIOut_Frame_10
+    originalName: 
+    pivot: {x: 0.5, y: -0.14285715}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 28
+      y: 94
+      width: 14
+      height: 7
+    spriteID: db0722ce1040ecc44ad9e5581840a10f
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 28, y: 94}
+  - name: EnemyBotTeleIOut_Frame_11
+    originalName: 
+    pivot: {x: 0.5, y: -0.33333334}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 118
+      width: 16
+      height: 6
+    spriteID: 862301e500726ea45b6ab3d0b80ac2c3
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 118}
+  - name: EnemyBotTeleIOut_Frame_12
+    originalName: 
+    pivot: {x: 0.5, y: -0.6}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 28
+      y: 109
+      width: 16
+      height: 5
+    spriteID: f2a0832edc072b14e854567ec737845e
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 28, y: 109}
+  - name: EnemyBotTeleIOut_Frame_13
+    originalName: 
+    pivot: {x: 0.5, y: -1}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 52
+      y: 4
+      width: 14
+      height: 4
+    spriteID: 1b139a6518f5da64ab8285a2415cc1de
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 52, y: 4}
+  - name: EnemyBotTeleIOut_Frame_14
+    originalName: 
+    pivot: {x: 0.5, y: -1.6666667}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 52
+      y: 16
+      width: 14
+      height: 3
+    spriteID: b374299498ddf60428a0fc92e7a609e4
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 52, y: 16}
+  - name: EnemyBotTeleIOut_Frame_15
+    originalName: 
+    pivot: {x: 0.5, y: -3}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 28
+      y: 122
+      width: 14
+      height: 2
+    spriteID: 7e189d784c7c2a04da1f9346e42250cf
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 28, y: 122}
+  - name: EnemyBotTeleIOut_Frame_16
+    originalName: 
+    pivot: {x: 0.5, y: -7}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 52
+      y: 27
+      width: 12
+      height: 1
+    spriteID: b1052330675611d429094af760479bb1
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 52, y: 27}
+  spriteSheetImportData: []
+  asepriteLayers:
+  - layerIndex: 0
+    guid: 460268822
+    name: EnemyBotTeleIOut
+    layerFlags: 0
+    layerType: 0
+    blendMode: 0
+    cells:
+    - name: EnemyBotTeleIOut_Frame_0
+      frameIndex: 0
+      cellRect:
+        x: 1
+        y: 0
+        width: 14
+        height: 16
+      spriteId: 76afb8b5e4ef6724f8c52e293446a375
+    - name: EnemyBotTeleIOut_Frame_1
+      frameIndex: 1
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 16
+      spriteId: a0bc61e4bc8a69a4187737dc2517d597
+    - name: EnemyBotTeleIOut_Frame_2
+      frameIndex: 2
+      cellRect:
+        x: 0
+        y: 1
+        width: 16
+        height: 15
+      spriteId: 1a5b55611818dc04281a2e978f088900
+    - name: EnemyBotTeleIOut_Frame_3
+      frameIndex: 3
+      cellRect:
+        x: 0
+        y: 2
+        width: 16
+        height: 14
+      spriteId: 77ed6209287e0474994593ebb361d5d8
+    - name: EnemyBotTeleIOut_Frame_4
+      frameIndex: 4
+      cellRect:
+        x: 0
+        y: 3
+        width: 16
+        height: 13
+      spriteId: b2c030d3d1006254e8dbe85ddcbaa190
+    - name: EnemyBotTeleIOut_Frame_5
+      frameIndex: 5
+      cellRect:
+        x: 0
+        y: 4
+        width: 16
+        height: 12
+      spriteId: 173226c9729f9c049b129d327fdf3f17
+    - name: EnemyBotTeleIOut_Frame_6
+      frameIndex: 6
+      cellRect:
+        x: 1
+        y: 5
+        width: 14
+        height: 11
+      spriteId: 33673213fe69d46468ad7aa1b4d42562
+    - name: EnemyBotTeleIOut_Frame_7
+      frameIndex: 7
+      cellRect:
+        x: 2
+        y: 6
+        width: 12
+        height: 10
+      spriteId: 04182d777387a8e4fba61523a37e57eb
+    - name: EnemyBotTeleIOut_Frame_8
+      frameIndex: 8
+      cellRect:
+        x: 1
+        y: 7
+        width: 14
+        height: 9
+      spriteId: e273323763814804483412dd9fbc7319
+    - name: EnemyBotTeleIOut_Frame_9
+      frameIndex: 9
+      cellRect:
+        x: 1
+        y: 8
+        width: 14
+        height: 8
+      spriteId: 2b4434a66b4a4f74abba615415fd2d91
+    - name: EnemyBotTeleIOut_Frame_10
+      frameIndex: 10
+      cellRect:
+        x: 1
+        y: 9
+        width: 14
+        height: 7
+      spriteId: db0722ce1040ecc44ad9e5581840a10f
+    - name: EnemyBotTeleIOut_Frame_11
+      frameIndex: 11
+      cellRect:
+        x: 0
+        y: 10
+        width: 16
+        height: 6
+      spriteId: 862301e500726ea45b6ab3d0b80ac2c3
+    - name: EnemyBotTeleIOut_Frame_12
+      frameIndex: 12
+      cellRect:
+        x: 0
+        y: 11
+        width: 16
+        height: 5
+      spriteId: f2a0832edc072b14e854567ec737845e
+    - name: EnemyBotTeleIOut_Frame_13
+      frameIndex: 13
+      cellRect:
+        x: 1
+        y: 12
+        width: 14
+        height: 4
+      spriteId: 1b139a6518f5da64ab8285a2415cc1de
+    - name: EnemyBotTeleIOut_Frame_14
+      frameIndex: 14
+      cellRect:
+        x: 1
+        y: 13
+        width: 14
+        height: 3
+      spriteId: b374299498ddf60428a0fc92e7a609e4
+    - name: EnemyBotTeleIOut_Frame_15
+      frameIndex: 15
+      cellRect:
+        x: 1
+        y: 14
+        width: 14
+        height: 2
+      spriteId: 7e189d784c7c2a04da1f9346e42250cf
+    - name: EnemyBotTeleIOut_Frame_16
+      frameIndex: 16
+      cellRect:
+        x: 2
+        y: 15
+        width: 12
+        height: 1
+      spriteId: b1052330675611d429094af760479bb1
+    linkedCells: []
+    parentIndex: -1
+  platformSettings:
+  - name: DefaultTexturePlatform
+    overridden: 0
+    ignorePlatformSupport: 0
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    androidETC2FallbackOverride: 0
+  - name: Standalone
+    overridden: 0
+    ignorePlatformSupport: 0
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    androidETC2FallbackOverride: 0
+  - name: Server
+    overridden: 0
+    ignorePlatformSupport: 0
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    androidETC2FallbackOverride: 0
+  secondarySpriteTextures: []
+  spritePackingTag: 
+  canvasSize: {x: 16, y: 16}

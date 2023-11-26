@@ -11,6 +11,7 @@ public class EnemyController : MonoBehaviour
     {
         Patrol,
         Chase,
+        Teleport,
         Attack,
         CoolDown,
         Defeated
@@ -51,6 +52,7 @@ public class EnemyController : MonoBehaviour
 
     private bool _canAttack = false;
     private bool _isAttacking = false;
+    private bool _isTeleporting = false;
 
     private Rigidbody2D _enemyRB;
     private RaycastHit2D _playerLayerHit;
@@ -75,6 +77,8 @@ public class EnemyController : MonoBehaviour
     private const string ENEMY_WALKING = "EnemyBotWalking";
     private const string ENEMY_CHASING = "EnemyBotChasing";
     private const string ENEMY_JUMP = "EnemyBotJump";
+    private const string ENEMY_TELEIN = "EnemyBotTeleIn";
+    private const string ENEMY_TELEOUT = "EnemyBotTeleOut";
 
     private void Awake()
     {
@@ -127,7 +131,6 @@ public class EnemyController : MonoBehaviour
 
     internal void HandleChase()
     {
-        Debug.Log(target.transform.position.y - transform.position.y);
         Vector2 diffDist = target.transform.position - transform.position;
         if (Mathf.Abs(diffDist.x) > .5f)
         {
@@ -140,18 +143,38 @@ public class EnemyController : MonoBehaviour
             _enemyRB.velocity = new Vector2(0f, _enemyRB.velocity.y);
         }
 
+        if (!IsPlayerOnHigherGround) return;
+
+        _confirmTeleportTimer -= _confirmTeleportTimer > 0f ? Time.deltaTime : 0f;
+
     }
 
     internal void HandleTeleportChase()
     {
-        if (!IsPlayerOnHigherGround) return;
+        //if (!IsPlayerOnHigherGround) return;
 
-        _confirmTeleportTimer -= Time.deltaTime;
+        //_confirmTeleportTimer -= _confirmTeleportTimer > 0f ? Time.deltaTime : 0f;
 
-        if (_confirmTeleportTimer > 0f || !target.IsGrounded) return;
+        //if (_confirmTeleportTimer > 0f || !target.IsGrounded) return;
+        if (_isTeleporting) return;
+        StartCoroutine(_Teleport());
+        //transform.position = target.transform.position;
+        //_confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
+    }
 
+    IEnumerator _Teleport() 
+    {
+        _isTeleporting = true;
+        _enemyRB.velocity = Vector2.zero;
+        _enemyAnim.Play(ENEMY_TELEOUT);
+        yield return new WaitForSeconds(2f);
         transform.position = target.transform.position;
+        _enemyRB.velocity = Vector2.zero;
+        _enemyAnim.Play(ENEMY_TELEIN);
+        yield return new WaitForSeconds(2f);
         _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
+        _isTeleporting = false;
+        CurrentState = EnemyState.Chase;
     }
 
     internal void HandleRandomFind()
@@ -218,11 +241,20 @@ public class EnemyController : MonoBehaviour
                 CurrentState = EnemyState.Chase;
                 break;
             case EnemyState.Chase:
-                if (!IsPlayerInRange) return;
+
+                if (_confirmTeleportTimer <= 0f && target.IsGrounded) 
+                {
+                    CurrentState = EnemyState.Teleport;
+                    return;
+                }
+
+                if (!IsPlayerInRange || _isTeleporting) return;
                 CurrentState = EnemyState.Attack;
+
+                break;
+            case EnemyState.Teleport:
                 break;
             case EnemyState.Attack:
-
                 break;
             case EnemyState.Defeated:
                 break;
@@ -240,6 +272,9 @@ public class EnemyController : MonoBehaviour
                 break;
             case EnemyState.Chase:
                 HandleChase();
+                _ChangeState();
+                break;
+            case EnemyState.Teleport:
                 HandleTeleportChase();
                 _ChangeState();
                 break;
