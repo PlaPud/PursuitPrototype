@@ -68,7 +68,7 @@ public class PlayerController : IControllableOnGround
     private bool _toJump = false;
     private bool _toToggleCrouch = false;
 
-    private Rigidbody2D _playerRigidBody;
+    private Rigidbody2D _playerRB;
     private Animator _playerAnimator;
 
 
@@ -89,7 +89,7 @@ public class PlayerController : IControllableOnGround
 
     private void Awake()
     {
-        _playerRigidBody = GetComponent<Rigidbody2D>();
+        _playerRB = GetComponent<Rigidbody2D>();
         _playerAnimator = GetComponent<Animator>();
         PlayerRopeJoint = GetComponent<DistanceJoint2D>();
         PlayerRopeRenderer = GetComponent<LineRenderer>();
@@ -205,29 +205,29 @@ public class PlayerController : IControllableOnGround
             );
         
         float accel = (Mathf.Abs(resultSpeed) > .01f ? maxAccelerate : maxDeccelerate);
-        float speedDif = resultSpeed - _playerRigidBody.velocity.x;
+        float speedDif = resultSpeed - _playerRB.velocity.x;
 
         float movement = Mathf.Pow(
                 Mathf.Abs(speedDif) * accel, velocityPower
             ) * Mathf.Sign(speedDif);
 
-        _playerRigidBody.AddForce(movement * Vector2.right);
+        _playerRB.AddForce(movement * Vector2.right);
     }
 
     private void HandleOnSwing() 
     {
-        bool isSwingSpeedExceed = PlayerRopeJoint.enabled && Vector3.Magnitude(_playerRigidBody.velocity) < maxSwingSpeed;
+        bool isSwingSpeedExceed = PlayerRopeJoint.enabled && Vector3.Magnitude(_playerRB.velocity) < maxSwingSpeed;
 
         if (!isSwingSpeedExceed) return;
         
             
         if (WalkInput > 0.5)
         {
-            _playerRigidBody.velocity += new Vector2 (swingForce * Time.deltaTime, 0f);
+            _playerRB.velocity += new Vector2 (swingForce * Time.deltaTime, 0f);
         }
         else if (WalkInput < -0.5) 
         {
-            _playerRigidBody.velocity -= new Vector2 (swingForce * Time.deltaTime, 0f);
+            _playerRB.velocity -= new Vector2 (swingForce * Time.deltaTime, 0f);
         }
 
     }
@@ -236,19 +236,19 @@ public class PlayerController : IControllableOnGround
     {
         if (IsSwingPressed && PlayerRopeJoint.enabled) 
         {
-            _playerRigidBody.AddForce(Vector2.down * 50f);
+            _playerRB.AddForce(Vector2.down * 50f);
             return;
         };
 
-        if (_playerRigidBody.velocity.y < 0)
+        if (_playerRB.velocity.y < 0)
         {
-            _playerRigidBody.velocity +=
+            _playerRB.velocity +=
                 Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1)
                 * Time.deltaTime;
         }
-        else if (_playerRigidBody.velocity.y > 0 && !Input.GetButton("Jump")) 
+        else if (_playerRB.velocity.y > 0 && !Input.GetButton("Jump")) 
         {
-            _playerRigidBody.velocity +=
+            _playerRB.velocity +=
                 Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1)
                 * Time.deltaTime;
         }
@@ -258,7 +258,8 @@ public class PlayerController : IControllableOnGround
     {
         if ((IsGrounded || _coyoteTimer > 0) && _toJump && !IsCrouching)
         {
-            _playerRigidBody.AddForce(
+            _playerRB.velocity = new Vector2 (_playerRB.velocity.x, 0f);
+            _playerRB.AddForce(
                 Vector2.up * jumpSpeed * (IsGrounded ? 1f : MAGIC_COYOTEJUMP_NUMBER), 
                 ForceMode2D.Impulse
             );
@@ -267,7 +268,7 @@ public class PlayerController : IControllableOnGround
         }
         else if (_toJump && IsWallSliding)
         {
-            _playerRigidBody.AddForce(
+            _playerRB.AddForce(
                 new Vector2(
                         -transform.localScale.x
                         * wallJumpForceX,
@@ -300,7 +301,7 @@ public class PlayerController : IControllableOnGround
 
         if (IsTouchWall &&
             !IsGrounded &&
-            _playerRigidBody.velocity.y < -0.5
+            _playerRB.velocity.y < -0.5
             )
         {
             IsWallSliding = true;
@@ -310,10 +311,10 @@ public class PlayerController : IControllableOnGround
             IsWallSliding = false;
         }
 
-        if (IsWallSliding && _playerRigidBody.velocity.y < -wallSlideSpeed)
+        if (IsWallSliding && _playerRB.velocity.y < -wallSlideSpeed)
         {
-            _playerRigidBody.velocity = new Vector2(
-                    _playerRigidBody.velocity.x,
+            _playerRB.velocity = new Vector2(
+                    _playerRB.velocity.x,
                     -wallSlideSpeed
                 );
         }
@@ -333,11 +334,11 @@ public class PlayerController : IControllableOnGround
     {
         if (_playerPushPull.IsGrabbing) return;
 
-        if (_playerRigidBody.velocity.x > 0.5f)
+        if (_playerRB.velocity.x > 0.5f)
         {
             transform.localScale = Vector3.one;
         }
-        if (_playerRigidBody.velocity.x < -0.5f)
+        if (_playerRB.velocity.x < -0.5f)
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
@@ -348,10 +349,10 @@ public class PlayerController : IControllableOnGround
         if (IsGrounded && Mathf.Abs(WalkInput) < .01f) 
         {
             float appliedFriction = Mathf.Min(
-                    Mathf.Abs(_playerRigidBody.velocity.x),
+                    Mathf.Abs(_playerRB.velocity.x),
                     frictionAmount   
-                ) * Mathf.Sign(_playerRigidBody.velocity.x);
-            _playerRigidBody.AddForce(Vector2.right * -appliedFriction, ForceMode2D.Impulse);
+                ) * Mathf.Sign(_playerRB.velocity.x);
+            _playerRB.AddForce(Vector2.right * -appliedFriction, ForceMode2D.Impulse);
         }
     }
 
@@ -438,7 +439,7 @@ public class PlayerController : IControllableOnGround
             switch (_currentAnimationState)
             {
                 case PLAYER_DROP:
-                    if (_playerRigidBody.velocity.y > 1f)
+                    if (_playerRB.velocity.y > 1f)
                     {
                         ChangeAnimationState(PLAYER_JUMP);
                     }
@@ -448,7 +449,7 @@ public class PlayerController : IControllableOnGround
                     }
                     break;
                 case PLAYER_JUMP:
-                    if (_playerRigidBody.velocity.y < -1f)
+                    if (_playerRB.velocity.y < -1f)
                     {
                         ChangeAnimationState(PLAYER_DROP);
                     }
@@ -472,8 +473,8 @@ public class PlayerController : IControllableOnGround
     }
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
-        Gizmos.DrawWireCube(transform.position + transform.up * aboveCastDistance, boxSizeAbove);
+        Gizmos.DrawWireCube(transform.position + Vector3.down * castDistance, boxSize);
+        Gizmos.DrawWireCube(transform.position + Vector3.up * aboveCastDistance, boxSizeAbove);
         Gizmos.DrawWireCube(
                     center: transform.position + new Vector3(transform.localScale.x, 0f, 0f) * (PlayerRopeRadius),
                     size: new Vector2(ropeBoxWidth, 2 * PlayerRopeRadius)

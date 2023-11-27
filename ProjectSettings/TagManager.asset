@@ -61,3 +61,6 @@ TagManager:
   - name: GroundOverlay
     uniqueID: 833932929
     locked: 0
+  - name: Enemy
+    uniqueID: 3360054483
+    locked: 0

@@ -9,21 +9,11 @@ abstract public class IControllableOnGround : MonoBehaviour
 
     public bool IsGrounded { get; protected set; }
 
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-        
-    }
-
     virtual public void RayCheck() 
     {
         IsGrounded = Physics2D.BoxCast(
-                            origin: transform.position, size: boxSize, angle: 0,
-                            direction: -transform.up, distance: castDistance,
+                            origin: transform.position + Vector3.down * castDistance, size: boxSize, angle: 0,
+                            direction: -transform.up, distance: 0f,
                             layerMask: groundLayer
                        );
     }
