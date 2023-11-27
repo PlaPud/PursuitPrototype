@@ -9,8 +9,8 @@ public class LevelController : MonoBehaviour
     public bool IsLevelComplete;
     [SerializeField] LayerMask playerMask;
     [SerializeField] PuzzleController puzzle;
-    [SerializeField] CombatController combat;
-    [SerializeField] LevelCompleteTrigger trigger;
+    [SerializeField] EnemyAreaController enemyAreaCtrl;
+    [SerializeField] LevelCompleteTrigger levelCompleteTrigger;
 
     void Start()
     {
@@ -19,7 +19,7 @@ public class LevelController : MonoBehaviour
 
     void Update()
     {
-        if (!trigger.IsLevelComplete) return;
+        if (!levelCompleteTrigger.IsLevelComplete) return;
         IsLevelComplete = true;
         puzzle.IsLevelComplete = true;
     }

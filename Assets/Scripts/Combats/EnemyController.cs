@@ -23,10 +23,12 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private PlayerController target;
 
     [Header("Patrol Movement")]
-    [SerializeField] private float walkSpeed;
+    [SerializeField] private int walkSpeedLower;
+    [SerializeField] private int walkSpeedUpper;
 
     [Header("Chasing Movement")]
-    [SerializeField] private float chaseSpeed;
+    [SerializeField] private int chaseSpeedLower;
+    [SerializeField] private int chaseSpeedUpper;
     [SerializeField] private float jumpForce;
     [SerializeField] private float waitForTeleportTimeLower;
     [SerializeField] private float waitForTeleportTimeUpper;
@@ -46,6 +48,9 @@ public class EnemyController : MonoBehaviour
     [Header("Layer Masks")]
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private LayerMask playerMask;
+
+    private int _walkSpeed;
+    private int _chaseSpeed;
 
     private float _changeDirTimer = 2f;
     private float _confirmTeleportTimer;
@@ -93,7 +98,9 @@ public class EnemyController : MonoBehaviour
 
     void Start()
     {
-        _currentEnemySpeed = walkSpeed;
+        _walkSpeed = Random.Range(walkSpeedLower, walkSpeedUpper);
+        _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
+        _currentEnemySpeed = _walkSpeed;
         _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
         _chargeToAttackTimer = chargeAttackTime;
         _coolDownTimer = coolDownTime;
@@ -130,8 +137,8 @@ public class EnemyController : MonoBehaviour
         if (Mathf.Abs(diffDist.x) > .5f)
         {
             float targetDir = Mathf.Sign(diffDist.x);
-            Vector2 chaseForce = targetDir * chaseSpeed * Vector2.right;
-            _enemyRB.velocity = new Vector2(targetDir * chaseSpeed, _enemyRB.velocity.y);
+            Vector2 chaseForce = targetDir * _chaseSpeed * Vector2.right;
+            _enemyRB.velocity = new Vector2(targetDir * _chaseSpeed, _enemyRB.velocity.y);
         }
         else
         {
@@ -223,17 +230,6 @@ public class EnemyController : MonoBehaviour
         yield return new WaitForSeconds(.5f);
         CurrentState = EnemyState.TeleportHide;
         _isTeleportOut = false;
-
-        //yield return new WaitUntil(() => IsPlayerOnHigherGround);
-        
-        //transform.position = target.transform.position;
-        //_enemyRB.velocity = Vector2.zero;
-        
-        //yield return new WaitForSeconds(.5f);
-
-        //_confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
-        //_isTeleporting = false;
-        //CurrentState = EnemyState.Chase;
     }
     private IEnumerator _JumpAttack()
     {
@@ -350,7 +346,7 @@ public class EnemyController : MonoBehaviour
                     return;
                 }
 
-                if (Mathf.Abs(_enemyRB.velocity.x) <= walkSpeed && IsGrounded) return;
+                if (Mathf.Abs(_enemyRB.velocity.x) <= _walkSpeed && IsGrounded) return;
 
                 if (IsGrounded)
                 {
@@ -363,7 +359,7 @@ public class EnemyController : MonoBehaviour
                 break;
             case ENEMY_CHASING:
 
-                if (Mathf.Abs(_enemyRB.velocity.x) <= walkSpeed && IsGrounded)
+                if (Mathf.Abs(_enemyRB.velocity.x) <= _walkSpeed && IsGrounded)
                 {
                     _ChangeAnimationState(ENEMY_WALKING);
                     return;
@@ -400,21 +396,6 @@ public class EnemyController : MonoBehaviour
         if (newState == _animState) return;
         _animState = newState;
         _enemyAnim.Play(_animState);
-    }
-    IEnumerator _TeleportAnim()
-    {
-        _isTeleportingAnim = true;
-        _ChangeAnimationState(ENEMY_TELEOUT);
-        yield return new WaitForSeconds(.5f);
-
-        _enemySR.enabled = false;
-        yield return new WaitUntil(() => IsPlayerOnHigherGround);
-        _enemySR.enabled = true;
-
-        _ChangeAnimationState(ENEMY_TELEIN);
-        yield return new WaitForSeconds(.5f);
-        _ChangeAnimationState(ENEMY_IDLE);
-        _isTeleportingAnim = false;
     }
 
     private void _RayCheck()
