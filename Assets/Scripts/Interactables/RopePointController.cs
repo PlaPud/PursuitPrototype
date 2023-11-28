@@ -4,24 +4,22 @@ using UnityEngine;
 
 public class RopePoint : MonoBehaviour
 {
-    
-    private PlayerController _playerController;
 
-    private Collider2D _playerNear;
     [SerializeField] LayerMask playerLayer;
-    [SerializeField] float detectRadius;
-    [SerializeField] PlayerController target;
+
+    private PlayerController target;
+    private Collider2D _playerNear;
 
     private bool _isUsing;
 
     private void Awake()
     {
-        
+        target = GameObject.FindGameObjectsWithTag("PlayerCat")[0].GetComponent<PlayerController>();
     }
 
     void Start()
     {
-       
+
     }
 
     void Update()
@@ -68,6 +66,6 @@ public class RopePoint : MonoBehaviour
     private void OnDrawGizmos()
     {
         //Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
-        Gizmos.DrawWireSphere(transform.position, target.PlayerRopeRadius);
+        //Gizmos.DrawWireSphere(transform.position, target.PlayerRopeRadius);
     }
 }

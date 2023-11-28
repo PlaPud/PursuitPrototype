@@ -53,7 +53,6 @@ public class PlayerController : IControllableOnGround
 
 
     public bool IsSwingPressed { get; private set; } = false;
-
     public bool IsCrouching { get; private set; } = false;
     public bool IsWallSliding { get; private set; } = false;
     public bool IsSprinting { get; private set; } = false;
@@ -70,7 +69,6 @@ public class PlayerController : IControllableOnGround
 
     private Rigidbody2D _playerRB;
     private Animator _playerAnimator;
-
 
     //TODO: Keep Animation String in ScriptableObject
     private const string PLAYER_IDLE = "PlayerIdle";
