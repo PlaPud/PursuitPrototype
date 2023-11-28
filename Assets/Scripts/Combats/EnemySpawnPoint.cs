@@ -19,16 +19,6 @@ public class EnemySpawnPoint : MonoBehaviour
         Debug.Log(_spawnPos.position);
     }
 
-    void Start()
-    {
-       
-    }
-
-    void Update()
-    {
-
-    }
-
     internal IEnumerator HandleSpawn(int amount, float spawnDelay) 
     {
         for (int i = 0; i < amount; i++) 
@@ -36,7 +26,7 @@ public class EnemySpawnPoint : MonoBehaviour
             GameObject newObj = EnemyPoolingManager.Instance.GetEnemyFromPool();
             if (!newObj)
             {
-                Debug.LogError("Cannot Find Object From EnemyPool");
+                Debug.LogError("Cannot Find Object From EnemyPool.");
                 continue;
             }
             newObj.transform.position = _spawnPos.position;

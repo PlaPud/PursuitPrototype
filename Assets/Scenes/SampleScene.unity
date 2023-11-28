@@ -16793,11 +16793,12 @@ GameObject:
   - component: {fileID: 237877228}
   - component: {fileID: 237877230}
   - component: {fileID: 237877231}
+  - component: {fileID: 237877240}
+  - component: {fileID: 237877241}
   - component: {fileID: 237877232}
   - component: {fileID: 237877238}
   - component: {fileID: 237877237}
   - component: {fileID: 237877239}
-  - component: {fileID: 237877240}
   m_Layer: 8
   m_Name: CatControl
   m_TagString: PlayerCat
@@ -17159,6 +17160,24 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   player: {fileID: 237877231}
+--- !u!114 &237877241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 237877226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb527c7d75993a41a76d0f879bb6741, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _aiming: {fileID: 1485021873}
+  shootKey: 323
+  shootDelay: 0
+  firingForce: 3
+  tillExplodeTime: 0
+  maxInField: 3
 --- !u!1 &240708286
 GameObject:
   m_ObjectHideFlags: 0
@@ -41684,7 +41703,7 @@ Transform:
   m_GameObject: {fileID: 1485021871}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 46.69484, y: 6.314713, z: -0.01902703}
+  m_LocalPosition: {x: 46.69483, y: 6.3147125, z: -0.01902703}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -42477,6 +42496,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1513266511}
+  - component: {fileID: 1513266512}
   m_Layer: 0
   m_Name: ElectroBombPool
   m_TagString: Untagged
@@ -42499,6 +42519,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1407310245}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1513266512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1513266510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f49c96f2685112b459d2f04aae2c7b31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bombPrefab: {fileID: 7828313225855586084, guid: e02d94fc9f59e7d4d9cb1e1c247bbbb3, type: 3}
 --- !u!1 &1521165815
 GameObject:
   m_ObjectHideFlags: 0
