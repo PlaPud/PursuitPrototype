@@ -30,11 +30,4 @@ public class AimingController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, _aimingAngle);
     }
 
-    private void OnDrawGizmos()
-    {
-        //Gizmos.DrawLine(transform.position, _aimingPositionGlobal);
-        //Gizmos.DrawLine(Vector2.zero, _aimingPositionGlobal);
-    }
-
-
 }

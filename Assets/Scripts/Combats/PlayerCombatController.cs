@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +11,15 @@ public class PlayerCombatController : MonoBehaviour
     [SerializeField] private KeyCode shootKey = KeyCode.Mouse0;
     [SerializeField] private float shootCoolDown;
     [SerializeField] private float firingForce = 1;
-    [SerializeField] private int maxInField = 3;
+    [field: SerializeField] public int MaxInField { get; private set; } = 3;
 
     private bool _toShoot;
     private bool _isInCoolDown;
 
-    private List<GameObject> _currentInField;
+    public List<GameObject> CurrentInField { get; private set; }
 
+    public Action OnPlayerShootBomb;
+    public Action OnCheckReload;
 
     private void Awake()
     {
@@ -24,7 +27,7 @@ public class PlayerCombatController : MonoBehaviour
     }
     private void Start()
     {
-        _currentInField = new List<GameObject>();
+        CurrentInField = new List<GameObject>();
     }
 
     private void Update()
@@ -34,7 +37,7 @@ public class PlayerCombatController : MonoBehaviour
 
     private void GetInputShoot() 
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0)) 
+        if (Input.GetKeyDown(KeyCode.Mouse0) && CurrentInField.Count < MaxInField) 
         {
             _toShoot = true;
         }
@@ -48,7 +51,7 @@ public class PlayerCombatController : MonoBehaviour
 
     private void HandleShoot() 
     {
-        if (!_toShoot || _currentInField.Count == maxInField || _isInCoolDown) return;
+        if (!_toShoot || CurrentInField.Count == MaxInField || _isInCoolDown) return;
 
         GameObject bomb = BombPoolingManager.Instance.GetBombFromPool();
 
@@ -63,6 +66,8 @@ public class PlayerCombatController : MonoBehaviour
         Rigidbody2D bombRB = bomb.GetComponent<Rigidbody2D>();
         bomb.SetActive(true);
 
+        OnPlayerShootBomb?.Invoke();
+
         bombRB.AddForce(
                 force: _aiming.AimingCircleDirection * firingForce,
                 mode: ForceMode2D.Impulse
@@ -70,15 +75,15 @@ public class PlayerCombatController : MonoBehaviour
 
         StartCoroutine(_EnableCoolDown());
 
-        _currentInField.Add(bomb);
+        CurrentInField.Add(bomb);
         _toShoot = false;
     }
 
     private void _ClearDisabledBomb() 
     {
-        if (_currentInField.Count <= 0f) return;
-        _currentInField = _currentInField.Where((go) => go.activeSelf).ToList();
-
+        if (CurrentInField.Count <= 0f) return;
+        CurrentInField = CurrentInField.Where((go) => go.activeSelf).ToList();
+        OnCheckReload?.Invoke(); 
     }
 
     private IEnumerator _EnableCoolDown() 

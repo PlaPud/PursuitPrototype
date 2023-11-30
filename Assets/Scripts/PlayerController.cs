@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : IControllableOnGround
@@ -98,6 +99,7 @@ public class PlayerController : IControllableOnGround
         PlayerRopeJoint.enabled = false;
         PlayerRopeRenderer.enabled = false;
         _coyoteTimer = coyoteJumpTime;
+        PlayerHealth.Instance.OnDamageTaken += KnockBackPlayer;
     }
 
     void Update()
@@ -351,6 +353,19 @@ public class PlayerController : IControllableOnGround
                 frictionAmount
             ) * Mathf.Sign(_playerRB.velocity.x);
         _playerRB.AddForce(Vector2.right * -appliedFriction, ForceMode2D.Impulse);
+    }
+
+    private void KnockBackPlayer(int damage) 
+    {
+        if (damage <= 0) return;
+        StartCoroutine(_KnockBack());
+    }
+
+    private IEnumerator _KnockBack() 
+    {
+        _playerRB.velocity = Vector3.zero;  
+        yield return new WaitForSeconds(.02f);
+        _playerRB.AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
     }
 
     private void ChangeAnimationState(string newAnimationState) 

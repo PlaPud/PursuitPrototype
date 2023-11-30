@@ -15,7 +15,6 @@ public class PlayerHealth : MonoBehaviour
     public int CurrentHealth = 5;
 
     private GameObject _playerGO;
-    private PlayerController _player;
     private float _regenTimer;
     private float _avoidDmgTimer;
     private float _invincibleTimer = 0;
@@ -28,7 +27,6 @@ public class PlayerHealth : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         _playerGO = GameObject.FindGameObjectsWithTag("PlayerCat")[0];
-        _player = _playerGO.GetComponent<PlayerController>();
     }
 
     void Start()
@@ -43,6 +41,7 @@ public class PlayerHealth : MonoBehaviour
         CheckInvincible();
         CheckHealthRegen();
         CheckAndHandleDeath();
+        
     }
 
     private void CheckInvincible() 
@@ -65,7 +64,7 @@ public class PlayerHealth : MonoBehaviour
             OnCountDownRegen?.Invoke(_regenTimer / regenTime);
             return;
         }
-
+        
         OnHealthRegen?.Invoke(regenAmount);
         _regenTimer = regenTime;
         CurrentHealth += regenAmount;
@@ -86,6 +85,7 @@ public class PlayerHealth : MonoBehaviour
         _avoidDmgTimer = avoidToRegenTime;
         _invincibleTimer = invincibleTime;
         _regenTimer = regenTime;
+        OnCountDownRegen?.Invoke(_regenTimer / regenTime);
     }
 
 }

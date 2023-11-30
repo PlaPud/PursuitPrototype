@@ -6,26 +6,32 @@ using UnityEngine.UI;
 public class RegenCircle : MonoBehaviour
 {
 
-    private Image circleImg;
+    private Image _circleImg;
 
     private void Awake()
     {
-        circleImg = GetComponent<Image>();
+        _circleImg = GetComponent<Image>();
     }
 
     void Start()
     {
-        circleImg.fillAmount = 0;
+        _circleImg.fillAmount = 0;
         PlayerHealth.Instance.OnCountDownRegen += FillDownCircle;
     }
 
     void Update()
     {
-        
+ 
     }
 
     private void FillDownCircle(float timeLeftRatio) 
     {
-        circleImg.fillAmount = timeLeftRatio;
+        if (timeLeftRatio <= 0 || timeLeftRatio == 1f) 
+        {
+            _circleImg.fillAmount = 0f;
+            return;
+        };
+
+        _circleImg.fillAmount = timeLeftRatio;
     }
 }
