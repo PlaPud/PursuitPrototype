@@ -342,16 +342,15 @@ public class PlayerController : IControllableOnGround
         }
     }
 
-    private void HandleFriction() 
+    private void HandleFriction()
     {
-        if (IsGrounded && Mathf.Abs(WalkInput) < .01f) 
-        {
-            float appliedFriction = Mathf.Min(
-                    Mathf.Abs(_playerRB.velocity.x),
-                    frictionAmount   
-                ) * Mathf.Sign(_playerRB.velocity.x);
-            _playerRB.AddForce(Vector2.right * -appliedFriction, ForceMode2D.Impulse);
-        }
+        if (!IsGrounded || Mathf.Abs(WalkInput) >= .01f) return;
+
+        float appliedFriction = Mathf.Min(
+                Mathf.Abs(_playerRB.velocity.x),
+                frictionAmount
+            ) * Mathf.Sign(_playerRB.velocity.x);
+        _playerRB.AddForce(Vector2.right * -appliedFriction, ForceMode2D.Impulse);
     }
 
     private void ChangeAnimationState(string newAnimationState) 

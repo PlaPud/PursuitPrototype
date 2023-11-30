@@ -6,11 +6,11 @@ using UnityEngine;
 public class PlayerHealth : MonoBehaviour
 {
     public static PlayerHealth Instance;
-    [field: SerializeField] public int maxHealth { get; private set; } = 5;
+    [field: SerializeField] public int MaxHealth { get; private set; } = 5;
     [SerializeField] private int regenAmount = 1;
     [SerializeField] private float invincibleTime = 1f;
     [SerializeField] private float avoidToRegenTime = 10f;
-    [SerializeField] private float regenDelayTime = 5f;
+    [SerializeField] private float regenTime = 5f;
 
     public int CurrentHealth = 5;
 
@@ -20,8 +20,9 @@ public class PlayerHealth : MonoBehaviour
     private float _avoidDmgTimer;
     private float _invincibleTimer = 0;
 
-    public Action OnDamageTaken;
-    public Action OnHealthRegen;
+    public Action<int> OnDamageTaken;
+    public Action<int> OnHealthRegen;
+    public Action<float> OnCountDownRegen;
     
     private void Awake()
     {
@@ -32,9 +33,9 @@ public class PlayerHealth : MonoBehaviour
 
     void Start()
     {
-        _regenTimer = regenDelayTime;
+        _regenTimer = regenTime;
         _avoidDmgTimer = avoidToRegenTime;
-        CurrentHealth = maxHealth;
+        CurrentHealth = MaxHealth;
     }
 
     void Update()
@@ -50,7 +51,7 @@ public class PlayerHealth : MonoBehaviour
     }
     private void CheckHealthRegen() 
     {
-        if (CurrentHealth >= maxHealth) return;
+        if (CurrentHealth >= MaxHealth) return;
 
         if (_avoidDmgTimer > 0f) 
         {
@@ -61,12 +62,13 @@ public class PlayerHealth : MonoBehaviour
         if (_regenTimer > 0f) 
         {
             _regenTimer -= Time.deltaTime;
+            OnCountDownRegen?.Invoke(_regenTimer / regenTime);
             return;
         }
 
-        _regenTimer = regenDelayTime;
+        OnHealthRegen?.Invoke(regenAmount);
+        _regenTimer = regenTime;
         CurrentHealth += regenAmount;
-        OnHealthRegen?.Invoke();
     }
 
     private void CheckAndHandleDeath() 
@@ -79,10 +81,11 @@ public class PlayerHealth : MonoBehaviour
     {
         if (_invincibleTimer > 0f) return;
 
+        OnDamageTaken?.Invoke(damage);
         CurrentHealth -= CurrentHealth - damage > 0 ? damage : CurrentHealth;
         _avoidDmgTimer = avoidToRegenTime;
         _invincibleTimer = invincibleTime;
-        OnDamageTaken?.Invoke();
+        _regenTimer = regenTime;
     }
 
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerCombatController : MonoBehaviour
@@ -7,13 +8,14 @@ public class PlayerCombatController : MonoBehaviour
     [SerializeField] private AimingController _aiming;
 
     [SerializeField] private KeyCode shootKey = KeyCode.Mouse0;
-    [SerializeField] private float shootDelay;
+    [SerializeField] private float shootCoolDown;
     [SerializeField] private float firingForce = 1;
-    [SerializeField] private float tillExplodeTime;
     [SerializeField] private int maxInField = 3;
 
     private bool _toShoot;
-    private int _currentInField;
+    private bool _isInCoolDown;
+
+    private List<GameObject> _currentInField;
 
 
     private void Awake()
@@ -22,7 +24,7 @@ public class PlayerCombatController : MonoBehaviour
     }
     private void Start()
     {
-        
+        _currentInField = new List<GameObject>();
     }
 
     private void Update()
@@ -41,11 +43,12 @@ public class PlayerCombatController : MonoBehaviour
     private void FixedUpdate()
     {
         HandleShoot();
+        _ClearDisabledBomb();
     }
 
     private void HandleShoot() 
     {
-        if (!_toShoot || _currentInField == maxInField) return;
+        if (!_toShoot || _currentInField.Count == maxInField || _isInCoolDown) return;
 
         GameObject bomb = BombPoolingManager.Instance.GetBombFromPool();
 
@@ -65,7 +68,23 @@ public class PlayerCombatController : MonoBehaviour
                 mode: ForceMode2D.Impulse
             );
 
-        _currentInField += 1;
+        StartCoroutine(_EnableCoolDown());
+
+        _currentInField.Add(bomb);
         _toShoot = false;
+    }
+
+    private void _ClearDisabledBomb() 
+    {
+        if (_currentInField.Count <= 0f) return;
+        _currentInField = _currentInField.Where((go) => go.activeSelf).ToList();
+
+    }
+
+    private IEnumerator _EnableCoolDown() 
+    {
+        _isInCoolDown = true;
+        yield return new WaitForSeconds(shootCoolDown);
+        _isInCoolDown = false;
     }
 }

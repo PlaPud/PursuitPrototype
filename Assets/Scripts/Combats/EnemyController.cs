@@ -60,10 +60,9 @@ public class EnemyController : MonoBehaviour
     private float _chargeToAttackTimer;
     private float _coolDownTimer;
 
-    private bool _isAttacking = false;
-    private bool _isTeleportOut = false;
-    private bool _isTeleportIn = false;
-    private bool _isTeleportingAnim = false;
+    private bool _isAttacking;
+    private bool _isTeleportOut;
+    private bool _isTeleportIn;
 
     private Rigidbody2D _enemyRB;
     private PlayerController _target;
@@ -72,12 +71,11 @@ public class EnemyController : MonoBehaviour
     private RaycastHit2D _attackRangeHit;
 
     private SpriteRenderer _enemySR;
-    private CircleCollider2D _enemyDamageTrigger;
     private Animator _enemyAnim;
 
-    public bool IsPlayerFound { get; private set; } = false;
-    public bool IsPlayerInRange { get; private set; } = false;
-    public bool IsChangingDir { get; private set; } = false;
+    public bool IsPlayerFound { get; private set; }
+    public bool IsPlayerInRange { get; private set; }
+    public bool IsChangingDir { get; private set; }
     public bool IsGrounded => _groundHit;
 
     public bool IsPlayerOnHigherGround => _target.IsGrounded && _target.transform.position.y - transform.position.y > .5f;
@@ -103,13 +101,7 @@ public class EnemyController : MonoBehaviour
 
     void Start()
     {
-        _walkSpeed = Random.Range(walkSpeedLower, walkSpeedUpper);
-        _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
-        _changeChaseSpeedTimer = changeChaseSpeedTime;
-        _currentEnemySpeed = _walkSpeed;
-        _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
-        _chargeToAttackTimer = chargeAttackTime;
-        _coolDownTimer = coolDownTime;
+        _Initialize();
     }
 
     void Update()
@@ -123,8 +115,14 @@ public class EnemyController : MonoBehaviour
         LogicStateMachine();
     }
 
+    public void KillEnemy() 
+    {
+        CurrentState = EnemyState.Defeated;
+    }
+
     private void OnEnable()
     {
+        _Initialize();
         CurrentState = EnemyState.Patrol;
     }
 
@@ -150,7 +148,7 @@ public class EnemyController : MonoBehaviour
     internal void HandleChase()
     {
 
-        _changeChaseSpeedTimer -= _changeChaseSpeedTimer > 0f ? Time.deltaTime : 0;
+        _changeChaseSpeedTimer -= _changeChaseSpeedTimer - Time.deltaTime > 0f ? Time.deltaTime : _changeChaseSpeedTimer;
         if (_changeChaseSpeedTimer <= 0f) 
         {
             _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
@@ -257,6 +255,7 @@ public class EnemyController : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
     private IEnumerator _ChangeTimeAndDir(float newChangeDirTime)
     {
         float tmpWalkSpeed = _currentEnemySpeed;
@@ -475,6 +474,27 @@ public class EnemyController : MonoBehaviour
         IsPlayerFound = _playerLayerHit && _playerLayerHit.collider.CompareTag("PlayerCat");
         IsPlayerInRange = _attackRangeHit && _attackRangeHit.collider.CompareTag("PlayerCat");
 
+    }
+
+    private void _Initialize()
+    {
+        _isAttacking = false;
+        _isTeleportOut = false;
+        _isTeleportIn = false;
+
+        IsPlayerFound = false;
+        IsPlayerInRange = false;
+        IsChangingDir = false;
+
+        _walkSpeed = Random.Range(walkSpeedLower, walkSpeedUpper);
+        _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
+        _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
+
+        _changeChaseSpeedTimer = changeChaseSpeedTime;
+        _chargeToAttackTimer = chargeAttackTime;
+        _coolDownTimer = coolDownTime;
+
+        _currentEnemySpeed = _walkSpeed;
     }
 
     private void OnDrawGizmos()
