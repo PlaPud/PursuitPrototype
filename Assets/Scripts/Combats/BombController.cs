@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,7 +10,15 @@ public class BombController : MonoBehaviour
     [SerializeField] private float explodeRadius;
 
     private float _timer;
+    private bool _isExploding;
+    private SpriteRenderer _bombSR;
 
+    public Action OnExplosion;
+
+    private void Awake()
+    {
+        _bombSR = GetComponent<SpriteRenderer>();
+    }
     void Start()
     {
         _Initialize();
@@ -32,13 +41,25 @@ public class BombController : MonoBehaviour
                 layerMask: enemyMask
             );
 
+        if (_isExploding) return;
+
         foreach (RaycastHit2D hitEnemy in hitEnemies) 
         {
             EnemyController enemyScript = hitEnemy.transform.gameObject.GetComponent<EnemyController>();
             enemyScript.KillEnemy();
         }
-        
+
+        StartCoroutine(_WaitForExplosion());
+    }
+
+    private IEnumerator _WaitForExplosion() 
+    {
+        _isExploding = true;
+        _bombSR.enabled = false;
+        OnExplosion?.Invoke();
+        yield return new WaitForSeconds(0.25f);
         gameObject.SetActive(false);
+        _isExploding = false;
     }
 
     private void OnEnable() 
@@ -48,11 +69,12 @@ public class BombController : MonoBehaviour
 
     private void OnDisable()
     {
-
+       
     }
 
     private void _Initialize() 
     {
+        _bombSR.enabled = true;
         _timer = explodeTime;
     }
 

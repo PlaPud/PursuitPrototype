@@ -49,6 +49,8 @@ public class ClawMachineController : MonoBehaviour
     const string CLAW_EMPTY = "ClawEmpty";
     const string CLAW_HOLD = "ClawHold";
 
+    public bool IsControlling => panel.IsControllingThis;
+
     private void Awake()
     {
         _wireLR = clawBody.GetComponent<LineRenderer>();

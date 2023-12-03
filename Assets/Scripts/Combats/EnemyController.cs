@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -7,6 +9,8 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
+    public bool DEBUG = false;
+
     public enum EnemyState
     {
         Despawn,
@@ -45,10 +49,12 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float groundDistance;
     [SerializeField] private Vector2 groundCheckBox;
     [SerializeField] private float playerCheckRadius;
+    [SerializeField] private float enemyCheckRadius;
 
     [Header("Layer Masks")]
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private LayerMask playerMask;
+    [SerializeField] private LayerMask enemyMask;
 
     private int _walkSpeed;
     private int _chaseSpeed;
@@ -63,10 +69,16 @@ public class EnemyController : MonoBehaviour
     private bool _isAttacking;
     private bool _isTeleportOut;
     private bool _isTeleportIn;
+    private bool _isChangingWalkoutDir;
+
+    private Vector2 _playerHighGroundPos;
 
     private Rigidbody2D _enemyRB;
     private PlayerController _target;
     private RaycastHit2D _playerLayerHit;
+
+    private List<RaycastHit2D> _enemiesHit;
+
     private RaycastHit2D _groundHit;
     private RaycastHit2D _attackRangeHit;
 
@@ -93,7 +105,10 @@ public class EnemyController : MonoBehaviour
 
     private void Awake()
     {
-        _target = GameObject.FindGameObjectsWithTag("PlayerCat")[0].GetComponent<PlayerController>();
+        _target = GameObject
+            .FindGameObjectsWithTag("PlayerCat")[0]
+            .GetComponent<PlayerController>();
+
         _enemyRB = GetComponent<Rigidbody2D>();
         _enemyAnim = GetComponent<Animator>();
         _enemySR = GetComponent<SpriteRenderer>();
@@ -148,34 +163,68 @@ public class EnemyController : MonoBehaviour
     internal void HandleChase()
     {
 
-        _changeChaseSpeedTimer -= _changeChaseSpeedTimer - Time.deltaTime > 0f ? Time.deltaTime : _changeChaseSpeedTimer;
-        if (_changeChaseSpeedTimer <= 0f) 
-        {
-            _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
-            _changeChaseSpeedTimer = changeChaseSpeedTime;
-        }
+        _changeChaseSpeedTimer -= _changeChaseSpeedTimer - Time.deltaTime > 0f 
+            ? Time.deltaTime 
+            : _changeChaseSpeedTimer;
 
-        Vector2 diffDist = _target.transform.position - transform.position;
-        if (Mathf.Abs(diffDist.x) > .5f)
-        {
-            float targetDir = Mathf.Sign(diffDist.x);
-            _enemyRB.velocity = new Vector2(targetDir * _chaseSpeed, _enemyRB.velocity.y);
-        }
-        else
-        {
-            _enemyRB.velocity = new Vector2(0f, _enemyRB.velocity.y);
-        }
+        if (_changeChaseSpeedTimer <= 0f) _GetNewChaseSpeed();
+
+        _FollowPlayer();
 
         if (!IsPlayerOnHigherGround) return;
 
         _confirmTeleportTimer -= _confirmTeleportTimer > 0f ? Time.deltaTime : 0f;
 
     }
+
+    private void _GetNewChaseSpeed()
+    {
+        _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
+        _changeChaseSpeedTimer = changeChaseSpeedTime;
+    }
+
+    private void _FollowPlayer()
+    {
+        Vector2 diffDist = _target.transform.position - transform.position;
+        bool isNotNearPlayerX = Mathf.Abs(diffDist.x) > .5f;
+
+        if (_enemiesHit.Count > 1) 
+        {
+            if (_isChangingWalkoutDir) return;
+            StartCoroutine(_ChangeCrowdWalkOutDir());
+            return;
+        }
+
+        if (isNotNearPlayerX)
+        {
+            float targetDir = Mathf.Sign(diffDist.x);
+            _enemyRB.velocity = new Vector2(targetDir * _chaseSpeed, _enemyRB.velocity.y);
+        }
+        else
+        {   
+            _enemyRB.velocity = new Vector2(0f, _enemyRB.velocity.y);
+        }
+    }
+
+    IEnumerator _ChangeCrowdWalkOutDir() 
+    {
+        _isChangingWalkoutDir = true;
+
+        float newSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
+        int newDir = Random.Range(-1, 2);
+
+        _enemyRB.velocity = new Vector2(newSpeed * newDir, _enemyRB.velocity.y);
+        yield return new WaitForSeconds(0.5f);
+
+        _isChangingWalkoutDir = false;
+    }
+
     internal void HandleTeleportOut()
     {
         if (_isTeleportOut) return;
         StartCoroutine(_TeleportOut());
     }
+
     internal void HandleTeleportHide()
     {
         _enemySR.enabled = false;
@@ -191,7 +240,15 @@ public class EnemyController : MonoBehaviour
     private IEnumerator _TeleportIn() 
     {
         _isTeleportIn = true;
-        transform.position = _target.transform.position;
+
+        if (DEBUG) 
+        { 
+            Debug.DrawLine(
+                    _playerHighGroundPos, _playerHighGroundPos + Vector2.down * 2f, 
+                    color: Color.cyan, duration: 1f
+                );
+        }
+        transform.position = _playerHighGroundPos;
         _enemyRB.velocity = Vector2.zero;
 
         yield return new WaitForSeconds(.5f);
@@ -212,15 +269,13 @@ public class EnemyController : MonoBehaviour
 
         if (_chargeToAttackTimer > 0f)
         {
+            _enemySR.color = Color.red;
             _enemyRB.velocity = new Vector2(0f, _enemyRB.velocity.y);
             _chargeToAttackTimer -= Time.deltaTime;
             return;
         }
 
-        if (_isAttacking) 
-        {
-            return;
-        }
+        if (_isAttacking) return;
         StartCoroutine(_JumpAttack());
     }
 
@@ -270,7 +325,18 @@ public class EnemyController : MonoBehaviour
     {
         _isTeleportOut = true;
         _enemyRB.velocity = Vector2.zero;
+        _playerHighGroundPos = _target.transform.position;
+
+        if (DEBUG) 
+        {
+            Debug.DrawLine(
+                    _playerHighGroundPos, _playerHighGroundPos + Vector2.down * 2f, 
+                    color: Color.blue, duration: 1f
+                );
+        }
+
         yield return new WaitForSeconds(.5f);
+
         CurrentState = EnemyState.TeleportHide;
         _isTeleportOut = false;
     }
@@ -286,6 +352,7 @@ public class EnemyController : MonoBehaviour
         yield return new WaitUntil(() => IsGrounded);
 
         _isAttacking = false;
+        _enemySR.color = Color.gray;
         CurrentState = EnemyState.CoolDown;
         _chargeToAttackTimer = chargeAttackTime;
     }
@@ -332,7 +399,7 @@ public class EnemyController : MonoBehaviour
                 break;
             case EnemyState.Chase:
 
-                if (_confirmTeleportTimer <= 0f && _target.IsGrounded)
+                if (_confirmTeleportTimer <= 0f && IsPlayerOnHigherGround)
                 {
                     CurrentState = EnemyState.TeleportOut;
                     return;
@@ -345,7 +412,6 @@ public class EnemyController : MonoBehaviour
             case EnemyState.TeleportOut:
                 break;
             case EnemyState.TeleportHide:
-                if (!IsPlayerOnHigherGround) return;
                 CurrentState = EnemyState.TeleportIn;
                 break;
             case EnemyState.TeleportIn:
@@ -463,6 +529,14 @@ public class EnemyController : MonoBehaviour
                 layerMask: playerMask
             );
 
+        _enemiesHit = Physics2D.CircleCastAll(
+                origin: transform.position,
+                radius: enemyCheckRadius,
+                distance: 0f,
+                direction: Vector2.zero,
+                layerMask: enemyMask
+            ).ToList();
+
         _attackRangeHit = Physics2D.CircleCast(
                 origin: transform.position,
                 radius: rangeToAttack,
@@ -481,6 +555,7 @@ public class EnemyController : MonoBehaviour
         _isAttacking = false;
         _isTeleportOut = false;
         _isTeleportIn = false;
+        _isChangingWalkoutDir = false;
 
         IsPlayerFound = false;
         IsPlayerInRange = false;
@@ -490,6 +565,7 @@ public class EnemyController : MonoBehaviour
         _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
         _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
 
+        _enemySR.color = Color.gray;
         _changeChaseSpeedTimer = changeChaseSpeedTime;
         _chargeToAttackTimer = chargeAttackTime;
         _coolDownTimer = coolDownTime;
@@ -501,6 +577,7 @@ public class EnemyController : MonoBehaviour
     {
         Gizmos.DrawWireCube(transform.position + groundDistance * Vector3.down, groundCheckBox);
         Gizmos.DrawWireSphere(transform.position, playerCheckRadius);
+        Gizmos.DrawWireSphere(transform.position, enemyCheckRadius);
         Gizmos.DrawWireSphere(transform.position, rangeToAttack);
         Gizmos.DrawWireSphere(transform.position, damageRadius);
     }

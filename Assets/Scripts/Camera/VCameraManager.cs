@@ -4,15 +4,20 @@ using UnityEngine;
 
 public class VCameraManager : MonoBehaviour
 {
-    // Start is called before the first frame update
+
+
+    private void Awake()
+    {
+
+    }
+
     void Start()
     {
         
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+    
     }
 }

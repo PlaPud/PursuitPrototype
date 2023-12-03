@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8039946948675238984}
   - component: {fileID: 3394293754032041376}
   - component: {fileID: -5099681838200321979}
+  - component: {fileID: -1910629220020659283}
   m_Layer: 13
   m_Name: ElectroBomb
   m_TagString: Untagged
@@ -187,4 +188,17 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4096
   explodeTime: 3
-  explodeRadius: 2
+  explodeRadius: 1.5
+--- !u!114 &-1910629220020659283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7828313225855586084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca830bcb297456e45a09de80b390e496, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  explodeEffectPrefab: {fileID: 816868683584384506, guid: ddac13bbe9b834444b9fb6ccf87e6bf3, type: 3}

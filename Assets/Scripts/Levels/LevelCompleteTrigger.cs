@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class LevelCompleteTrigger : MonoBehaviour
 {
-    public bool IsLevelComplete = false;
+
+    public bool IsPlayerReached = false;
 
     private Collider2D _triggerCD;
 
@@ -13,10 +14,15 @@ public class LevelCompleteTrigger : MonoBehaviour
         _triggerCD = GetComponent<Collider2D>();    
     }
 
+    private void Update()
+    {
+        
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (!collision.CompareTag("PlayerCat")) return;
-        IsLevelComplete = true;
+        IsPlayerReached = true;
         _triggerCD.enabled = false;
     }
 }

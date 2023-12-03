@@ -23,6 +23,12 @@ public class AimingController : MonoBehaviour
 
     void Update()
     {
+        Rotate();
+        _CheckPlayerDead();
+    }
+
+    private void Rotate()
+    {
         transform.position = followingTarget.position;
         _aimingPositionGlobal = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         _aimingCircleDirection = _aimingPositionGlobal - transform.position;
@@ -30,4 +36,14 @@ public class AimingController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, _aimingAngle);
     }
 
+    private void _CheckPlayerDead() 
+    {
+        if (followingTarget.gameObject.activeSelf) 
+        {
+            gameObject.SetActive(true);    
+            return;
+        }
+
+        gameObject.SetActive(false);
+    }
 }

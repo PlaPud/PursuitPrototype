@@ -9,11 +9,12 @@ TagManager:
   - PlayerCompBot
   - Moveable
   - GraphNodes
+  - ClawMachine
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Camera
   - Water
   - UI
   - Ground
@@ -52,14 +53,17 @@ TagManager:
   - name: SceneProps
     uniqueID: 2799403693
     locked: 0
+  - name: Effects
+    uniqueID: 1870740875
+    locked: 0
   - name: Ground
     uniqueID: 1757585653
     locked: 0
-  - name: PlayerControllable
-    uniqueID: 1242880349
-    locked: 0
   - name: GroundOverlay
     uniqueID: 833932929
+    locked: 0
+  - name: PlayerControllable
+    uniqueID: 1242880349
     locked: 0
   - name: Enemy
     uniqueID: 3360054483
