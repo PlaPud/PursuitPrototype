@@ -43,12 +43,13 @@ public class CompBotController : IControllableOnGround
 
     private RaycastHit2D _groundHit;
     private RaycastHit2D _grapplerHit;
+    private RaycastHit2D grapplerHitObject;
 
     private Vector2 _hookDirection;
     private Vector2 _hookPosition;
     private bool _isOnHook;
-    private RaycastHit2D grapplerHitObject;
     private bool _isHit;
+
     private float _shootAngle;
 
     private Rigidbody2D _compBotRigidBody;
@@ -115,7 +116,10 @@ public class CompBotController : IControllableOnGround
 
         foreach (Vector2 dir in directions)
         {
-            if (!IsGrounded && Physics2D.Raycast(transform.position, dir, castDistance, groundLayer))
+            RaycastHit2D wallHitCD = Physics2D
+                .Raycast(transform.position, dir, castDistance, groundLayer);
+
+            if (!IsGrounded && _IsRayHitWall(wallHitCD))
             {
                 _gravityDirection = dir;
                 if (dir == Vector2.up && !IsGrounded)
@@ -159,7 +163,7 @@ public class CompBotController : IControllableOnGround
         if (!_enableInput) return;
 
         _isShootPressed = Input.GetKeyDown(KeyCode.Mouse0);
-        if (_isShootPressed && !_toShoot && grapplerHitObject)
+        if (_isShootPressed && !_toShoot && _IsRayHitWall(grapplerHitObject))
         {
             _hookPosition = _aimingController.AimingPositionGlobal;
             _hookDirection = _aimingController.AimingCircleDirection;
@@ -368,4 +372,6 @@ public class CompBotController : IControllableOnGround
         yield return new WaitForSeconds(.1f);
         _isLandingNewGround = true;
     }
+
+    private bool _IsRayHitWall(RaycastHit2D hit) => hit && hit.collider && !hit.collider.CompareTag("Moveable");
 }
