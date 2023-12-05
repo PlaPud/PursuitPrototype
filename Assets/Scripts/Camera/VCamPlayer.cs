@@ -12,8 +12,13 @@ public class VCamPlayer : MonoBehaviour
     private CompBotController _botController;
     private ClawMachineController _clawMachineController;
 
-    private List<GameObject> _allClawMachineGO;
-    private List<ClawMachineController> _allClawMachine;
+    private List<GameObject> _allClawMachineGO = new();
+    private List<GameObject> _allCompBotGO = new();
+    private List<ClawMachineController> _allClawMachine = new();
+    private List<CompBotController> _allCompBot = new();
+
+    [SerializeField] private float normalOrthSize = 9;
+    [SerializeField] private float zoomedOrthSize = 6;
 
     private void Awake()
     {
@@ -23,27 +28,23 @@ public class VCamPlayer : MonoBehaviour
             .FindGameObjectWithTag("PlayerCat")
             .GetComponent<PlayerController>();
 
-        _botController = GameObject
-            .FindGameObjectWithTag("PlayerCompBot")
-            .GetComponent<CompBotController>();
+        _allCompBotGO = GameObject
+            .FindGameObjectsWithTag("PlayerCompBot")
+            .ToList();
 
         _allClawMachineGO = GameObject
             .FindGameObjectsWithTag("ClawMachine")
             .ToList();
-
-        _allClawMachineGO.ForEach((clawGO) => {
-            _allClawMachine.Add(clawGO.GetComponent<ClawMachineController>());
-        });
     }
 
     void Start()
     {
-        
+
     }
 
     void Update()
     {
-        switch (ControllingManager.instance.CurrentControl) 
+        switch (ControllingManager.Instance.CurrentControl) 
         {
             case ControllingManager.Control.PlayerMain:
                 SetCamCat();
@@ -60,18 +61,34 @@ public class VCamPlayer : MonoBehaviour
     private void SetCamCat() 
     {
         _playerCam.Follow = _player.transform;
+        _playerCam.m_Lens.OrthographicSize = normalOrthSize;
     }
 
     private void SetCamClawMachine() 
     {
+        if (_allClawMachine.Count >= 0) 
+        {
+            _allClawMachine = _allClawMachineGO.Select(
+                cb => cb.GetComponent<ClawMachineController>()
+                ).ToList();
+        }
         ClawMachineController controlledClaw = _allClawMachine.Find((cm) => cm.IsControlling);
         if (!controlledClaw) return;
-        _playerCam.Follow = controlledClaw.transform;   
+        _playerCam.Follow = controlledClaw.transform;
+        _playerCam.m_Lens.OrthographicSize = normalOrthSize;
     }
 
     private void SetCamCompBot() 
     {
-        Debug.Log("set");
-        _playerCam.Follow = _botController.transform;
+        if (_allCompBot.Count >= 0)
+        {
+            _allCompBot = _allCompBotGO.Select(
+                cb => cb.GetComponent<CompBotController>()
+                ).ToList();
+        }
+        CompBotController compBot = _allCompBot.Find((cb) => cb.IsControlling);
+        if (!compBot) return;
+        _playerCam.Follow = compBot.transform;
+        _playerCam.m_Lens.OrthographicSize = zoomedOrthSize;
     }
 }

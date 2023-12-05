@@ -8,6 +8,9 @@ public class CompBotController : IControllableOnGround
         Ceiling, Ground, LeftWall, RightWall
     }
 
+    [Header("Control Panel")]
+    [SerializeField] private CompBotPanelController panel;
+
     [Header("Controlling")]
     [SerializeField] float walkSpeed;
     [SerializeField] float maxAccelerate;
@@ -22,7 +25,7 @@ public class CompBotController : IControllableOnGround
 
     [Header("Grappling Hook")]
     [SerializeField] AimingController _aimingController;
-    [SerializeField] float maxDistance;
+    [SerializeField] float maxGrapplingDistance;
     [SerializeField] float grapplingSpeed;
 
     [Header("Rope Animation")]
@@ -55,6 +58,7 @@ public class CompBotController : IControllableOnGround
     private Rigidbody2D _compBotRigidBody;
     private Animator _compBotAnimator;
     private LineRenderer _compBotLineRenderer;
+    private PlayerPushPull _playerPushPull;
 
     private String _currentAnimationState;
     private const String COMPBOT_IDLE = "CompBotIdle";
@@ -66,11 +70,14 @@ public class CompBotController : IControllableOnGround
 
     private ClimbPlane _currentPlane = ClimbPlane.Ground;
 
+    public bool IsControlling => panel.IsControllingThis;
+
     private void Awake()
     {
         _compBotRigidBody = GetComponent<Rigidbody2D>();
         _compBotAnimator = GetComponent<Animator>();
         _compBotLineRenderer = GetComponent<LineRenderer>();
+        _playerPushPull = GetComponent<PlayerPushPull>();
     }
 
     void Start()
@@ -84,12 +91,14 @@ public class CompBotController : IControllableOnGround
     {
         RayCheck();
 
-        if (ControllingManager.instance.CurrentControl == ControllingManager.Control.CompBot) 
-        {
-            OnWalk();
-            OnJump();
-            OnShootHook();
-        }
+        if (!CompBotManager.Instance.IsControlCompBot || !IsControlling) return;
+
+        //if (ControllingManager.Instance.CurrentControl == ControllingManager.Control.CompBot) 
+        //{
+        OnWalk();
+        OnJump();
+        OnShootHook();
+        //}
 
         HandleGravityState();
         HandleSpriteRotate();
@@ -125,18 +134,22 @@ public class CompBotController : IControllableOnGround
                 if (dir == Vector2.up && !IsGrounded)
                 {
                     _currentPlane = ClimbPlane.Ceiling;
+                    _playerPushPull.enabled = false;
                 }
                 else if (dir == Vector2.down)
                 {
                     _currentPlane = ClimbPlane.Ground;
+                    _playerPushPull.enabled = true;
                 }
                 else if (dir == Vector2.right)
                 {
                     _currentPlane = ClimbPlane.RightWall;
+                    _playerPushPull.enabled = false;
                 }
                 else if (dir == Vector2.left)
                 {
                     _currentPlane = ClimbPlane.LeftWall;
+                    _playerPushPull.enabled = false;
                 }
             }
         }
@@ -151,8 +164,8 @@ public class CompBotController : IControllableOnGround
                    );
         _grapplerHit = Physics2D.Raycast(
                     origin: transform.position,
-                    direction: _aimingController.AimingCircleDirection.normalized * maxDistance,
-                    distance: maxDistance,
+                    direction: _aimingController.AimingCircleDirection.normalized * maxGrapplingDistance,
+                    distance: maxGrapplingDistance,
                     layerMask: groundLayer
                 );
 
@@ -266,6 +279,8 @@ public class CompBotController : IControllableOnGround
 
     private void HandleFlipSprite()
     {
+        if (_playerPushPull.IsGrabbing) return;
+
         switch (_currentPlane)
         {
             case ClimbPlane.Ground:
@@ -364,7 +379,7 @@ public class CompBotController : IControllableOnGround
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(transform.position, 3);
+        Gizmos.DrawWireSphere(transform.position, maxGrapplingDistance);
     }
 
     IEnumerator GrapplerStartCoroutine() 

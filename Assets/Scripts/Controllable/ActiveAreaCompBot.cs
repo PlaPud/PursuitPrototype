@@ -16,7 +16,6 @@ public class ActiveAreaCompBot : MonoBehaviour
         {
             //TODO: if first time enter THIS area set latestPos = spawnPoint
             //TODO: if not first time latestPos = compBot.transform.position
-            CompBotManager.instance.IsInActiveArea = true;
         }
     }
 
@@ -25,7 +24,6 @@ public class ActiveAreaCompBot : MonoBehaviour
         if (collision.CompareTag("PlayerCat"))
         {
             latestPos = spawnPoint.position;
-            CompBotManager.instance.IsInActiveArea = false;
         }
     }
 

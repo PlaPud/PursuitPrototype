@@ -22,7 +22,7 @@ public class ClawMachineManager : MonoBehaviour
 
     void Update()
     {
-        IsControlClaw = ControllingManager.instance.CurrentControl == ControllingManager.Control.ClawMachine;
+        IsControlClaw = ControllingManager.Instance.CurrentControl == ControllingManager.Control.ClawMachine;
         AssignMachine();
     }
 

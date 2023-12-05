@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static ControllingManager;
+
 
 public class ClawPanelController : Interactable
 {
@@ -20,13 +20,17 @@ public class ClawPanelController : Interactable
 
     override public void HandleInteract()
     {
-        switch (instance.CurrentControl)
+        switch (ControllingManager.Instance.CurrentControl)
         {
-            case Control.ClawMachine:
-                instance.ChangeControl(Control.PlayerMain);
+            case ControllingManager.Control.ClawMachine:
+                ControllingManager.Instance.ChangeControl(
+                    ControllingManager.Control.PlayerMain
+                );
                 break;
-            case Control.PlayerMain:
-                instance.ChangeControl(Control.ClawMachine);
+            case ControllingManager.Control.PlayerMain:
+                ControllingManager.Instance.ChangeControl(
+                    ControllingManager.Control.ClawMachine
+                );
                 break;
         }
     }

@@ -13,6 +13,7 @@ public class EnemyAreaController : MonoBehaviour
     private List<DoorController> _lockedDoors;
 
     public Action OnEnemyAllCleared;
+    public static Action OnCombatEnd;
 
     private void Awake()
     {
@@ -58,6 +59,7 @@ public class EnemyAreaController : MonoBehaviour
 
         if (!IsEnemyAllCleared) return;
         _UnlockAllDoors();
+        OnCombatEnd?.Invoke();
     }
     private void _UnlockAllDoors()
     {

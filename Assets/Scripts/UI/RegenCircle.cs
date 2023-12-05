@@ -17,6 +17,9 @@ public class RegenCircle : MonoBehaviour
     {
         _circleImg.fillAmount = 0;
         PlayerHealth.Instance.OnCountDownRegen += FillDownCircle;
+
+        EnemySpawnPoint.OnEnterCombat += EnableUI;
+        EnemyAreaController.OnCombatEnd += DisableUI;
     }
 
     void Update()
@@ -33,5 +36,15 @@ public class RegenCircle : MonoBehaviour
         };
 
         _circleImg.fillAmount = timeLeftRatio;
+    }
+
+    private void EnableUI()
+    {
+        
+    }
+
+    private void DisableUI()
+    {
+        
     }
 }

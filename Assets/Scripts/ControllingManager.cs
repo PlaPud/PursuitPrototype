@@ -10,13 +10,13 @@ public class ControllingManager : MonoBehaviour
         ClawMachine
     }
 
-    public static ControllingManager instance;
+    public static ControllingManager Instance;
 
     public Control CurrentControl { get; private set; } = Control.PlayerMain;
 
     private void Awake()
     {
-        instance = this;
+        Instance = this;
     }
 
     void Start()

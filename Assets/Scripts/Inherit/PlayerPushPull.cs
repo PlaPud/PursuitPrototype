@@ -7,16 +7,16 @@ public class PlayerPushPull : MonoBehaviour
     private const float HOLD_DOWN_TIME = 1f;
     private const KeyCode KEY_TO_HOLD = KeyCode.E;
 
+
     [Header("Check Moveable")]
     [SerializeField] private float grabDistance;
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Controllables")]
     [SerializeField] private IControllableOnGround player;
-
+    [SerializeField] ControllingManager.Control pusher;
 
     private RaycastHit2D _hitGroundForward;
-    private RaycastHit2D _hitGroundBehind;
 
     private GameObject _moveableObject;
     private Rigidbody2D _playerRB;
@@ -31,8 +31,8 @@ public class PlayerPushPull : MonoBehaviour
     public bool IsGrabbing => _moveableObject != null;
     public bool IsFoundMoveable => _hitGroundForward && _hitGroundForward.collider.CompareTag("Moveable");
     // Need To Check Controlling Which one Main or CompBot
-    private bool _isControllingMain => ControllingManager.instance.CurrentControl == ControllingManager.Control.PlayerMain;
-
+    private bool _isControllingMain => ControllingManager.Instance.CurrentControl == ControllingManager.Control.PlayerMain;
+    private bool _isConotrollingCompBot => ControllingManager.Instance.CurrentControl == ControllingManager.Control.CompBot;
     void Start()
     {
         _playerRB = GetComponent<Rigidbody2D>();
@@ -40,10 +40,12 @@ public class PlayerPushPull : MonoBehaviour
 
     void Update()
     {
+        if (pusher != ControllingManager.Instance.CurrentControl) return;
+
         OnGrab();
         RayCheck();
 
-        if (_isControllingMain)
+        if (_isControllingMain || _isConotrollingCompBot)
         {
             EnableCountDownToInteract();
         }

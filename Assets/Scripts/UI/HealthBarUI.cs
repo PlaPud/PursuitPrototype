@@ -14,6 +14,10 @@ public class HealthBarUI : MonoBehaviour
     {
         PlayerHealth.Instance.OnDamageTaken += DecreaseHealthBar;
         PlayerHealth.Instance.OnHealthRegen += RegenHealthBar;
+
+        //EnemySpawnPoint.OnEnterCombat += EnableUI;
+        //EnemyAreaController.OnCombatEnd += DisableUI;
+
         _RenderHealthBar();
     }
 
@@ -82,6 +86,30 @@ public class HealthBarUI : MonoBehaviour
             Image healthImg = _healthBarDisplay[i].GetComponent<Image>();
             if (!healthImg) return;
             healthImg.sprite = healthPieceEmpty;
+        }
+    }
+
+    private void EnableUI() 
+    {
+        foreach (GameObject health in  _healthBarDisplay) 
+        {
+            Image healthImg = health.GetComponent<Image>();
+            if (healthImg.enabled) return;
+            Color newAlpha = Color.white;
+            newAlpha.a = 0;
+            healthImg.color = newAlpha;
+        }
+    }
+
+    private void DisableUI() 
+    {
+        foreach (GameObject health in _healthBarDisplay)
+        {
+            Image healthImg = health.GetComponent<Image>();
+            healthImg.enabled = false;
+            Color newAlpha = Color.white;
+            newAlpha.a = 1;
+            healthImg.color = newAlpha;
         }
     }
 }

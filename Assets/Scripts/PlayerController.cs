@@ -106,7 +106,7 @@ public class PlayerController : IControllableOnGround
     {
         BoolAndRayCheck();
 
-        if (ControllingManager.instance.CurrentControl == ControllingManager.Control.PlayerMain) 
+        if (ControllingManager.Instance.CurrentControl == ControllingManager.Control.PlayerMain) 
         { 
             OnWalk();
             OnJump();

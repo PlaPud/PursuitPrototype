@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,8 @@ public class EnemySpawnPoint : MonoBehaviour
     private List<GameObject> _enemiesInField = new List<GameObject>();
 
     public bool IsTriggerGoesOff => !_enemySpawnTrigger.enabled;
+
+    public static Action OnEnterCombat;
 
     private void Awake()
     {
@@ -101,6 +104,7 @@ public class EnemySpawnPoint : MonoBehaviour
                 spawnDelay: spawnDelay
             )
         );
-        _enemySpawnTrigger.enabled = false; 
+        _enemySpawnTrigger.enabled = false;
+        OnEnterCombat?.Invoke();
     }
 }

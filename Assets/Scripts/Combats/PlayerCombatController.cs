@@ -37,6 +37,8 @@ public class PlayerCombatController : MonoBehaviour
 
     private void GetInputShoot() 
     {
+        if (ControllingManager.Instance.CurrentControl != ControllingManager.Control.PlayerMain) return;
+
         if (Input.GetKeyDown(shootKey) && CurrentInField.Count < MaxInField) 
         {
             _toShoot = true;
