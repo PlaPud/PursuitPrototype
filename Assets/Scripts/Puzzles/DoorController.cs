@@ -100,6 +100,7 @@ public class DoorController : MonoBehaviour
 
     private Vector2 _GetDoorOpenDirection(DoorOpenDir dir)
     {
+
         switch (dir)
         {
             case DoorOpenDir.Upward:

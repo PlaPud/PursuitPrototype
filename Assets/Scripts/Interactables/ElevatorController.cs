@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ElevatorController : MonoBehaviour
 {
-
+    [Header("Elevator Control")]
     [SerializeField] private Transform lowerPos;
     [SerializeField] private Transform upperPos;
     [SerializeField] private float moveSpeed;
@@ -34,6 +34,7 @@ public class ElevatorController : MonoBehaviour
 
     void Update()
     {
+
         switch (CurrentState) 
         {
             case ElevatorState.Ready:
@@ -57,6 +58,7 @@ public class ElevatorController : MonoBehaviour
     private void HandleGoingDown() 
     {
         if (currentPos == ElevatorIdlePos.Bottom) return;
+
         _ChangeAnimationState(ELEVATOR_DOWN);
         _MoveElevator(to: lowerPos, isReach: IsReachedBottom, pos: ElevatorIdlePos.Bottom);
     }
