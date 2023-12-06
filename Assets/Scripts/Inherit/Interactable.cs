@@ -23,6 +23,9 @@ abstract public class Interactable : MonoBehaviour
 
     public Collider2D PlayerCD { get; private set; }
 
+    public bool IsControllingCat => ControllingManager.Instance.CurrentControl == ControllingManager.Control.PlayerMain;
+    public bool IsControllingCompBot => ControllingManager.Instance.CurrentControl == ControllingManager.Control.CompBot;
+
     protected virtual void Update()
     {
         switch (typeOfInteract)
@@ -44,15 +47,21 @@ abstract public class Interactable : MonoBehaviour
 
         if (_isKeyLock) return;
 
-        if (PlayerCD && PlayerCD.CompareTag("PlayerCat"))
+        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && PlayerCD && PlayerCD.CompareTag("PlayerCompBot");
+        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && PlayerCD && PlayerCD.CompareTag("PlayerCat");
+
+        if (isCatInteract || isCompBotInteract)
         {
             _isInteract = Input.GetKey(interactKey);
         }
     }
 
+
     private void _HandlePressToInteract() 
     {
-        if (PlayerCD && PlayerCD.CompareTag("PlayerCat")) 
+        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && PlayerCD && PlayerCD.CompareTag("PlayerCompBot");
+        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && PlayerCD && PlayerCD.CompareTag("PlayerCat");
+        if (isCatInteract || isCompBotInteract) 
         {
             _isInteract = Input.GetKeyDown(interactKey);
         }
@@ -82,22 +91,25 @@ abstract public class Interactable : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        bool isCompBotInteract = compBotInteractable && collision.gameObject.layer == 8;
-        if (!collision.CompareTag("PlayerCat") && !isCompBotInteract) return;
+        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
+        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
+        if (!isCatInteract && !isCompBotInteract) return;
         OnEnterInteractable?.Invoke();
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        bool isCompBotInteract = compBotInteractable && collision.gameObject.layer == 8;
-        if (!collision.CompareTag("PlayerCat") && !isCompBotInteract) return;
+        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
+        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
+        if (!isCatInteract && !isCompBotInteract) return;
         PlayerCD = collision;
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        bool isCompBotInteract = compBotInteractable && collision.gameObject.layer == 8;
-        if (!collision.CompareTag("PlayerCat") && !isCompBotInteract) return;
+        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
+        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
+        if (!isCatInteract && !isCompBotInteract) return;
         PlayerCD = null;
         OnExitInteractable?.Invoke();
     }

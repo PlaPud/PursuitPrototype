@@ -181,10 +181,10 @@ MonoBehaviour:
   jumpForce: 6
   waitForTeleportTimeLower: 2
   waitForTeleportTimeUpper: 4
-  rangeToAttack: 1
+  rangeToAttack: 1.25
   damageRadius: 0.65
   chargeAttackTime: 0.125
-  attackLeapForce: 8
+  attackLeapForce: 9
   coolDownTime: 0.5
   avgAttackDamage: 1
   groundDistance: 0.58

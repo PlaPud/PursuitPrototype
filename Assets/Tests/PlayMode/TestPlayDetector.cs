@@ -26,7 +26,7 @@ public class TestPlayDetector
         detectorScript.IsCheckItem = true;
         detectorScript.TryCheckItemToUnlock(targetItem);
 
-        Assert.IsTrue(detectorScript.IsOpen);
+        Assert.IsTrue(detectorScript.IsUnlocked);
         Assert.AreEqual(totalItems - 1, inv.ItemCount);
     }
 
@@ -52,7 +52,7 @@ public class TestPlayDetector
         detectorScript.IsCheckItem = true;
         detectorScript.TryCheckItemToUnlock(targetItem);
 
-        Assert.IsFalse(detectorScript.IsOpen);
+        Assert.IsFalse(detectorScript.IsUnlocked);
         Assert.AreEqual(totalItems, inv.ItemCount);
     }
 

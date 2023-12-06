@@ -32,7 +32,7 @@ public class DoorController : MonoBehaviour
         DoorOpenPos = (Vector2)DoorBody.position + _GetDoorOpenDirection(doorOpenDirection);
     }
 
-    private void Update()
+    protected void Update()
     {
         if (_isTransitioning)
         {

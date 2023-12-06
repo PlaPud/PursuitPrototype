@@ -19,7 +19,7 @@ public class ItemDetectorController : Interactable
 
     private SpriteRenderer _detectorSR;
 
-    public bool IsOpen { get; private set; } = false;
+    public bool IsUnlocked = false;
 
     public bool IsCheckItem { get; internal set; } = false;
 
@@ -30,6 +30,11 @@ public class ItemDetectorController : Interactable
 
     protected override void Update()
     {
+        if (IsUnlocked) {
+            _UpdateSprite();
+            return;
+        }
+
         base.Update();
 
         TryCheckItemToUnlock(reqItem);
@@ -44,9 +49,9 @@ public class ItemDetectorController : Interactable
         IsCheckItem = false;
 
         bool isExistToRemove = InventoryManager.instance.TryRemoveItem(reqItem);
-        IsOpen = isExistToRemove ? true : IsOpen;
+        IsUnlocked = isExistToRemove ? true : IsUnlocked;
 
-        if (!IsOpen) return;
+        if (!IsUnlocked) return;
         OnUnlock?.Invoke();
 
     }
@@ -56,6 +61,7 @@ public class ItemDetectorController : Interactable
 
     private void _UpdateSprite() 
     {
-        _detectorSR.sprite = IsOpen ? UnlockedSprite : LockSprite;
+        if (!_detectorSR) return;
+        _detectorSR.sprite = IsUnlocked ? UnlockedSprite : LockSprite;
     }
 }

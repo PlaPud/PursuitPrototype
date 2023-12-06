@@ -10,6 +10,8 @@ TagManager:
   - Moveable
   - GraphNodes
   - ClawMachine
+  - ControlPanel
+  - Elevator
   layers:
   - Default
   - TransparentFX
