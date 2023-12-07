@@ -48530,7 +48530,7 @@ MonoBehaviour:
   wallJumpTime: 0.2
   wallJumpForceX: 20
   wallJumpForceY: 20
-  wallSlideSpeed: 0.125
+  wallSlideSpeed: 0.025
   wallDistance: 1
   fallMultiplier: 7
   lowJumpMultiplier: 4
@@ -48709,7 +48709,7 @@ DistanceJoint2D:
   m_Anchor: {x: 0, y: 0}
   m_ConnectedAnchor: {x: 150.60515, y: 3.1852884}
   m_AutoConfigureDistance: 1
-  m_Distance: 47.315063
+  m_Distance: 76.01529
   m_MaxDistanceOnly: 0
 --- !u!61 &237877239
 BoxCollider2D:
@@ -50690,7 +50690,7 @@ GameObject:
   - component: {fileID: 415128779}
   m_Layer: 0
   m_Name: ClawPanel
-  m_TagString: Untagged
+  m_TagString: ControlPanel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -51390,7 +51390,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 104.568054, y: 3.2479644, z: -10.019027}
+  m_LocalPosition: {x: 75.86806, y: 3.0479643, z: -10.019027}
   m_LocalScale: {x: 2.2021, y: 2.2021, z: 2.2021}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -54122,7 +54122,7 @@ Transform:
   m_GameObject: {fileID: 919830467}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 56.6, y: -3.8, z: 0}
+  m_LocalPosition: {x: 27.9, y: -4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -55929,7 +55929,7 @@ Transform:
   m_GameObject: {fileID: 1248336676}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 104.568054, y: 3.2479644, z: -10.019027}
+  m_LocalPosition: {x: 75.86806, y: 3.0479643, z: -10.019027}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -103575,8 +103575,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1495563603
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
@@ -110263,6 +110263,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 323156417833898260, guid: ea905f8c419c1a342927b675546dd9ad, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7672842786750639250, guid: ea905f8c419c1a342927b675546dd9ad, type: 3}
+      propertyPath: doorOpenDirection
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

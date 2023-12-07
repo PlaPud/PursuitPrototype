@@ -4,6 +4,7 @@ using UnityEngine;
 [RequireComponent (typeof(Collider2D))]
 abstract public class Interactable : MonoBehaviour
 {
+    //TODO: Fix Interaction Switch Bug (Player Kept walking)
     public enum Interact { HoldToInteract, PressToInteract }
 
     [SerializeField] private KeyCode interactKey = KeyCode.E;
@@ -49,7 +50,6 @@ abstract public class Interactable : MonoBehaviour
 
         bool isCompBotInteract = IsControllingCompBot && compBotInteractable && PlayerCD && PlayerCD.CompareTag("PlayerCompBot");
         bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && PlayerCD && PlayerCD.CompareTag("PlayerCat");
-
         if (isCatInteract || isCompBotInteract)
         {
             _isInteract = Input.GetKey(interactKey);
