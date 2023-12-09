@@ -8,16 +8,19 @@ using UnityEngine.UI;
 [assembly: InternalsVisibleTo("PlayMode")]
 
 [RequireComponent(typeof(Collider2D))]
-public class KeyItemController : MonoBehaviour
+public class KeyItemController : MonoBehaviour, IDataPersistence
 {
     [field : SerializeField] public string guid { get; internal set; }
     [field: SerializeField] public Sprite displaySprite { get; internal set; }
 
     private bool _isCollected = false;
+    private SpriteRenderer _itemSR;
+    private Collider2D _itemTrigger;
 
     private void Awake()
     {
-
+        _itemSR = GetComponent<SpriteRenderer>();
+        _itemTrigger = GetComponent<Collider2D>();
     }
 
     private void Start()
@@ -27,7 +30,14 @@ public class KeyItemController : MonoBehaviour
 
     internal void Update()
     {
+        CheckOnCollect();
+    }
+
+    private void CheckOnCollect() 
+    {
         gameObject.SetActive(!_isCollected);
+        //_itemSR.enabled = !_isCollected;
+        //_itemTrigger.enabled = !_isCollected;
     }
 
     [ContextMenu("Generate GUID for This Key Item")]
@@ -35,14 +45,30 @@ public class KeyItemController : MonoBehaviour
 
     internal void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.layer != 8 || InventoryManager.instance.IsFull) return;
+        if (collision.gameObject.layer != 8 || InventoryManager.Instance.IsFull) return;
         
-        if (!gameObject.activeSelf) return;
-
         Debug.Log("Collected");
-        InventoryManager.instance.AddItem(this);
+        InventoryManager.Instance.AddItem(this);
         _isCollected = true;
     }
 
+    public void LoadData(GameData data)
+    {
+        if (!data.SavedCollectedItem.ContainsKey(guid)) return;
 
+        _isCollected = data.SavedCollectedItem[guid];
+    }
+
+    public void SaveData(GameData data)
+    {
+        if (guid == "") return;
+
+        if (data.SavedCollectedItem.ContainsKey(guid)) 
+        {
+            data.SavedCollectedItem[guid] = _isCollected;
+            return;
+        }
+
+        data.SavedCollectedItem.Add(guid, _isCollected);
+    }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ClawMachineManager : MonoBehaviour
 {
-    public static ClawMachineManager instance;  
+    public static ClawMachineManager Instance;  
 
     private ClawPanelController[] _clawPanels;
 
@@ -12,7 +12,13 @@ public class ClawMachineManager : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;    
+        if (Instance != null)
+        {
+            Debug.LogError("More Than One Instance of ClawMachineManager Exist");
+        }
+
+        Instance = this;
+
         _clawPanels = FindObjectsOfType<ClawPanelController>();
     }
     void Start()

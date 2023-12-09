@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoxController : MonoBehaviour
+public class BoxController : MonoBehaviour, IDataPersistence
 {
-
+    [Header("BoxID")]
+    [SerializeField] private string boxid;
     [Header("Ground Check")]
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float boxCastDistance;
@@ -51,4 +52,26 @@ public class BoxController : MonoBehaviour
             size: boxCastSize
         );
     }
+
+    public void LoadData(GameData data)
+    {
+        if (!data.SavedMoveablePos.ContainsKey(boxid)) return;
+        transform.position = data.SavedMoveablePos[boxid].ToUnityVector3();
+    }
+
+    public void SaveData(GameData data)
+    {
+        if (boxid == "") return;
+
+        if (data.SavedMoveablePos.ContainsKey(boxid)) 
+        {
+            data.SavedMoveablePos[boxid] = new Vector3Serialize(transform.position);
+            return;
+        }
+
+        data.SavedMoveablePos.Add(boxid, new Vector3Serialize(transform.position));
+    }
+
+    [ContextMenu("Generate GUID for This Key Item")]
+    private void _GenerateItemGuid() => boxid = System.Guid.NewGuid().ToString();
 }

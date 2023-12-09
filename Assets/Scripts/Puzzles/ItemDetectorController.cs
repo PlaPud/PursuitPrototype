@@ -6,7 +6,7 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("EditMode")]
 [assembly: InternalsVisibleTo("PlayMode")]
 
-public class ItemDetectorController : Interactable
+public class ItemDetectorController : Interactable, IDataPersistence
 {
     [field: SerializeField] public string guid { get; internal set; }
     [field: SerializeField] public KeyItemController reqItem { get; internal set; }
@@ -48,7 +48,7 @@ public class ItemDetectorController : Interactable
 
         IsCheckItem = false;
 
-        bool isExistToRemove = InventoryManager.instance.TryRemoveItem(reqItem);
+        bool isExistToRemove = InventoryManager.Instance.TryRemoveItem(reqItem);
         IsUnlocked = isExistToRemove ? true : IsUnlocked;
 
         if (!IsUnlocked) return;
@@ -63,5 +63,24 @@ public class ItemDetectorController : Interactable
     {
         if (!_detectorSR) return;
         _detectorSR.sprite = IsUnlocked ? UnlockedSprite : LockSprite;
+    }
+
+    public void LoadData(GameData data)
+    {
+        if (!data.SavedItemDetectors.ContainsKey(guid)) return;
+        IsUnlocked = data.SavedItemDetectors[guid];
+    }
+
+    public void SaveData(GameData data)
+    {
+        if (guid == "") return;
+
+        if (data.SavedItemDetectors.ContainsKey(guid))
+        {
+            data.SavedItemDetectors[guid] = IsUnlocked;
+            return;
+        }
+
+        data.SavedItemDetectors.Add(guid, IsUnlocked);
     }
 }

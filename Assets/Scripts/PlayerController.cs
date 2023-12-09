@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class PlayerController : IControllableOnGround
+public class PlayerController : IControllableOnGround, IDataPersistence
 {
     
     [Header("Disable")]
@@ -483,6 +483,17 @@ public class PlayerController : IControllableOnGround
             }
         }
     }
+
+    public void LoadData(GameData data)
+    {
+        transform.position = data.PlayerPos.ToUnityVector3();
+    }
+
+    public void SaveData(GameData data)
+    {
+        data.PlayerPos = new Vector3Serialize(transform.position);
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireCube(transform.position + Vector3.down * castDistance, boxSize);
@@ -492,5 +503,4 @@ public class PlayerController : IControllableOnGround
                     size: new Vector2(ropeBoxWidth, 2 * PlayerRopeRadius)
                 );
     }
-
 }

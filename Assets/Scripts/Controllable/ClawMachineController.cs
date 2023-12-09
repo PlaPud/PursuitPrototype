@@ -69,7 +69,7 @@ public class ClawMachineController : MonoBehaviour
         RayCheck();
         FilteringMoveable();
 
-        if (ClawMachineManager.instance.IsControlClaw && panel.IsControllingThis) 
+        if (ClawMachineManager.Instance.IsControlClaw && panel.IsControllingThis) 
         {
             OnMove();
             OnToggleHold();

@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using UnityEngine;
 
-public class LevelController : MonoBehaviour
+public class LevelController : MonoBehaviour, IDataPersistence
 {
+    [Header("Level ID")]
+    [SerializeField] private string levelId;
 
+    [Header("Level Config")]
     public bool IsLevelComplete;
     [SerializeField] LayerMask playerMask;
     [SerializeField] EnemyAreaController enemyAreaCtrl;
@@ -58,4 +61,27 @@ public class LevelController : MonoBehaviour
 
         return false;
     }
+
+    public void LoadData(GameData data)
+    {
+        if (!data.SavedLevelComplete.ContainsKey(levelId)) return;
+        IsLevelComplete = data.SavedLevelComplete[levelId];
+    }
+
+    public void SaveData(GameData data)
+    {
+        if (levelId == "") return;
+
+        if (data.SavedLevelComplete.ContainsKey(levelId)) 
+        {
+            data.SavedLevelComplete[levelId] = IsLevelComplete;
+            return;
+        }
+
+        data.SavedLevelComplete.Add(levelId, IsLevelComplete);
+    }
+
+    [ContextMenu("Generate GUID for This Key Item")]
+    private void _GenerateItemGuid() => levelId = System.Guid.NewGuid().ToString();
+
 }

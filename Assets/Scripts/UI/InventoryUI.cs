@@ -9,8 +9,9 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private GameObject emptySlotPrefab;
     void Start()
     {
-        InventoryManager.instance.OnPickupItem += AddItemToDisplay;
-        InventoryManager.instance.OnUseItem += RemoveItemFromSlot;
+        InventoryManager.Instance.OnPickupItem += AddItemToDisplay;
+        InventoryManager.Instance.OnUseItem += RemoveItemFromSlot;
+        InventoryManager.Instance.OnLoadData += RenderInventory;
         RenderInventory();
     }
 
@@ -21,7 +22,7 @@ public class InventoryUI : MonoBehaviour
 
     private void RenderInventory() 
     {
-        foreach (KeyItemController item in InventoryManager.instance.Inventory) 
+        foreach (KeyItemController item in InventoryManager.Instance.Inventory) 
         {
             AddItemToDisplay(item);
         }
@@ -42,4 +43,5 @@ public class InventoryUI : MonoBehaviour
         Transform removeItem = transform.Find(item.guid);
         Destroy(removeItem?.gameObject);
     }
+
 }
