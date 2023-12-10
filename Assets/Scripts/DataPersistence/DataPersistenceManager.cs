@@ -7,6 +7,8 @@ public class DataPersistenceManager : MonoBehaviour
 {
     public static DataPersistenceManager Instance { get; private set; }
 
+    [SerializeField] private bool turnOnDebug = false;
+
     [Header("File Storage")]
     [SerializeField] private string fileName;
 
@@ -38,8 +40,9 @@ public class DataPersistenceManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P)) 
+        if (turnOnDebug && Input.GetKeyDown(KeyCode.P)) 
         {
+            Debug.Log("[DEBUG] Forced Game Save");
             SaveGameData();
         }
     }

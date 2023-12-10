@@ -57,7 +57,7 @@ public class ItemDetectorController : Interactable, IDataPersistence
     }
 
     [ContextMenu("Generate GUID for This Key Item")]
-    private void _GenerateItemGuid() => guid = System.Guid.NewGuid().ToString();
+    private void _GenerateItemGuid() => guid = "ITD-" + System.Guid.NewGuid().ToString();
 
     private void _UpdateSprite() 
     {

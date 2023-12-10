@@ -21,6 +21,7 @@ public class FileDataHandler
     public GameData LoadFromFile() 
     {
         GameData loadedData = null;
+        Debug.Log("Load File From: " + FullPath);
 
         if (File.Exists(FullPath)) 
         {

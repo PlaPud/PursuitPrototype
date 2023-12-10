@@ -73,5 +73,5 @@ public class BoxController : MonoBehaviour, IDataPersistence
     }
 
     [ContextMenu("Generate GUID for This Key Item")]
-    private void _GenerateItemGuid() => boxid = System.Guid.NewGuid().ToString();
+    private void _GenerateItemGuid() => boxid = "B-" + System.Guid.NewGuid().ToString();
 }

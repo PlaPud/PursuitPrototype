@@ -12,6 +12,7 @@ public class GameData
     public Dictionary<string, bool> SavedLevelComplete;
     public Dictionary<string, bool> SavedCollectedItem;
     public Dictionary<string, bool> SavedItemDetectors;
+    public Dictionary<string, bool> SavedCheckpoints;
     public List<string> InventoryItems;
 
     public GameData() 
@@ -22,6 +23,7 @@ public class GameData
         SavedLevelComplete = new Dictionary<string, bool>();
         SavedCollectedItem = new Dictionary<string, bool>();
         SavedItemDetectors = new Dictionary<string, bool>();
+        SavedCheckpoints = new Dictionary<string, bool>();
         InventoryItems = new List<string>();
     }
 }

@@ -41,7 +41,7 @@ public class KeyItemController : MonoBehaviour, IDataPersistence
     }
 
     [ContextMenu("Generate GUID for This Key Item")]
-    private void _GenerateItemGuid() => guid = System.Guid.NewGuid().ToString();
+    private void _GenerateItemGuid() => guid = "KIT-" + System.Guid.NewGuid().ToString();
 
     internal void OnTriggerEnter2D(Collider2D collision)
     {

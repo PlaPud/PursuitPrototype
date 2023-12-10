@@ -82,6 +82,6 @@ public class LevelController : MonoBehaviour, IDataPersistence
     }
 
     [ContextMenu("Generate GUID for This Key Item")]
-    private void _GenerateItemGuid() => levelId = System.Guid.NewGuid().ToString();
+    private void _GenerateItemGuid() => levelId = "L-" + System.Guid.NewGuid().ToString();
 
 }
