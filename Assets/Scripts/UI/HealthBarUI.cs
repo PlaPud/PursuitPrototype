@@ -17,7 +17,9 @@ public class HealthBarUI : MonoBehaviour
 
         //EnemySpawnPoint.OnEnterCombat += EnableUI;
         //EnemyAreaController.OnCombatEnd += DisableUI;
+        
 
+        DisableUI();
         _RenderHealthBar();
     }
 
@@ -89,27 +91,22 @@ public class HealthBarUI : MonoBehaviour
         }
     }
 
-    private void EnableUI() 
+    public void EnableUI() 
     {
         foreach (GameObject health in  _healthBarDisplay) 
         {
             Image healthImg = health.GetComponent<Image>();
             if (healthImg.enabled) return;
-            Color newAlpha = Color.white;
-            newAlpha.a = 0;
-            healthImg.color = newAlpha;
+            healthImg.enabled = true;
         }
     }
 
-    private void DisableUI() 
+    public void DisableUI() 
     {
         foreach (GameObject health in _healthBarDisplay)
         {
             Image healthImg = health.GetComponent<Image>();
             healthImg.enabled = false;
-            Color newAlpha = Color.white;
-            newAlpha.a = 1;
-            healthImg.color = newAlpha;
         }
     }
 }

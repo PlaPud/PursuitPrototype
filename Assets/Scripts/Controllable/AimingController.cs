@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class AimingController : MonoBehaviour
 {
-    [SerializeField] Transform followingTarget;
-    [SerializeField] Transform arrow;
+    [SerializeField] protected Transform followingTarget;
+    [SerializeField] protected Transform arrow;
 
     private Vector3 _aimingPositionGlobal;
     private Vector3 _aimingCircleDirection;
@@ -21,10 +21,10 @@ public class AimingController : MonoBehaviour
 
     }
 
-    void Update()
+    protected void Update()
     {
         Rotate();
-        _CheckPlayerDead();
+        _CheckDisable();
     }
 
     private void Rotate()
@@ -36,7 +36,7 @@ public class AimingController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, _aimingAngle);
     }
 
-    private void _CheckPlayerDead() 
+    private void _CheckDisable() 
     {
         if (followingTarget.gameObject.activeSelf) 
         {

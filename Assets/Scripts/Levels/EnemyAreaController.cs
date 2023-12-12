@@ -14,6 +14,9 @@ public class EnemyAreaController : MonoBehaviour
 
     public Action OnEnemyAllCleared;
     public static Action OnCombatEnd;
+    public static Action OnCombatStart;
+
+    public bool IsLockedDown { get; private set; } = false;
 
     private void Awake()
     {
@@ -38,15 +41,17 @@ public class EnemyAreaController : MonoBehaviour
                 (enemySp) => !enemySp.IsEnemyInAreaClear && enemySp.IsTriggerGoesOff
             );
 
-        if (!anyTriggerGoesOff) return;
+        if (!anyTriggerGoesOff || IsLockedDown) return;
         _LockDownDoors();
     }
 
     private void _LockDownDoors() 
     {
+        IsLockedDown = true;
         _lockedDoors.ForEach((door) => {
             door.SetCloseDoor();
         });
+        OnCombatStart?.Invoke();
     }
 
     private void CheckEnemyAreaClear() 
@@ -57,15 +62,16 @@ public class EnemyAreaController : MonoBehaviour
 
         IsEnemyAllCleared = !anyAreaNotCleared;
 
-        if (!IsEnemyAllCleared) return;
+        if (!IsEnemyAllCleared || !IsLockedDown) return;
         _UnlockAllDoors();
-        OnCombatEnd?.Invoke();
     }
     private void _UnlockAllDoors()
     {
+        IsLockedDown = false;
         _lockedDoors.ForEach((door) => {
             door.SetOpenDoor();
         });
+        OnCombatEnd?.Invoke();
     }
 
 }

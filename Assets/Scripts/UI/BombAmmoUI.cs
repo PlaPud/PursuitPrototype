@@ -65,4 +65,23 @@ public class BombAmmoUI : MonoBehaviour
         ammoImg.sprite = bombFull;
         _bombEmptyCount -= 1;
     }
+
+    public void EnableUI() 
+    {
+        foreach (GameObject ammo in _bombDisplay)
+        {
+            Image ammoImg = ammo.GetComponent<Image>();
+            if (ammoImg.enabled) return;
+            ammoImg.enabled = true;
+        }
+    }
+
+    public void DisableUI() 
+    {
+        foreach (GameObject ammo in _bombDisplay)
+        {
+            Image ammoImg = ammo.GetComponent<Image>();
+            ammoImg.enabled = false;
+        }
+    }
 }

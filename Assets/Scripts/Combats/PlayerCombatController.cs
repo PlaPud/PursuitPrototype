@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class PlayerCombatController : MonoBehaviour
 {
-    [SerializeField] private AimingController _aiming;
+    [SerializeField] private CombatAiming _aiming;
 
     [SerializeField] private KeyCode shootKey = KeyCode.Mouse0;
     [SerializeField] private float shootCoolDown;
@@ -15,6 +15,7 @@ public class PlayerCombatController : MonoBehaviour
 
     private bool _toShoot;
     private bool _isInCoolDown;
+    private bool _isInCombat;
 
     public List<GameObject> CurrentInField { get; private set; }
 
@@ -28,10 +29,13 @@ public class PlayerCombatController : MonoBehaviour
     private void Start()
     {
         CurrentInField = new List<GameObject>();
+        EnemyAreaController.OnCombatStart += EnableCombat;
+        EnemyAreaController.OnCombatEnd += DisableCombat;
     }
 
     private void Update()
     {
+        if (!_isInCombat) return;
         GetInputShoot();
     }
 
@@ -53,7 +57,7 @@ public class PlayerCombatController : MonoBehaviour
 
     private void HandleShoot() 
     {
-        if (!_toShoot || CurrentInField.Count == MaxInField || _isInCoolDown) return;
+        if (!_isInCombat || !_toShoot || CurrentInField.Count == MaxInField || _isInCoolDown) return;
 
         GameObject bomb = BombPoolingManager.Instance.GetBombFromPool();
 
@@ -86,6 +90,18 @@ public class PlayerCombatController : MonoBehaviour
         if (CurrentInField.Count <= 0f) return;
         CurrentInField = CurrentInField.Where((go) => go.activeSelf).ToList();
         OnCheckReload?.Invoke(); 
+    }
+
+    private void EnableCombat() 
+    {
+        _isInCombat = true;
+    }
+
+    private void DisableCombat() 
+    {
+        _isInCombat = false;
+        _toShoot = false ;
+        _isInCoolDown = false;
     }
 
     private IEnumerator _EnableCoolDown() 

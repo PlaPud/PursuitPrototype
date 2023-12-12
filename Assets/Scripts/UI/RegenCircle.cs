@@ -38,13 +38,13 @@ public class RegenCircle : MonoBehaviour
         _circleImg.fillAmount = timeLeftRatio;
     }
 
-    private void EnableUI()
+    public void EnableUI()
     {
-        
+        _circleImg.enabled = true;
     }
 
-    private void DisableUI()
+    public void DisableUI()
     {
-        
+        _circleImg.enabled = false;
     }
 }

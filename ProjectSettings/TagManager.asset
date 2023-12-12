@@ -64,9 +64,15 @@ TagManager:
   - name: GroundOverlay
     uniqueID: 833932929
     locked: 0
+  - name: Aiming
+    uniqueID: 3997860095
+    locked: 0
   - name: PlayerControllable
     uniqueID: 1242880349
     locked: 0
   - name: Enemy
     uniqueID: 3360054483
+    locked: 0
+  - name: OverlayUI
+    uniqueID: 351530559
     locked: 0
