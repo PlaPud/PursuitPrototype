@@ -7,7 +7,6 @@ public class PlayerPushPull : MonoBehaviour
     private const float HOLD_DOWN_TIME = 1f;
     private const KeyCode KEY_TO_HOLD = KeyCode.E;
 
-
     [Header("Check Moveable")]
     [SerializeField] private float grabDistance;
     [SerializeField] private LayerMask groundLayer;
