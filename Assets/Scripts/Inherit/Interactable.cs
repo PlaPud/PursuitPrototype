@@ -19,7 +19,7 @@ abstract public class Interactable : MonoBehaviour
     protected private bool _isKeyLock;
     protected private float _holdTimer = HOLD_DOWN_TIME;
 
-    public static event Action OnEnterInteractable;
+    public static event Action OnStayInteractable;
     public static event Action OnExitInteractable;
     public static event Action<bool, float, Interact> OnInteraction;
 
@@ -95,7 +95,6 @@ abstract public class Interactable : MonoBehaviour
         bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
         bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
         if (!isCatInteract && !isCompBotInteract) return;
-        OnEnterInteractable?.Invoke();
     }
 
     private void OnTriggerStay2D(Collider2D collision)
@@ -103,7 +102,13 @@ abstract public class Interactable : MonoBehaviour
         bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
         bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
         if (!isCatInteract && !isCompBotInteract) return;
+
+        PlayerPushPull checkedPushPull = collision.gameObject.GetComponent<PlayerPushPull>();
+
+        if (checkedPushPull.IsFoundMoveable) return;
+
         PlayerCD = collision;
+        OnStayInteractable?.Invoke();
     }
 
     private void OnTriggerExit2D(Collider2D collision)

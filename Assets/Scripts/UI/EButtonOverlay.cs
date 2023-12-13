@@ -22,7 +22,7 @@ public class EButtonOverlay : MonoBehaviour
     {
         _overlayAnim = GetComponent<Animator>();    
         gameObject.SetActive(false);
-        Interactable.OnEnterInteractable += ShowOverlay;
+        Interactable.OnStayInteractable += ShowOverlay;
         Interactable.OnExitInteractable += DisableOverlay;
         Interactable.OnInteraction += HandleOverlayState;
     }
