@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5969541605205551125}
   - component: {fileID: 2182321199991939316}
   - component: {fileID: 3858210263458245358}
+  - component: {fileID: 3806374740262463095}
   m_Layer: 0
   m_Name: GUIButton
   m_TagString: Untagged
@@ -26,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 471565073591322820}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 53.09, y: 7.010001, z: -0.019027028}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -73,8 +74,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1495563603
-  m_SortingLayer: 2
+  m_SortingLayerID: 351530559
+  m_SortingLayer: 9
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: b38f50aa10b9681489b7e61b7fd19857, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -108,6 +109,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3806374740262463095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 471565073591322820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71ca471f0ca1b7d419e6834401f86c68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xLocalOffset: 1.4
+  yLocalOffset: 1
+  onGroundPlayer: {fileID: 0}
 --- !u!1 &2982316544337793408
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,8 +330,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 351530559
+  m_SortingLayer: 9
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

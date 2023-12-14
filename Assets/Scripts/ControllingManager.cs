@@ -14,6 +14,9 @@ public class ControllingManager : MonoBehaviour
 
     public Control CurrentControl { get; private set; } = Control.PlayerMain;
 
+    public bool IsControllingCat => CurrentControl == Control.PlayerMain;
+    public bool IsControllingCompBot => CurrentControl == Control.CompBot;
+
     private void Awake()
     {
         Instance = this;

@@ -19,14 +19,14 @@ abstract public class Interactable : MonoBehaviour
     protected private bool _isKeyLock;
     protected private float _holdTimer = HOLD_DOWN_TIME;
 
-    public static event Action OnStayInteractable;
-    public static event Action OnExitInteractable;
-    public static event Action<bool, float, Interact> OnInteraction;
+    public static event Action<KeyCode> OnAnyStayInteractable;
+    public static event Action<KeyCode> OnAnyExitInteractable;
+    public static event Action<bool, float, Interact, KeyCode> OnAnyInteraction;
 
     public Collider2D PlayerCD { get; private set; }
 
-    public bool IsControllingCat => ControllingManager.Instance.CurrentControl == ControllingManager.Control.PlayerMain;
-    public bool IsControllingCompBot => ControllingManager.Instance.CurrentControl == ControllingManager.Control.CompBot;
+    public bool IsControllingCat => ControllingManager.Instance.IsControllingCat;
+    public bool IsControllingCompBot => ControllingManager.Instance.IsControllingCompBot;
 
     protected virtual void Update()
     {
@@ -57,7 +57,6 @@ abstract public class Interactable : MonoBehaviour
         }
     }
 
-
     private void _HandlePressToInteract() 
     {
         bool isCompBotInteract = IsControllingCompBot && compBotInteractable && PlayerCD && PlayerCD.CompareTag("PlayerCompBot");
@@ -85,6 +84,7 @@ abstract public class Interactable : MonoBehaviour
     private void _TriggerInteract() 
     {
         if (!_isInteract) return;
+        OnAnyInteraction?.Invoke(_isInteract, _holdTimer, typeOfInteract, interactKey);
         HandleInteract();
     }
 
@@ -101,6 +101,7 @@ abstract public class Interactable : MonoBehaviour
     {
         bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
         bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
+
         if (!isCatInteract && !isCompBotInteract) return;
 
         PlayerPushPull checkedPushPull = collision.gameObject.GetComponent<PlayerPushPull>();
@@ -108,7 +109,7 @@ abstract public class Interactable : MonoBehaviour
         if (checkedPushPull.IsFoundMoveable) return;
 
         PlayerCD = collision;
-        OnStayInteractable?.Invoke();
+        OnAnyStayInteractable?.Invoke(interactKey);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -117,7 +118,7 @@ abstract public class Interactable : MonoBehaviour
         bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
         if (!isCatInteract && !isCompBotInteract) return;
         PlayerCD = null;
-        OnExitInteractable?.Invoke();
+        OnAnyExitInteractable?.Invoke(interactKey);
     }
 
     private void _LockInteractKey()

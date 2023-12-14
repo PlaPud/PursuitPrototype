@@ -18,6 +18,7 @@ public class ItemDetectorController : Interactable, IDataPersistence
     public event UnlockHandler OnUnlock;
 
     private SpriteRenderer _detectorSR;
+    private Collider2D _detectorCD;
 
     public bool IsUnlocked = false;
 
@@ -25,13 +26,15 @@ public class ItemDetectorController : Interactable, IDataPersistence
 
     void Start()
     {
-        _detectorSR = GetComponent<SpriteRenderer>();    
+        _detectorSR = GetComponent<SpriteRenderer>();
+        _detectorCD = GetComponent<Collider2D>();
     }
 
     protected override void Update()
     {
         if (IsUnlocked) {
             _UpdateSprite();
+            _detectorCD.enabled = false;
             return;
         }
 
