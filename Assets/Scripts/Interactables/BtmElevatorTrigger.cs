@@ -29,7 +29,7 @@ public class BtmElevatorTrigger : MonoBehaviour
 
         if (!collision.CompareTag("Moveable") && !collision.CompareTag("PlayerCat") && !collision.CompareTag("PlayerCompBot")) return;
 
-        _elvt.currentPos = ElevatorController.ElevatorIdlePos.Bottom;
+        _elvt.CurrentPos = ElevatorController.ElevatorIdlePos.Bottom;
         _elvt.CurrentState = ElevatorController.ElevatorState.GoingUp;
     }
 }

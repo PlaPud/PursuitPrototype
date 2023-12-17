@@ -13,7 +13,7 @@ public class ElevatorController : MonoBehaviour
     public enum ElevatorIdlePos { Top, Bottom }
 
     public ElevatorState CurrentState = ElevatorState.Ready;
-    public ElevatorIdlePos currentPos = ElevatorIdlePos.Bottom;
+    public ElevatorIdlePos CurrentPos = ElevatorIdlePos.Bottom;
 
     public bool IsReachedTop => Vector2.Distance(transform.position, upperPos.position) < 0.05f;
     public bool IsReachedBottom => Vector2.Distance(transform.position, lowerPos.position) < 0.05f;
@@ -57,7 +57,7 @@ public class ElevatorController : MonoBehaviour
 
     private void HandleGoingDown() 
     {
-        if (currentPos == ElevatorIdlePos.Bottom) return;
+        if (CurrentPos == ElevatorIdlePos.Bottom) return;
 
         _ChangeAnimationState(ELEVATOR_DOWN);
         _MoveElevator(to: lowerPos, isReach: IsReachedBottom, pos: ElevatorIdlePos.Bottom);
@@ -65,7 +65,7 @@ public class ElevatorController : MonoBehaviour
 
     private void HandleGoingUp() 
     {
-        if (currentPos == ElevatorIdlePos.Top) return;
+        if (CurrentPos == ElevatorIdlePos.Top) return;
         _ChangeAnimationState(ELEVATOR_UP);
         _MoveElevator(to: upperPos, isReach: IsReachedTop, pos: ElevatorIdlePos.Top);
     }
@@ -81,13 +81,13 @@ public class ElevatorController : MonoBehaviour
         if (!isReach) return;
 
         CurrentState = ElevatorState.Ready;
-        currentPos = pos;
+        CurrentPos = pos;
     }
 
     private void _RepositionElevator() 
     {
         if (CurrentState != ElevatorState.Ready) return;
-        switch (currentPos) 
+        switch (CurrentPos) 
         {
             case ElevatorIdlePos.Top:
                 transform.position = upperPos.position;

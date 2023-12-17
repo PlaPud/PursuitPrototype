@@ -48,10 +48,9 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
     public LineRenderer PlayerRopeRenderer { get; private set; }
     public DistanceJoint2D PlayerRopeJoint { get; private set; }
-
-    public float WalkInput { get; private set; } = 0f;
     public RaycastHit2D FrontRopePointHit { get; private set; }
 
+    public float WalkInput { get; private set; } = 0f;
 
     public bool IsSwingPressed { get; private set; } = false;
     public bool IsCrouching { get; private set; } = false;
@@ -106,13 +105,17 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         BoolAndRayCheck();
 
-        if (ControllingManager.Instance.CurrentControl == ControllingManager.Control.PlayerMain)
+        if (ControllingManager.Instance.IsControllingCat)
         {
             OnWalk();
             OnJump();
             OnSprint();
             OnCrouch();
             OnSwing();
+        }
+        else 
+        {
+            WalkInput = 0f;
         }
 
         HandleFlipSprite();

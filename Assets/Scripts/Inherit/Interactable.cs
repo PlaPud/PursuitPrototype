@@ -19,14 +19,16 @@ abstract public class Interactable : MonoBehaviour
     protected private bool _isKeyLock;
     protected private float _holdTimer = HOLD_DOWN_TIME;
 
-    public static event Action<KeyCode> OnAnyStayInteractable;
-    public static event Action<KeyCode> OnAnyExitInteractable;
-    public static event Action<bool, float, Interact, KeyCode> OnAnyInteraction;
+    public static Action<Transform, Collider2D, KeyCode> OnAnyStayInteractable;
+    public static Action<KeyCode> OnAnyExitInteractable;
+    public static Action<bool, float> OnAnyCountdownInteract;
+    public static Action<bool, float, Interact, KeyCode> OnAnyInteraction;
 
     public Collider2D PlayerCD { get; private set; }
 
     public bool IsControllingCat => ControllingManager.Instance.IsControllingCat;
     public bool IsControllingCompBot => ControllingManager.Instance.IsControllingCompBot;
+    public bool IsControllingClawMachine => ControllingManager.Instance.IsControllingClawMachine;
 
     protected virtual void Update()
     {
@@ -49,9 +51,7 @@ abstract public class Interactable : MonoBehaviour
 
         if (_isKeyLock) return;
 
-        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && PlayerCD && PlayerCD.CompareTag("PlayerCompBot");
-        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && PlayerCD && PlayerCD.CompareTag("PlayerCat");
-        if (isCatInteract || isCompBotInteract)
+        if (PlayerCD && _IsControllableInteractable(PlayerCD))
         {
             _isInteract = Input.GetKey(interactKey);
         }
@@ -59,19 +59,21 @@ abstract public class Interactable : MonoBehaviour
 
     private void _HandlePressToInteract() 
     {
-        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && PlayerCD && PlayerCD.CompareTag("PlayerCompBot");
-        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && PlayerCD && PlayerCD.CompareTag("PlayerCat");
-        if (isCatInteract || isCompBotInteract) 
+        if (PlayerCD && _IsControllableInteractable(PlayerCD)) 
         {
             _isInteract = Input.GetKeyDown(interactKey);
         }
     }
     private void _CountDownToInteract() 
     {
+        if (!PlayerCD) return;
+
         _holdTimer = _isInteract ?
             _holdTimer - Time.deltaTime : HOLD_DOWN_TIME;
-        
+
         _isReadyToInteract = _holdTimer <= 0;
+
+        OnAnyCountdownInteract.Invoke(_isInteract, _holdTimer);
 
         if (_isReadyToInteract)
         {
@@ -92,33 +94,50 @@ abstract public class Interactable : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
-        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
-        if (!isCatInteract && !isCompBotInteract) return;
+        if (!_IsControllableInteractable(collision)) return;
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
-        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
 
-        if (!isCatInteract && !isCompBotInteract) return;
+        if (!_IsControllableInteractable(collision) || collision.GetComponent<Rigidbody2D>().velocity.magnitude > .5f) return;
 
         PlayerPushPull checkedPushPull = collision.gameObject.GetComponent<PlayerPushPull>();
 
         if (checkedPushPull.IsFoundMoveable) return;
 
         PlayerCD = collision;
-        OnAnyStayInteractable?.Invoke(interactKey);
+
+        OnAnyStayInteractable?.Invoke(transform, collision, interactKey);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        bool isCompBotInteract = IsControllingCompBot && compBotInteractable && collision.CompareTag("PlayerCompBot");
-        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
-        if (!isCatInteract && !isCompBotInteract) return;
+        
+        if (!_IsControllableInteractable(collision)) return;
+
         PlayerCD = null;
-        OnAnyExitInteractable?.Invoke(interactKey);
+        _isInteract = false;
+        _isReadyToInteract = false;
+        _isKeyLock = false;
+        _holdTimer = HOLD_DOWN_TIME;
+
+        try 
+        {
+            OnAnyExitInteractable?.Invoke(interactKey);
+        }
+        catch (Exception e) 
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    private bool _IsControllableInteractable(Collider2D collision) 
+    {
+        bool isCatInteract = (IsControllingCat || gameObject.CompareTag("ControlPanel")) && collision.CompareTag("PlayerCat");
+        bool isCompBotInteract = compBotInteractable && IsControllingCompBot && collision.CompareTag("PlayerCompBot") && ControllingManager.Instance.IsMatchedCompBot(collision.GetComponent<CompBotController>());
+
+        return isCatInteract || isCompBotInteract;
     }
 
     private void _LockInteractKey()

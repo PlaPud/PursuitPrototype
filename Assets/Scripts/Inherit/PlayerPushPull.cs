@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,8 +31,14 @@ public class PlayerPushPull : MonoBehaviour
     public bool IsGrabbing => _moveableObject != null;
     public bool IsFoundMoveable => _hitGroundForward && _hitGroundForward.collider.CompareTag("Moveable");
     // Need To Check Controlling Which one Main or CompBot
-    private bool _isControllingMain => ControllingManager.Instance.CurrentControl == ControllingManager.Control.PlayerMain;
-    private bool _isConotrollingCompBot => ControllingManager.Instance.CurrentControl == ControllingManager.Control.CompBot;
+    private bool _isFoundMoveable;
+    private bool _isControllingMain => ControllingManager.Instance.IsControllingCat;
+    private bool _isControllingCompBot => ControllingManager.Instance.IsControllingCompBot;
+
+    public static Action<KeyCode, Collider2D, IControllableOnGround> OnAnyFoundMoveable;
+    public static Action<KeyCode, IControllableOnGround> OnAnyNotFoundMoveable;
+    public static Action<bool, bool, float> OnAnyGrabbing;
+
     void Start()
     {
         _playerRB = GetComponent<Rigidbody2D>();
@@ -41,10 +48,12 @@ public class PlayerPushPull : MonoBehaviour
     {
         if (pusher != ControllingManager.Instance.CurrentControl) return;
 
+        if (player is CompBotController && !ControllingManager.Instance.IsMatchedCompBot((CompBotController)player)) return;
+
         OnGrab();
         RayCheck();
 
-        if (_isControllingMain || _isConotrollingCompBot)
+        if (_isControllingMain || _isControllingCompBot)
         {
             EnableCountDownToInteract();
         }
@@ -70,6 +79,15 @@ public class PlayerPushPull : MonoBehaviour
             distance: grabDistance,
             layerMask: groundLayer
         );
+
+        if (!IsFoundMoveable) 
+        {
+            Debug.Log("Not Found");
+            OnAnyNotFoundMoveable?.Invoke(KEY_TO_HOLD, player);
+            return;
+        }
+
+        OnAnyFoundMoveable?.Invoke(KEY_TO_HOLD, _hitGroundForward.collider, player);
     }
 
     private void HandleNotOnGround() 
@@ -88,10 +106,14 @@ public class PlayerPushPull : MonoBehaviour
 
     private void EnableCountDownToInteract()
     {
+        if (!IsFoundMoveable) return;
+
         _holdTimer = _isInteractHold ?
             _holdTimer - Time.deltaTime : HOLD_DOWN_TIME;
 
         _isReadyToInteract = _holdTimer <= 0;
+
+        OnAnyGrabbing?.Invoke(IsGrabbing, _isInteractHold, _holdTimer);
 
         if (_isReadyToInteract)
         {

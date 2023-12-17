@@ -8,33 +8,12 @@ public class VCamPlayer : MonoBehaviour
 {
     private CinemachineVirtualCamera _playerCam;
 
-    private PlayerController _player;
-    private CompBotController _botController;
-    private ClawMachineController _clawMachineController;
-
-    private List<GameObject> _allClawMachineGO = new();
-    private List<GameObject> _allCompBotGO = new();
-    private List<ClawMachineController> _allClawMachine = new();
-    private List<CompBotController> _allCompBot = new();
-
     [SerializeField] private float normalOrthSize = 9;
     [SerializeField] private float zoomedOrthSize = 6;
 
     private void Awake()
     {
         _playerCam = GetComponent<CinemachineVirtualCamera>();
-
-        _player = GameObject
-            .FindGameObjectWithTag("PlayerCat")
-            .GetComponent<PlayerController>();
-
-        _allCompBotGO = GameObject
-            .FindGameObjectsWithTag("PlayerCompBot")
-            .ToList();
-
-        _allClawMachineGO = GameObject
-            .FindGameObjectsWithTag("ClawMachine")
-            .ToList();
     }
 
     void Start()
@@ -60,19 +39,13 @@ public class VCamPlayer : MonoBehaviour
 
     private void SetCamCat() 
     {
-        _playerCam.Follow = _player.transform;
+        _playerCam.Follow = ControllingManager.Instance.CatController.transform;
         _playerCam.m_Lens.OrthographicSize = normalOrthSize;
     }
 
     private void SetCamClawMachine() 
     {
-        if (_allClawMachine.Count >= 0) 
-        {
-            _allClawMachine = _allClawMachineGO.Select(
-                cb => cb.GetComponent<ClawMachineController>()
-                ).ToList();
-        }
-        ClawMachineController controlledClaw = _allClawMachine.Find((cm) => cm.IsControlling);
+        ClawMachineController controlledClaw = ControllingManager.Instance.ClawMachineControlled;
         if (!controlledClaw) return;
         _playerCam.Follow = controlledClaw.transform;
         _playerCam.m_Lens.OrthographicSize = normalOrthSize;
@@ -80,13 +53,7 @@ public class VCamPlayer : MonoBehaviour
 
     private void SetCamCompBot() 
     {
-        if (_allCompBot.Count >= 0)
-        {
-            _allCompBot = _allCompBotGO.Select(
-                cb => cb.GetComponent<CompBotController>()
-                ).ToList();
-        }
-        CompBotController compBot = _allCompBot.Find((cb) => cb.IsControlling);
+        CompBotController compBot = ControllingManager.Instance.CompBotControlled;
         if (!compBot) return;
         _playerCam.Follow = compBot.transform;
         _playerCam.m_Lens.OrthographicSize = zoomedOrthSize;

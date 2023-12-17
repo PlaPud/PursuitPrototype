@@ -3,44 +3,51 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-public class ElevatorBottonController : MonoBehaviour
+public class ElevatorBottonController : Interactable
 {
     enum ButtonRole { Top, Bottom, Inside }
 
     [SerializeField] ElevatorController controlledElevator;
     [SerializeField] ButtonRole buttonRole;
 
-    private bool _isButtonPress;
-    private bool _canPress;
+    private Collider2D _buttonCD;
+
+    private void Awake()
+    {
+        _buttonCD = GetComponent<Collider2D>(); 
+    }
 
     void Start()
     {
 
     }
 
-    void Update()
+    protected override void Update()
     {
-        OnPressButton();
-        HandlePress();
+        if (controlledElevator.CurrentState == ElevatorController.ElevatorState.Ready && !_buttonCD.enabled) 
+        {
+            _buttonCD.enabled = true;
+        }
+
+        base.Update();
     }
 
-    private void OnPressButton() 
+    public override void HandleInteract() 
     {
-
-        _isButtonPress = Input.GetKeyDown(KeyCode.E) && _canPress;
-    }
-
-    private void HandlePress() 
-    {
-        if (!_isButtonPress) return;
 
         switch (buttonRole) 
         {
             case ButtonRole.Top:
+                if (controlledElevator.CurrentPos == ElevatorController.ElevatorIdlePos.Top) return;
                 controlledElevator.CurrentState = ElevatorController.ElevatorState.GoingUp;
+                _buttonCD.enabled = false;
+                _isInteract = false;
                 break;
             case ButtonRole.Bottom:
+                if (controlledElevator.CurrentPos == ElevatorController.ElevatorIdlePos.Bottom) return;
                 controlledElevator.CurrentState = ElevatorController.ElevatorState.GoingDown;
+                _buttonCD.enabled = false;
+                _isInteract = false;
                 break;
             case ButtonRole.Inside:
                 _SetStateInside();
@@ -50,24 +57,18 @@ public class ElevatorBottonController : MonoBehaviour
 
     private void _SetStateInside()
     {
-        switch (controlledElevator.currentPos) 
+        switch (controlledElevator.CurrentPos) 
         {
             case ElevatorController.ElevatorIdlePos.Top:
                 controlledElevator.CurrentState = ElevatorController.ElevatorState.GoingDown;
+                _buttonCD.enabled = false;
+                _isInteract = false;
                 break;
             case ElevatorController.ElevatorIdlePos.Bottom:
                 controlledElevator.CurrentState = ElevatorController.ElevatorState.GoingUp;
+                _buttonCD.enabled = false;
+                _isInteract = false;
                 break;
         }
-    }
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        if (!collision.CompareTag("PlayerCat")) return;
-        _canPress = true;
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        _canPress = false;
     }
 }

@@ -25,7 +25,7 @@ public class CompBotManager : MonoBehaviour
 
     void Update()
     {
-        IsControlCompBot = ControllingManager.Instance.CurrentControl == ControllingManager.Control.CompBot;
+        IsControlCompBot = ControllingManager.Instance.IsControllingCompBot;
         AssignCompbot();
     }
 
@@ -35,4 +35,5 @@ public class CompBotManager : MonoBehaviour
             panel.IsControllingThis = (panel.PlayerCD != null); 
         });
     }
+
 }
