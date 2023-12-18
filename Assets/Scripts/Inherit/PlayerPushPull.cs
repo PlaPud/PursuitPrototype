@@ -82,7 +82,6 @@ public class PlayerPushPull : MonoBehaviour
 
         if (!IsFoundMoveable) 
         {
-            Debug.Log("Not Found");
             OnAnyNotFoundMoveable?.Invoke(KEY_TO_HOLD, player);
             return;
         }

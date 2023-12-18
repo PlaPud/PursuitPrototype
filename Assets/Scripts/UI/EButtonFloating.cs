@@ -16,7 +16,7 @@ public class EButtonFloating : MonoBehaviour
     private const string UNFILL_BUTTON = "UnfillButton";
 
     private string _currentAnim = EMPTY_BUTTON;
-    private bool _isPlayingAnim;
+
 
     public bool IsDisplayOnThisCtrl => ControllingManager.Instance.CurrentControl == overlayDisplayFor;
 
@@ -86,7 +86,6 @@ public class EButtonFloating : MonoBehaviour
         if (interactKey != KeyCode.E) return;
 
         _currentAnim = EMPTY_BUTTON;
-        _isPlayingAnim = false;
         gameObject.SetActive(false);
     }
 
@@ -101,7 +100,6 @@ public class EButtonFloating : MonoBehaviour
                 if (!IsDisplayOnThisCtrl)
                 {
                     _currentAnim = EMPTY_BUTTON;
-                    _isPlayingAnim = false;
                     gameObject.SetActive(false);
                     return;
                 }
@@ -117,7 +115,6 @@ public class EButtonFloating : MonoBehaviour
                 if (IsDisplayOnThisCtrl && !IsCtrlCompBotHitMoveable)
                 {
                     _currentAnim = EMPTY_BUTTON;
-                    _isPlayingAnim = false;
                     gameObject.SetActive(false);
                     return;
                 }
