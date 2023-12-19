@@ -27,7 +27,7 @@ TagManager:
   - ClawMachineRail
   - Enemy
   - Weapon
-  - 
+  - MoveableBlockers
   - 
   - 
   - 
@@ -52,17 +52,11 @@ TagManager:
   - name: Background
     uniqueID: 2579082525
     locked: 0
-  - name: SceneProps
-    uniqueID: 2799403693
+  - name: BackgroundOverlay
+    uniqueID: 1497740213
     locked: 0
   - name: Effects
     uniqueID: 1870740875
-    locked: 0
-  - name: Ground
-    uniqueID: 1757585653
-    locked: 0
-  - name: GroundOverlay
-    uniqueID: 833932929
     locked: 0
   - name: Aiming
     uniqueID: 3997860095
@@ -72,6 +66,18 @@ TagManager:
     locked: 0
   - name: Enemy
     uniqueID: 3360054483
+    locked: 0
+  - name: SceneProps
+    uniqueID: 2799403693
+    locked: 0
+  - name: Ground
+    uniqueID: 1757585653
+    locked: 0
+  - name: GroundOverlay
+    uniqueID: 833932929
+    locked: 0
+  - name: Foreground
+    uniqueID: 428518081
     locked: 0
   - name: OverlayUI
     uniqueID: 351530559

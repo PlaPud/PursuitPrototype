@@ -51,7 +51,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     public RaycastHit2D FrontRopePointHit { get; private set; }
 
     public float WalkInput { get; private set; } = 0f;
-
+    public bool IsTryGetDown { get; private set; } = false;
     public bool IsSwingPressed { get; private set; } = false;
     public bool IsCrouching { get; private set; } = false;
     public bool IsWallSliding { get; private set; } = false;
