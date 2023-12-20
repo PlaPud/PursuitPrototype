@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using UnityEngine;
-using Unity.Plastic.Newtonsoft.Json;
+using Newtonsoft.Json;
 
 public class FileDataHandler
 {

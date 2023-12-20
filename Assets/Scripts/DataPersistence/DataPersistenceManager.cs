@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ public class DataPersistenceManager : MonoBehaviour
     private List<IDataPersistence> _dataPersistObjs;
 
     private FileDataHandler _fileHandler;
+
+    public Action OnLoadedComplete;
 
     private void Awake()
     {
@@ -50,7 +53,9 @@ public class DataPersistenceManager : MonoBehaviour
     public void NewGameData() 
     {
         _gameData = new GameData();
+        OnLoadedComplete?.Invoke();
     }
+
     public void LoadGameData()
     {
         _gameData = _fileHandler.LoadFromFile();
@@ -65,6 +70,7 @@ public class DataPersistenceManager : MonoBehaviour
         _dataPersistObjs.ForEach((dataPersistObj) => {
             dataPersistObj.LoadData(_gameData);
         });
+        OnLoadedComplete?.Invoke();
 
     }
     public void SaveGameData() 

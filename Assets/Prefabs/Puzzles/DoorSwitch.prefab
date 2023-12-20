@@ -72,10 +72,10 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1495563603
+  m_SortingLayerID: 1497740213
   m_SortingLayer: 2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 3aa2957e74d130348b9f6affe13bd8bb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c8b11d8202c8d604896867d2f8361f53, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -98,6 +98,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4aa2ebf9980bfc441b1dd6a1e759a42d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactKey: 101
+  typeOfInteract: 1
+  compBotInteractable: 0
   IsPuzzleComplete: 0
   toggleDoorsTarget: []
 --- !u!61 &3369651281167011996

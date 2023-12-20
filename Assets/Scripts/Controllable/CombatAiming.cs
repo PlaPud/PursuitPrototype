@@ -11,7 +11,7 @@ public class CombatAiming : AimingController
         EnemyAreaController.OnCombatEnd += DisableAiming;
     }
 
-    void Update()
+    private new void Update()
     {
         base.Update();
     }

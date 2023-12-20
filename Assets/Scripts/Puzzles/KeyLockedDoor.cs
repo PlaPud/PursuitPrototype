@@ -7,7 +7,7 @@ public class KeyLockedDoor : DoorController
     [Header("Detector")]
     [SerializeField] ItemDetectorController detector;
 
-    void Update()
+    private new void Update()
     {
         if (detector.IsUnlocked && !IsOpen) 
         {

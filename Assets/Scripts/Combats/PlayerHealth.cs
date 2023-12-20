@@ -23,6 +23,7 @@ public class PlayerHealth : MonoBehaviour, IDataPersistence
     public Action<int> OnDamageTaken;
     public Action<int> OnHealthRegen;
     public Action<float> OnCountDownRegen;
+    public Action OnPlayerDied;
     
     private void Awake()
     {
@@ -74,6 +75,8 @@ public class PlayerHealth : MonoBehaviour, IDataPersistence
     {
         if (CurrentHealth > 0) return;
         _playerGO.gameObject.SetActive(false);
+        OnPlayerDied?.Invoke();
+
     }
 
     public void DamagePlayer(int damage)

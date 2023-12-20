@@ -26,9 +26,15 @@ public class CombatUIController : MonoBehaviour
     {
         //if (combatUis.Count <= 0) return;
         //combatUis.ForEach((img) => _imgs.Add(img.GetComponent<Image>()));
-        DisableEveryUI();
         EnemyAreaController.OnCombatStart += EnableEveryUI;
         EnemyAreaController.OnCombatEnd += DisableEveryUI;
+        StartCoroutine(_LateStart());
+    }
+
+    private IEnumerator _LateStart() 
+    {
+        yield return new WaitForSeconds(.005f);
+        DisableEveryUI();
     }
 
     void Update()

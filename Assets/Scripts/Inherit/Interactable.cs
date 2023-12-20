@@ -104,7 +104,16 @@ abstract public class Interactable : MonoBehaviour
 
         PlayerPushPull checkedPushPull = collision.gameObject.GetComponent<PlayerPushPull>();
 
-        if (checkedPushPull.IsFoundMoveable) return;
+        if (checkedPushPull.IsFoundMoveable)
+        {
+            PlayerCD = null;
+            _isInteract = false;
+            _isReadyToInteract = false;
+            _isKeyLock = false;
+            _holdTimer = HOLD_DOWN_TIME;
+            OnAnyExitInteractable?.Invoke(interactKey);
+            return;
+        };
 
         PlayerCD = collision;
 
