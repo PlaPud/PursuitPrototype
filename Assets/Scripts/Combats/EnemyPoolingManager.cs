@@ -24,6 +24,11 @@ public class EnemyPoolingManager : MonoBehaviour
         {
             GameObject newObj = Instantiate(enemyBotPrefab, transform);
             newObj.SetActive(false);
+            newObj.transform.position = new Vector3(
+                    newObj.transform.position.x, 
+                    newObj.transform.position.y, 
+                    0f
+                );
             _enemyPool.Add(newObj);
         }
     }
