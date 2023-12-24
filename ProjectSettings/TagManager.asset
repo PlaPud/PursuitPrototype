@@ -12,6 +12,7 @@ TagManager:
   - ClawMachine
   - ControlPanel
   - Elevator
+  - ClawMachineRail
   layers:
   - Default
   - TransparentFX

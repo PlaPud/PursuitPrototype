@@ -170,6 +170,12 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
     private void OnSprint()
     {
+        if (_playerPushPull.IsFoundMoveable) 
+        {
+            _isSprintPressed = false;
+            return;
+        }
+
         _isSprintPressed = Input.GetKey(KeyCode.LeftShift);
     }
 

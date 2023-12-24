@@ -13,10 +13,11 @@ public class EnemySpawnPoint : MonoBehaviour
 
     [field: Header("Enemy Spawning")]
     [field: SerializeField] public int enemyAmount { get; private set; } = 1;
-    [SerializeField] private float secToSpawn = 0.5f;
+    [SerializeField] private float secPerSpawn = 0.5f;
     [SerializeField] private float spawnDelay = 1f;
 
-    private bool _hasSpawned = false;
+    public bool HasSpawnedAll { get; private set; } = false;
+    public bool IsSpawned { get; private set; } = false;
 
     private Transform _spawnPos;
     private Collider2D _enemySpawnTrigger;
@@ -48,7 +49,8 @@ public class EnemySpawnPoint : MonoBehaviour
     private void _OverrideAreaClear()
     {
         _enemySpawnTrigger.enabled = false;
-        _hasSpawned = true;
+        IsSpawned = true;
+        HasSpawnedAll = true;
         _DespawnAll();
     }
 
@@ -66,7 +68,7 @@ public class EnemySpawnPoint : MonoBehaviour
 
     private void _CheckClear() 
     {
-        bool isCleared = _hasSpawned && !_enemySpawnTrigger.enabled && _enemiesInField.Count <= 0;
+        bool isCleared = HasSpawnedAll && !_enemySpawnTrigger.enabled && _enemiesInField.Count <= 0;
         IsEnemyInAreaClear = isCleared;
     }
 
@@ -91,7 +93,7 @@ public class EnemySpawnPoint : MonoBehaviour
             yield return new WaitForSeconds(secPerSpawn);
         }
 
-        _hasSpawned = true;
+        HasSpawnedAll = true;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -100,10 +102,11 @@ public class EnemySpawnPoint : MonoBehaviour
         StartCoroutine(
             HandleSpawn(
                 amount: enemyAmount, 
-                secPerSpawn: secToSpawn,
+                secPerSpawn: secPerSpawn,
                 spawnDelay: spawnDelay
             )
         );
+        IsSpawned = true;
         _enemySpawnTrigger.enabled = false;
         OnEnterCombat?.Invoke();
     }

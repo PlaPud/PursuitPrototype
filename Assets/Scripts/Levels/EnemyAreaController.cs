@@ -6,8 +6,7 @@ using UnityEngine;
 
 public class EnemyAreaController : MonoBehaviour
 {
-    public bool IsEnemyAllCleared;
-
+    public bool IsAllSpawnsCleared;
 
     private List<EnemySpawnPoint> _enemySpawns;
     private List<DoorController> _lockedDoors;
@@ -31,6 +30,12 @@ public class EnemyAreaController : MonoBehaviour
 
     void Update()
     {
+        if (IsAllSpawnsCleared) 
+        {
+            _enemySpawns.ForEach((enemySp) => enemySp.IsEnemyInAreaClear = true);
+            return;
+        }
+
         CheckLockDown();
         CheckEnemyAreaClear();
     }
@@ -38,7 +43,7 @@ public class EnemyAreaController : MonoBehaviour
     private void CheckLockDown()
     {
         bool anyTriggerGoesOff = _enemySpawns.Any(
-                (enemySp) => !enemySp.IsEnemyInAreaClear && enemySp.IsTriggerGoesOff
+                (enemySp) => enemySp.IsTriggerGoesOff && enemySp.IsSpawned
             );
 
         if (!anyTriggerGoesOff || IsLockedDown) return;
@@ -56,14 +61,16 @@ public class EnemyAreaController : MonoBehaviour
 
     private void CheckEnemyAreaClear() 
     {
-        if (IsEnemyAllCleared) return;
+        bool anyAreaNotCleared = _enemySpawns.Any(
+                (enemySp) => !enemySp.IsEnemyInAreaClear
+            );
 
-        bool anyAreaNotCleared = _enemySpawns.Any((enemySp) => !enemySp.IsEnemyInAreaClear);
+        IsAllSpawnsCleared = !anyAreaNotCleared;
 
-        IsEnemyAllCleared = !anyAreaNotCleared;
+        if (!IsAllSpawnsCleared || !IsLockedDown) return;
 
-        if (!IsEnemyAllCleared || !IsLockedDown) return;
         _UnlockAllDoors();
+
     }
     private void _UnlockAllDoors()
     {

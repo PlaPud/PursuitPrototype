@@ -5,8 +5,8 @@ using UnityEngine;
 public class Entry : Interactable
 {
     [SerializeField] Transform destTransform;
-
-    public override void HandleInteract()
+    
+    public override void HandleInteract()   
     {
         if (!ControllingManager.Instance.IsControllingCat) return;
 

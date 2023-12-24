@@ -50,7 +50,7 @@ MonoBehaviour:
   moveSpeed: 5
   detectionRadius: 1.25
   railCheckDistance: 0.5
-  clawEndOffset: 0
+  clawEndOffset: 2.12
   clawBody: {fileID: 2787024200112140682}
   clawMiddle: {fileID: 2874904748997834861}
   holdingPoint: {fileID: 9033491102979712194}
@@ -58,9 +58,9 @@ MonoBehaviour:
   layerToGrab:
     serializedVersion: 2
     m_Bits: 64
-  railLayer:
+  groundLayer:
     serializedVersion: 2
-    m_Bits: 2048
+    m_Bits: 64
 --- !u!1 &2018099299625707559
 GameObject:
   m_ObjectHideFlags: 0
@@ -133,7 +133,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1495563603
+  m_SortingLayerID: 1497740213
   m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: e96d57b5500853b4896599dc1629260f, type: 3}
@@ -286,7 +286,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1495563603
-  m_SortingLayer: 2
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_Sprite: {fileID: -6187689493690252440, guid: f86222826388a3c4f997592d95b2a77d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -387,7 +387,7 @@ LineRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1495563603
-  m_SortingLayer: 2
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_Positions:
   - {x: 0, y: 0, z: 0}
@@ -694,7 +694,7 @@ LineRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1495563603
-  m_SortingLayer: 2
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_Positions:
   - {x: 0, y: 0, z: 0}

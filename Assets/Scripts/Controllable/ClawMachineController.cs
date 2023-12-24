@@ -20,7 +20,7 @@ public class ClawMachineController : MonoBehaviour
     [SerializeField] private Transform  holdingPoint;
     [SerializeField] private Transform  wirePoint;
     [SerializeField] private LayerMask  layerToGrab;
-    [SerializeField] private LayerMask  railLayer;
+    [SerializeField] private LayerMask  groundLayer;
 
 
     private LineRenderer _wireLR;
@@ -101,9 +101,9 @@ public class ClawMachineController : MonoBehaviour
     {
         Collider2D clawMiddleCD = clawMiddle.GetComponent<Collider2D>();
         Rigidbody2D clawMiddleRB = clawMiddle.GetComponent<Rigidbody2D>();
-        bool cantMoveRight = !_hitRailRight && _moveX > 0;
-        bool cantMoveLeft = !_hitRailLeft && _moveX < 0;
-        bool cantMoveUp = clawMiddleCD.IsTouchingLayers(railLayer) && _moveY > 0;
+        bool cantMoveRight = _hitRailRight && !_hitRailRight.collider.CompareTag("ClawMachineRail") && _moveX > 0;
+        bool cantMoveLeft = _hitRailLeft && !_hitRailLeft.collider.CompareTag("ClawMachineRail") && _moveX < 0;
+        bool cantMoveUp = clawMiddleCD.IsTouchingLayers(groundLayer) && _moveY > 0;
 
         float appliedX = (cantMoveLeft || cantMoveRight) ? 0 : _moveX * moveSpeed;
         float appliedY = (cantMoveUp) ? 0 : _moveY * moveSpeed;
@@ -162,30 +162,30 @@ public class ClawMachineController : MonoBehaviour
             ).ToList();
 
         _hitRailMid = Physics2D.Raycast(
-                        clawBody.transform.position + Vector3.up * clawEndOffset,
-                        Vector2.up,
-                        Mathf.Infinity,
-                        railLayer
-                    );
+                            clawBody.transform.position + Vector3.up * clawEndOffset,
+                            Vector2.up,
+                            Mathf.Infinity,
+                            groundLayer
+                        );
         _hitRailLeft = Physics2D.Raycast(
-                        clawBody.transform.position - Vector3.right * railCheckDistance,
-                        Vector2.up,
-                        Mathf.Infinity,
-                        railLayer
-                    );
+                            clawBody.transform.position - Vector3.right * railCheckDistance + Vector3.up * clawEndOffset,
+                            Vector2.up,
+                            Mathf.Infinity,
+                            groundLayer
+                        );
         _hitRailRight = Physics2D.Raycast(
-                        clawBody.transform.position + Vector3.right * railCheckDistance,
-                        Vector2.up,
-                        Mathf.Infinity,
-                        railLayer
-                    );
+                            clawBody.transform.position + Vector3.right * railCheckDistance + Vector3.up * clawEndOffset,
+                            Vector2.up,
+                            Mathf.Infinity,
+                            groundLayer
+                        );
     }
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireCube(holdingPoint.position, Vector2.one * detectionRadius);
         Gizmos.DrawLine(clawBody.transform.position + Vector3.up * clawEndOffset, clawBody.transform.position + Vector3.up * clawEndOffset + Vector3.up * 10f);
-        Gizmos.DrawLine(clawBody.transform.position + Vector3.right * railCheckDistance, clawBody.transform.position + Vector3.right * railCheckDistance + Vector3.up * 10f);
-        Gizmos.DrawLine(clawBody.transform.position - Vector3.right * railCheckDistance, clawBody.transform.position - Vector3.right * railCheckDistance + Vector3.up * 10f);
+        Gizmos.DrawLine(clawBody.transform.position + Vector3.right * railCheckDistance + Vector3.up * clawEndOffset, clawBody.transform.position + Vector3.right * railCheckDistance + Vector3.up * 10f);
+        Gizmos.DrawLine(clawBody.transform.position - Vector3.right * railCheckDistance + Vector3.up * clawEndOffset, clawBody.transform.position - Vector3.right * railCheckDistance + Vector3.up * 10f);
     }
 
     private void FilteringMoveable()
@@ -245,7 +245,7 @@ public class ClawMachineController : MonoBehaviour
     }
     private void SetWireLength()
     {
-        if (_hitRailMid)
+        if (_hitRailMid.collider.CompareTag("ClawMachineRail"))
         {
             _wireLR.SetPosition(0, wirePoint.position);
             _wireLR.SetPosition(1, new Vector2 (

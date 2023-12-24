@@ -23,11 +23,9 @@ public class LevelController : MonoBehaviour, IDataPersistence
     {
         if (IsLevelComplete)
         {
-            if (enemyAreaCtrl) 
-            enemyAreaCtrl.IsEnemyAllCleared = true;
+            if (enemyAreaCtrl) enemyAreaCtrl.IsAllSpawnsCleared = true;
 
-            if (puzzleCompleteTrigger) 
-            puzzleCompleteTrigger.IsPlayerReached = true;
+            if (puzzleCompleteTrigger) puzzleCompleteTrigger.IsPlayerReached = true;
 
             return;
         }
@@ -57,7 +55,7 @@ public class LevelController : MonoBehaviour, IDataPersistence
     {
         if (!enemyAreaCtrl) return true;
 
-        if (enemyAreaCtrl.IsEnemyAllCleared) return true;  
+        if (enemyAreaCtrl.IsAllSpawnsCleared) return true;  
 
         return false;
     }
