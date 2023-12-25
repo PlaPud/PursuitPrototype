@@ -50,9 +50,10 @@ MonoBehaviour:
   moveSpeed: 5
   detectionRadius: 1.25
   railCheckDistance: 0.5
+  sideCheckSize: {x: 0.25, y: 1.92}
+  sideCheckDistance: 1
   clawEndOffset: 2.12
   clawBody: {fileID: 2787024200112140682}
-  clawMiddle: {fileID: 2874904748997834861}
   holdingPoint: {fileID: 9033491102979712194}
   wirePoint: {fileID: 4563248278170894077}
   layerToGrab:

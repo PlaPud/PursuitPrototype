@@ -15,6 +15,8 @@ public class BoxController : MonoBehaviour, IDataPersistence
     private FixedJoint2D _boxFJ;
     private RaycastHit2D _hitGround;
 
+    public bool IsGrounded => _hitGround;
+
     void Start()
     {
         _boxRB = GetComponent<Rigidbody2D>();

@@ -47,7 +47,7 @@ public class VCamPlayer : MonoBehaviour
     {
         ClawMachineController controlledClaw = ControllingManager.Instance.ClawMachineControlled;
         if (!controlledClaw) return;
-        _playerCam.Follow = controlledClaw.transform;
+        _playerCam.Follow = controlledClaw.GetComponentsInChildren<Transform>()[2].transform;
         _playerCam.m_Lens.OrthographicSize = normalOrthSize;
     }
 

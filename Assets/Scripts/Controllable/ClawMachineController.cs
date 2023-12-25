@@ -14,9 +14,10 @@ public class ClawMachineController : MonoBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float detectionRadius;
     [SerializeField] private float railCheckDistance;
+    [SerializeField] private Vector2 sideCheckSize;
+    [SerializeField] private float sideCheckDistance;
     [SerializeField] private float clawEndOffset;
     [SerializeField] private GameObject clawBody;
-    [SerializeField] private GameObject clawMiddle;
     [SerializeField] private Transform  holdingPoint;
     [SerializeField] private Transform  wirePoint;
     [SerializeField] private LayerMask  layerToGrab;
@@ -38,9 +39,13 @@ public class ClawMachineController : MonoBehaviour
     private Collider2D   _clawBodyCD;
     [NonSerialized] private List<Collider2D> _allEnteredCollider = new List<Collider2D>();
     [NonSerialized] private List<Collider2D> _filteredMoveables = new List<Collider2D>();
+
     private RaycastHit2D _hitRailMid;
     private RaycastHit2D _hitRailLeft;
     private RaycastHit2D _hitRailRight;
+
+    private Collider2D _holdingSideHitLeft;
+    private Collider2D _holdingSideHitRight;
 
     private Animator _clawBodyAnimator;
 
@@ -50,6 +55,10 @@ public class ClawMachineController : MonoBehaviour
     const string CLAW_HOLD = "ClawHold";
 
     public bool IsControlling => panel.IsControllingThis;
+
+    private bool _leftStuckOnHold => _holdingObject && _holdingSideHitLeft;
+    private bool _rightStuckOnHold => _holdingObject && _holdingSideHitRight;
+
 
     private void Awake()
     {
@@ -97,21 +106,18 @@ public class ClawMachineController : MonoBehaviour
         if (_isToggleHold && _filteredMoveables.Count > 0) _toToggleHold = true;
     }
 
-    private void HandleMove() 
+    private void HandleMove()
     {
-        Collider2D clawMiddleCD = clawMiddle.GetComponent<Collider2D>();
-        Rigidbody2D clawMiddleRB = clawMiddle.GetComponent<Rigidbody2D>();
-        bool cantMoveRight = _hitRailRight && !_hitRailRight.collider.CompareTag("ClawMachineRail") && _moveX > 0;
-        bool cantMoveLeft = _hitRailLeft && !_hitRailLeft.collider.CompareTag("ClawMachineRail") && _moveX < 0;
-        bool cantMoveUp = clawMiddleCD.IsTouchingLayers(groundLayer) && _moveY > 0;
+        bool cantMoveRight = (_hitRailRight && !_hitRailRight.collider.CompareTag("ClawMachineRail") || _rightStuckOnHold) && _moveX > 0;
+        bool cantMoveLeft = (_hitRailLeft && !_hitRailLeft.collider.CompareTag("ClawMachineRail") || _leftStuckOnHold) && _moveX < 0;
+        bool cantMoveDown = _holdingObject && _holdingObject.GetComponent<BoxController>().IsGrounded && _moveY < 00;
 
         float appliedX = (cantMoveLeft || cantMoveRight) ? 0 : _moveX * moveSpeed;
-        float appliedY = (cantMoveUp) ? 0 : _moveY * moveSpeed;
+        float appliedY =  (cantMoveDown) ? 0 : _moveY * moveSpeed;
 
         Vector2 appliedVelocity = new Vector2(appliedX, appliedY);
        
         _clawBodyRB.velocity = appliedVelocity;
-        clawMiddle.GetComponent<Rigidbody2D>().velocity = _clawBodyRB.velocity;
     }
 
     private void HandleIdle() 
@@ -179,9 +185,28 @@ public class ClawMachineController : MonoBehaviour
                             Mathf.Infinity,
                             groundLayer
                         );
+
+        if (!_holdingObject) return;
+
+        _holdingSideHitLeft = Physics2D.OverlapBox(
+                    clawBody.transform.position + Vector3.left * sideCheckDistance + Vector3.up * 1f,
+                    sideCheckSize,
+                    0f,
+                    groundLayer
+                );
+
+        _holdingSideHitRight = Physics2D.OverlapBox(
+                    clawBody.transform.position + Vector3.right * sideCheckDistance + Vector3.up * 1f,
+                    sideCheckSize,
+                    0f,
+                    groundLayer
+                );
+
     }
     private void OnDrawGizmos()
     {
+        Gizmos.DrawWireCube(clawBody.transform.position + Vector3.right * sideCheckDistance + Vector3.up * 1f, sideCheckSize);
+        Gizmos.DrawWireCube(clawBody.transform.position + Vector3.left * sideCheckDistance + Vector3.up * 1f, sideCheckSize);
         Gizmos.DrawWireCube(holdingPoint.position, Vector2.one * detectionRadius);
         Gizmos.DrawLine(clawBody.transform.position + Vector3.up * clawEndOffset, clawBody.transform.position + Vector3.up * clawEndOffset + Vector3.up * 10f);
         Gizmos.DrawLine(clawBody.transform.position + Vector3.right * railCheckDistance + Vector3.up * clawEndOffset, clawBody.transform.position + Vector3.right * railCheckDistance + Vector3.up * 10f);

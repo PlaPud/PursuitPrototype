@@ -108,15 +108,16 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
         if (ControllingManager.Instance.IsControllingCat)
         {
+            _playerRB.constraints = RigidbodyConstraints2D.FreezeRotation;
             OnWalk();
             OnJump();
             OnSprint();
             OnCrouch();
             OnSwing();
         }
-        else 
+        else
         {
-            WalkInput = 0f;
+            _FreezePlayer();
         }
 
         HandleFlipSprite();
@@ -124,6 +125,12 @@ public class PlayerController : IControllableOnGround, IDataPersistence
         AnimationStateMachineHandler();
 
         HandleDisable();
+    }
+
+    private void _FreezePlayer()
+    {
+        WalkInput = 0f;
+        _playerRB.constraints = RigidbodyConstraints2D.FreezeAll;
     }
 
     private void FixedUpdate()
