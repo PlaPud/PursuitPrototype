@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,6 +71,7 @@ public class EnemyController : MonoBehaviour
     private bool _isTeleportOut;
     private bool _isTeleportIn;
     private bool _isChangingWalkoutDir;
+    private bool _isSetExplosion;
 
     private Vector2 _playerHighGroundPos;
 
@@ -102,6 +104,8 @@ public class EnemyController : MonoBehaviour
     private const string ENEMY_JUMP = "EnemyBotJump";
     private const string ENEMY_TELEIN = "EnemyBotTeleIn";
     private const string ENEMY_TELEOUT = "EnemyBotTeleOut";
+
+    public Action OnDefeated;
 
     private void Awake()
     {
@@ -148,7 +152,7 @@ public class EnemyController : MonoBehaviour
 
     internal void HandlePatrol()
     {
-        float newChangeDirTime = Random.Range(3f, 5f);
+        float newChangeDirTime = UnityEngine.Random.Range(3f, 5f);
         _enemyRB.velocity = new Vector2(_currentEnemySpeed, _enemyRB.velocity.y);
 
         if (_changeDirTimer > 0f)
@@ -179,7 +183,7 @@ public class EnemyController : MonoBehaviour
 
     private void _GetNewChaseSpeed()
     {
-        _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
+        _chaseSpeed = UnityEngine.Random.Range(chaseSpeedLower, chaseSpeedUpper);
         _changeChaseSpeedTimer = changeChaseSpeedTime;
     }
 
@@ -210,8 +214,8 @@ public class EnemyController : MonoBehaviour
     {
         _isChangingWalkoutDir = true;
 
-        float newSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
-        int newDir = Random.Range(-1, 2);
+        float newSpeed = UnityEngine.Random.Range(chaseSpeedLower, chaseSpeedUpper);
+        int newDir = UnityEngine.Random.Range(-1, 2);
 
         _enemyRB.velocity = new Vector2(newSpeed * newDir, _enemyRB.velocity.y);
         yield return new WaitForSeconds(0.5f);
@@ -253,7 +257,7 @@ public class EnemyController : MonoBehaviour
 
         yield return new WaitForSeconds(.5f);
 
-        _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
+        _confirmTeleportTimer = UnityEngine.Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
         CurrentState = EnemyState.Chase;
         _isTeleportIn = false;
     }
@@ -308,8 +312,13 @@ public class EnemyController : MonoBehaviour
     }
     internal void HandleDefeated()
     {
+        if (!gameObject.activeSelf) return;
+
+        OnDefeated?.Invoke();
         gameObject.SetActive(false);
     }
+
+    
 
     private IEnumerator _ChangeTimeAndDir(float newChangeDirTime)
     {
@@ -561,9 +570,9 @@ public class EnemyController : MonoBehaviour
         IsPlayerInRange = false;
         IsChangingDir = false;
 
-        _walkSpeed = Random.Range(walkSpeedLower, walkSpeedUpper);
-        _chaseSpeed = Random.Range(chaseSpeedLower, chaseSpeedUpper);
-        _confirmTeleportTimer = Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
+        _walkSpeed = UnityEngine.Random.Range(walkSpeedLower, walkSpeedUpper);
+        _chaseSpeed = UnityEngine.Random.Range(chaseSpeedLower, chaseSpeedUpper);
+        _confirmTeleportTimer = UnityEngine.Random.Range(waitForTeleportTimeLower, waitForTeleportTimeUpper);
 
         _enemySR.color = Color.gray;
         _changeChaseSpeedTimer = changeChaseSpeedTime;

@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.SearchService;
+using UnityEngine.SceneManagement;
+
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -32,8 +35,7 @@ public class GameManager : MonoBehaviour
 
     private void HandlePlayerDeath() 
     {
-        // Reload Scene
-        DataPersistenceManager.Instance.LoadGameData();
+        SceneManager.LoadScene("Loading");
     }
 
     private void HandleOnPause() 

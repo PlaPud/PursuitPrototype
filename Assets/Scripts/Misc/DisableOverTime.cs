@@ -8,12 +8,13 @@ public class DisableOverTime : MonoBehaviour
 
     private void OnEnable()
     {
-        _DisableOverTime();
+        StartCoroutine(_DisableOverTime());
     }
 
     private IEnumerator _DisableOverTime() 
     {
         yield return new WaitForSeconds(lifeTime);
+        Debug.Log("Disabled");
         gameObject.SetActive(false);    
     }
 

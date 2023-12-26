@@ -26,8 +26,23 @@ public class BoxController : MonoBehaviour, IDataPersistence
     void Update()
     {
         RayGroundCheck();
+        HandleFreezePosition();
         HandleOffGround();
     }
+
+    private void HandleFreezePosition()
+    {
+        if (!_boxFJ.enabled && IsGrounded)
+        {
+            _boxRB.constraints = 
+                  RigidbodyConstraints2D.FreezePositionX 
+                | RigidbodyConstraints2D.FreezeRotation;
+            return;
+        }
+
+        _boxRB.constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
     private void RayGroundCheck()
     {
         _hitGround = Physics2D.BoxCast(

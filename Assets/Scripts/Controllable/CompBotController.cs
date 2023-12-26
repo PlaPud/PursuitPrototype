@@ -38,7 +38,7 @@ public class CompBotController : IControllableOnGround
 
     private float _walkInput;
     private bool _isJumpPressed;
-    private bool _isShootPressed;
+    private bool _isShootHold;
     private bool _isLandingNewGround;
 
     private bool _toJump;
@@ -55,15 +55,15 @@ public class CompBotController : IControllableOnGround
 
     private float _shootAngle;
 
-    private Rigidbody2D _compBotRigidBody;
+    private Rigidbody2D _compBotRB;
     private Animator _compBotAnimator;
     private LineRenderer _compBotLineRenderer;
     private PlayerPushPull _playerPushPull;
 
-    private String _currentAnimationState;
-    private const String COMPBOT_IDLE = "CompBotIdle";
-    private const String COMPBOT_WALK = "CompBotWalk";
-    private const String COMPBOT_JUMP = "CompBotJump";
+    private string _currentAnimationState;
+    private const string COMPBOT_IDLE = "CompBotIdle";
+    private const string COMPBOT_WALK = "CompBotWalk";
+    private const string COMPBOT_JUMP = "CompBotJump";
 
     private float _gravityScale;
     private Vector2 _gravityDirection = Vector2.down;
@@ -74,7 +74,7 @@ public class CompBotController : IControllableOnGround
 
     private void Awake()
     {
-        _compBotRigidBody = GetComponent<Rigidbody2D>();
+        _compBotRB = GetComponent<Rigidbody2D>();
         _compBotAnimator = GetComponent<Animator>();
         _compBotLineRenderer = GetComponent<LineRenderer>();
         _playerPushPull = GetComponent<PlayerPushPull>();
@@ -82,8 +82,8 @@ public class CompBotController : IControllableOnGround
 
     void Start()
     {
-        _gravityScale = _compBotRigidBody.gravityScale;
-        _compBotRigidBody.gravityScale = 0;
+        _gravityScale = _compBotRB.gravityScale;
+        _compBotRB.gravityScale = 0;
         _currentPlane = ClimbPlane.Ground;
     }
 
@@ -91,16 +91,18 @@ public class CompBotController : IControllableOnGround
     {
         RayCheck();
 
+        if (!IsControlling) _FreezeCompBot();
+
         if (!CompBotManager.Instance.IsControlCompBot || !IsControlling) return;
 
-        //if (ControllingManager.Instance.CurrentControl == ControllingManager.Control.CompBot) 
-        //{
+        _FreezeRotation();
+
         OnWalk();
         OnJump();
         OnShootHook();
-        //}
 
-        HandleGravityState();
+        CheckGravityState();
+
         HandleSpriteRotate();
         HandleFlipSprite();
 
@@ -112,10 +114,10 @@ public class CompBotController : IControllableOnGround
         HandleWalk();
         HandleJump();
         HandleShootHook();
-        _compBotRigidBody.AddForce(_gravityDirection * _gravityScale);
+        HandleGravity();
     }
 
-    private void HandleGravityState()
+    private void CheckGravityState()
     {
         Vector2[] directions = new Vector2[4];
         directions[0] = Vector2.right;
@@ -171,57 +173,77 @@ public class CompBotController : IControllableOnGround
 
         IsGrounded = _groundHit;
     }
-    private void OnShootHook()
+
+    private void OnWalk()
     {
         if (!_enableInput) return;
 
-        _isShootPressed = Input.GetKeyDown(KeyCode.Mouse0);
-        if (_isShootPressed && !_toShoot && _IsRayHitWall(grapplerHitObject))
+        if (_currentPlane == ClimbPlane.LeftWall || _currentPlane == ClimbPlane.RightWall)
         {
-            _hookPosition = _aimingController.AimingPositionGlobal;
-            _hookDirection = _aimingController.AimingCircleDirection;
-            _toShoot = true;
+            _walkInput = Input.GetAxis("Vertical");
+            return;
+        }
+        _walkInput = Input.GetAxis("Horizontal");
+    }
+
+    private void OnJump()
+    {
+        if (!_enableInput) return;
+
+        _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
+        if (_isJumpPressed && IsGrounded)
+        {
+            _toJump = true;
         }
     }
+
+    private void OnShootHook()
+    {
+        _isShootHold = Input.GetKey(KeyCode.Mouse0);
+    }
+
+    private void HandleGravity() => _compBotRB.AddForce(_gravityDirection * _gravityScale);
+ 
     private void HandleShootHook()
     {
-        if (!_toShoot)
+        if (_isShootHold && !_grapplerHit) return;
+
+        if (_isShootHold && !_isOnHook) 
         {
+            _isOnHook = true;
             grapplerHitObject = _grapplerHit;
-            _isHit = grapplerHitObject;
-            _shootAngle = _aimingController.AimingAngle;
-            _isLandingNewGround = false;
         }
 
-        if (grapplerHitObject && _toShoot)
+        if (_isShootHold && _isOnHook)
         {
             _enableInput = false;
+
             Vector2 target = grapplerHitObject.point;
-            _compBotLineRenderer.SetPosition(0, transform.position);
-            _compBotLineRenderer.SetPosition(1, target);
-            _compBotRigidBody.MovePosition(
-                    Vector2.MoveTowards(
-                            current: transform.position,
-                            target: target,
-                            maxDistanceDelta: Time.deltaTime * grapplingSpeed
-                        )
-                );
-            StartCoroutine(GrapplerStartCoroutine());
-            if (IsGrounded && _isLandingNewGround)
-            {
-                _enableInput = true;
-                _toShoot = false;
-                _compBotLineRenderer.SetPosition(0, Vector3.zero);
-                _compBotLineRenderer.SetPosition(1, Vector3.zero);
-            }
+            _SetLineToTarget(target);
+
+            _compBotRB.MovePosition(
+                Vector2.MoveTowards(
+                    current: transform.position,
+                    target: target,
+                    maxDistanceDelta: Time.deltaTime * grapplingSpeed
+                )
+            );
         }
+
+        if (!_isShootHold && _isOnHook)
+        {
+            _enableInput = true;
+            _isOnHook = false;
+            _RemoveAndDisableLine();
+        }
+
     }
 
     private void HandleJump()
     {
         if (IsGrounded && _toJump)
         {
-            _compBotRigidBody.AddForce(
+            _compBotRB.AddForce(
                     _groundHit.normal.normalized * jumpSpeed,
                     ForceMode2D.Impulse
                 );
@@ -233,7 +255,7 @@ public class CompBotController : IControllableOnGround
             ChangeAnimationState(COMPBOT_JUMP);
         }
     }
-
+    
     private void HandleWalk()
     {
         float resultSpeed = _walkInput * walkSpeed;
@@ -241,13 +263,13 @@ public class CompBotController : IControllableOnGround
         if (_currentPlane == ClimbPlane.Ground || _currentPlane == ClimbPlane.Ceiling)
         {
             float accel = (Mathf.Abs(resultSpeed) > .01f ? maxAccelerate : maxDeccelerate);
-            float speedDif = resultSpeed - _compBotRigidBody.velocity.x;
+            float speedDif = resultSpeed - _compBotRB.velocity.x;
 
             float movement = Mathf.Pow(
                     Mathf.Abs(speedDif) * accel, velocityPower
                 ) * Mathf.Sign(speedDif);
-            _compBotRigidBody.AddForce(movement * Vector2.right);
-            if (IsGrounded && Mathf.Abs(_compBotRigidBody.velocity.x) > 0.5f)
+            _compBotRB.AddForce(movement * Vector2.right);
+            if (IsGrounded && Mathf.Abs(_compBotRB.velocity.x) > 0.5f)
             {
                 ChangeAnimationState(COMPBOT_WALK);
             }
@@ -255,28 +277,28 @@ public class CompBotController : IControllableOnGround
         else
         {
             float accel = (Mathf.Abs(resultSpeed) > .01f ? maxAccelerate : maxDeccelerate);
-            float speedDif = resultSpeed - _compBotRigidBody.velocity.y;
+            float speedDif = resultSpeed - _compBotRB.velocity.y;
 
             float movement = Mathf.Pow(
                     Mathf.Abs(speedDif) * accel, velocityPower
                 ) * Mathf.Sign(speedDif);
-            _compBotRigidBody.AddForce(movement * Vector2.up);
-            if (IsGrounded && Mathf.Abs(_compBotRigidBody.velocity.y) > 0.5f)
+            _compBotRB.AddForce(movement * Vector2.up);
+            if (IsGrounded && Mathf.Abs(_compBotRB.velocity.y) > 0.5f)
             {
                 ChangeAnimationState(COMPBOT_WALK);
             }
         }
 
     }
-
+    
     private void HandleIdle()
     {
-        if (Vector3.Magnitude(_compBotRigidBody.velocity) < 0.5f  && IsGrounded)
+        if (Vector3.Magnitude(_compBotRB.velocity) < 0.5f  && IsGrounded)
         {
             ChangeAnimationState(COMPBOT_IDLE);
         }
     }
-
+    
     private void HandleFlipSprite()
     {
         if (_playerPushPull.IsGrabbing) return;
@@ -286,32 +308,32 @@ public class CompBotController : IControllableOnGround
             case ClimbPlane.Ground:
                 {
                     transform.localScale =
-                        _compBotRigidBody.velocity.x > 0.5f ?
-                        Vector3.one : _compBotRigidBody.velocity.x < -0.5f ?
+                        _compBotRB.velocity.x > 0.5f ?
+                        Vector3.one : _compBotRB.velocity.x < -0.5f ?
                         new Vector3(-1, 1, 1) : transform.localScale;
                     break;
                 }
             case ClimbPlane.Ceiling:
                 {
                     transform.localScale =
-                        _compBotRigidBody.velocity.x > 0.5f ?
-                        new Vector3(-1, 1, 1) : _compBotRigidBody.velocity.x < -0.5f ?
+                        _compBotRB.velocity.x > 0.5f ?
+                        new Vector3(-1, 1, 1) : _compBotRB.velocity.x < -0.5f ?
                         Vector3.one : transform.localScale;
                     break;
                 }
             case ClimbPlane.LeftWall:
                 {
                     transform.localScale =
-                        _compBotRigidBody.velocity.y > 0.5f ?
-                        new Vector3(-1, 1, 1) : _compBotRigidBody.velocity.y < -0.5f ?
+                        _compBotRB.velocity.y > 0.5f ?
+                        new Vector3(-1, 1, 1) : _compBotRB.velocity.y < -0.5f ?
                         Vector3.one : transform.localScale;
                     break;
                 }
             case ClimbPlane.RightWall:
                 {
                     transform.localScale =
-                            _compBotRigidBody.velocity.y > 0.5f ?
-                            Vector3.one : _compBotRigidBody.velocity.y < -0.5f ?
+                            _compBotRB.velocity.y > 0.5f ?
+                            Vector3.one : _compBotRB.velocity.y < -0.5f ?
                             new Vector3(-1, 1, 1) : transform.localScale;
                     break;
                 }
@@ -345,29 +367,6 @@ public class CompBotController : IControllableOnGround
         }
     }
 
-    private void OnWalk()
-    {
-        if (!_enableInput) return;
-
-        if (_currentPlane == ClimbPlane.LeftWall || _currentPlane == ClimbPlane.RightWall)
-        {
-            _walkInput = Input.GetAxis("Vertical");
-            return;
-        }
-        _walkInput = Input.GetAxis("Horizontal");
-    }
-    private void OnJump()
-    {
-        if (!_enableInput) return;
-
-        _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
-        if (_isJumpPressed && IsGrounded)
-        {
-            _toJump = true;
-        }
-    }
-
-
     private void ChangeAnimationState(string newAnimationState)
     {
         if (_currentAnimationState == newAnimationState) return;
@@ -377,16 +376,35 @@ public class CompBotController : IControllableOnGround
         _currentAnimationState = newAnimationState;
     }
 
+    private void _RemoveAndDisableLine()
+    {
+        _compBotLineRenderer.SetPosition(0, Vector3.zero);
+        _compBotLineRenderer.SetPosition(1, Vector3.zero);
+        _compBotLineRenderer.enabled = false;
+    }
+
+    private void _SetLineToTarget(Vector2 target)
+    {
+        _compBotLineRenderer.enabled = true;
+        _compBotLineRenderer.SetPosition(0, transform.position);
+        _compBotLineRenderer.SetPosition(1, target);
+    }
+
+    private void _FreezeCompBot()
+    {
+        _walkInput = 0f;
+        _compBotRB.constraints = 
+              RigidbodyConstraints2D.FreezeRotation 
+            | RigidbodyConstraints2D.FreezePositionX;
+    }
+    
+    private void _FreezeRotation() => _compBotRB.constraints = RigidbodyConstraints2D.FreezeRotation;
+    
+    private bool _IsRayHitWall(RaycastHit2D hit) => hit && hit.collider && !hit.collider.CompareTag("Moveable");
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(transform.position, maxGrapplingDistance);
     }
 
-    IEnumerator GrapplerStartCoroutine() 
-    {
-        yield return new WaitForSeconds(.1f);
-        _isLandingNewGround = true;
-    }
-
-    private bool _IsRayHitWall(RaycastHit2D hit) => hit && hit.collider && !hit.collider.CompareTag("Moveable");
 }

@@ -130,7 +130,9 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     private void _FreezePlayer()
     {
         WalkInput = 0f;
-        _playerRB.constraints = RigidbodyConstraints2D.FreezeAll;
+        _playerRB.constraints = 
+              RigidbodyConstraints2D.FreezeRotation 
+            | RigidbodyConstraints2D.FreezePositionX;
     }
 
     private void FixedUpdate()

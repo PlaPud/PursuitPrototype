@@ -12,7 +12,7 @@ abstract public class Interactable : MonoBehaviour
     [SerializeField] private Interact typeOfInteract = Interact.PressToInteract;
     [SerializeField] private bool compBotInteractable = false;
 
-    private const float HOLD_DOWN_TIME = 1f;
+    private const float HOLD_DOWN_TIME = 0.8f;
 
     protected private bool _isInteract;
     protected private bool _isReadyToInteract;

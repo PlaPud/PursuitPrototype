@@ -172,12 +172,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0311ba9a660fdc94a96d0bc816d94998, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxid: 
+  boxid: B-7874b130-338e-44e2-9e2c-525ea710c908
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  boxCastDistance: 0.6
-  boxCastSize: {x: 1, y: 0.15}
+  boxCastDistance: 0.57
+  boxCastSize: {x: 0.91, y: 0.15}
 --- !u!255 &5920669228820288496
 FixedJoint2D:
   m_ObjectHideFlags: 0

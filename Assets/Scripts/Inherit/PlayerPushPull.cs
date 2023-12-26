@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayerPushPull : MonoBehaviour
 {
-    private const float HOLD_DOWN_TIME = 1f;
+    private const float HOLD_DOWN_TIME = 0.8f;
     private const KeyCode KEY_TO_HOLD = KeyCode.E;
 
     [Header("Check Moveable")]
@@ -30,8 +30,6 @@ public class PlayerPushPull : MonoBehaviour
     private float _localScaleXSign => Mathf.Sign(transform.localScale.x);
     public bool IsGrabbing => _moveableObject != null;
     public bool IsFoundMoveable => _hitGroundForward && _hitGroundForward.collider.CompareTag("Moveable");
-    // Need To Check Controlling Which one Main or CompBot
-    private bool _isFoundMoveable;
     private bool _isControllingMain => ControllingManager.Instance.IsControllingCat;
     private bool _isControllingCompBot => ControllingManager.Instance.IsControllingCompBot;
 

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6922700035539795678}
   - component: {fileID: 3381957293954453452}
   - component: {fileID: 9055300054094313993}
+  - component: {fileID: -8369701989375545790}
   - component: {fileID: 5000366296617268712}
   m_Layer: 12
   m_Name: EneymyBot
@@ -201,6 +202,18 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4096
   CurrentState: 1
+--- !u!114 &-8369701989375545790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4908241049256359014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66ff8aada80f9e44995957330c6260c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!95 &5000366296617268712
 Animator:
   serializedVersion: 5
