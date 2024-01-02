@@ -56,8 +56,8 @@ public class ClawMachineController : MonoBehaviour
 
     public bool IsControlling => panel.IsControllingThis;
 
-    private bool _leftStuckOnHold => _holdingObject && _holdingSideHitLeft;
-    private bool _rightStuckOnHold => _holdingObject && _holdingSideHitRight;
+    private bool _leftStuckOnHold => _holdingObject && _holdingSideHitLeft && !_holdingSideHitLeft.CompareTag("Moveable");
+    private bool _rightStuckOnHold => _holdingObject && _holdingSideHitRight && !_holdingSideHitRight.CompareTag("Moveable");
 
 
     private void Awake()

@@ -46,7 +46,7 @@ public class CombatUIController : MonoBehaviour
         _playerHeadImage.enabled = false;
         _healthBarUI.DisableUI();
         _ammoUI.DisableUI();
-        _regenCircleUI.DisableUI();
+        _regenCircleUI.DisableUI();   
     }
 
     private void EnableEveryUI()
@@ -55,6 +55,12 @@ public class CombatUIController : MonoBehaviour
         _healthBarUI.EnableUI();
         _ammoUI.EnableUI();
         _regenCircleUI.EnableUI();
+    }
+
+    private void OnDestroy()
+    {
+        EnemyAreaController.OnCombatStart -= EnableEveryUI;
+        EnemyAreaController.OnCombatEnd -= DisableEveryUI;
     }
 
 }

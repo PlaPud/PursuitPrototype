@@ -25,7 +25,7 @@ public class KeyItemController : MonoBehaviour, IDataPersistence
 
     private void Start()
     {
-
+        _itemTrigger.enabled = false;
     }
 
     internal void Update()
@@ -36,8 +36,7 @@ public class KeyItemController : MonoBehaviour, IDataPersistence
     private void CheckOnCollect() 
     {
         gameObject.SetActive(!_isCollected);
-        //_itemSR.enabled = !_isCollected;
-        //_itemTrigger.enabled = !_isCollected;
+        if (gameObject.activeSelf) _itemTrigger.enabled = true;
     }
 
     [ContextMenu("Generate GUID for This Key Item")]

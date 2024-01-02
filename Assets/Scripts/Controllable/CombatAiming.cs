@@ -29,4 +29,10 @@ public class CombatAiming : AimingController
         List<SpriteRenderer> _allSprite = arrow.GetComponentsInChildren<SpriteRenderer>().ToList();
         _allSprite.ForEach(sprite => { sprite.enabled = false; });
     }
+
+    private void OnDestroy()
+    {
+        EnemyAreaController.OnCombatStart -= EnableAiming;
+        EnemyAreaController.OnCombatEnd -= DisableAiming;
+    }
 }
