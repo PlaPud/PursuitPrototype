@@ -37,4 +37,9 @@ public class SavingUI : MonoBehaviour
         _anim.enabled = false;
         _tmpText.enabled = false;
     }
+
+    private void OnDestroy()
+    {
+        CheckPoint.OnSave -= PlaySavingAnimation;
+    }
 }

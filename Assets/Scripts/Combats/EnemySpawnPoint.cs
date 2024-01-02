@@ -15,6 +15,7 @@ public class EnemySpawnPoint : MonoBehaviour
     [field: SerializeField] public int enemyAmount { get; private set; } = 1;
     [SerializeField] private float secPerSpawn = 0.5f;
     [SerializeField] private float spawnDelay = 1f;
+    [SerializeField] private float spawnWarningDelay = 0.25f;
 
     public bool HasSpawnedAll { get; private set; } = false;
     public bool IsSpawned { get; private set; } = false;
@@ -27,6 +28,8 @@ public class EnemySpawnPoint : MonoBehaviour
     public bool IsTriggerGoesOff => !_enemySpawnTrigger.enabled;
 
     public static Action OnEnterCombat;
+
+    public Action OnBeforeSpawn;
 
     private void Awake()
     {
@@ -78,6 +81,10 @@ public class EnemySpawnPoint : MonoBehaviour
 
         for (int i = 0; i < amount; i++) 
         {
+            OnBeforeSpawn?.Invoke();
+            
+            yield return new WaitForSeconds(spawnWarningDelay);
+            
             GameObject newObj = EnemyPoolingManager.Instance.GetEnemyFromPool();
 
             if (!newObj)

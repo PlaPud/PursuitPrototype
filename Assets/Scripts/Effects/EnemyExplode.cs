@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class EnemyExplode : MonoBehaviour
 {
-
     private EnemyController _enemy;
 
     private void Awake()

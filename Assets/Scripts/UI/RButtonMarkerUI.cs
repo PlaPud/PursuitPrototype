@@ -149,4 +149,9 @@ public class RButtonMarkerUI : MonoBehaviour
             buttonTransform.gameObject.SetActive(true);
         }
     }
+
+    private void OnDestroy()
+    {
+        RButtonOverlay.OnFillUnfillOverlay -= HandleFillUnfill;
+    }
 }

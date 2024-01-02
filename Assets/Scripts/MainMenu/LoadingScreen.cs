@@ -8,7 +8,7 @@ public class LoadingScreen : MonoBehaviour
 {
     [SerializeField] RectTransform panel;
     [SerializeField] RectTransform loadingTMP;
-    //[SerializeField] RectTransform loadingIcon;
+
     private bool _isLoading = false;
 
     void Start()
@@ -31,6 +31,7 @@ public class LoadingScreen : MonoBehaviour
         {
             Debug.Log(gameScene.progress);
             await Task.Delay(100);
+
         } while (gameScene.progress < 0.9f);
 
         gameScene.allowSceneActivation = true;
