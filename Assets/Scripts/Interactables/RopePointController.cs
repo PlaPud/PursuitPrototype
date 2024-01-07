@@ -69,7 +69,6 @@ public class RopePoint : MonoBehaviour
 
     private void CheckEnableOutline() 
     {
-
         if (!_isPlayerAboveRopePoint && _isPlayerFacingThis || _isUsing)
         {
             _outline.enabled = true;

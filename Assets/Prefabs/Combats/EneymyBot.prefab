@@ -180,8 +180,8 @@ MonoBehaviour:
   chaseSpeedUpper: 16
   changeChaseSpeedTime: 2
   jumpForce: 6
-  waitForTeleportTimeLower: 2
-  waitForTeleportTimeUpper: 4
+  waitForTeleportTimeLower: 1
+  waitForTeleportTimeUpper: 3
   rangeToAttack: 1.25
   damageRadius: 0.65
   chargeAttackTime: 0.125

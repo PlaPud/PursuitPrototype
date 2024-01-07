@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/UIScreens/Loading.unity
     guid: d8cbecc8c40b7364c8f326c197b67588
+  - enabled: 1
+    path: Assets/Scenes/UIScreens/GameEnd.unity
+    guid: dbfa6daf6e5b7394c84b9eef9b492303
   m_configObjects: {}

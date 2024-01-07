@@ -28,6 +28,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     [SerializeField] private float aboveCastDistance;
 
     [field: Header("RopePoints")]
+    [SerializeField] private LayerMask ropePointLayer;
     [field: SerializeField] public float PlayerRopeRadius { get; private set; }
     [SerializeField] private float ropeBoxWidth;
     [SerializeField] private float swingForce;
@@ -168,7 +169,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
                 angle: 0f,
                 direction: new Vector2(transform.localScale.x, 0f),
                 distance: PlayerRopeRadius,
-                layerMask: groundLayer
+                layerMask: ropePointLayer
             );
     }
     private void OnWalk()
