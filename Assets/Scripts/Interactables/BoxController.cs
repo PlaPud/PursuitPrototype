@@ -6,6 +6,7 @@ public class BoxController : MonoBehaviour, IDataPersistence
 {
     [Header("BoxID")]
     [SerializeField] private string boxid;
+
     [Header("Ground Check")]
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float boxCastDistance;

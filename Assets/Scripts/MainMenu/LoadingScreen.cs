@@ -9,7 +9,6 @@ public class LoadingScreen : MonoBehaviour
     [SerializeField] RectTransform panel;
     [SerializeField] RectTransform loadingTMP;
 
-    private bool _isLoading = false;
 
     void Start()
     {
@@ -23,7 +22,6 @@ public class LoadingScreen : MonoBehaviour
 
     private async void _LoadSavedGameScene() 
     {
-        _isLoading = true;
         AsyncOperation gameScene = SceneManager.LoadSceneAsync("Stage1", mode: LoadSceneMode.Additive);
         gameScene.allowSceneActivation = false;
 
@@ -35,10 +33,12 @@ public class LoadingScreen : MonoBehaviour
         } while (gameScene.progress < 0.9f);
 
         gameScene.allowSceneActivation = true;
+        
         await Task.Delay(3000);
+        
         panel.gameObject.SetActive(false);
         loadingTMP.gameObject.SetActive(false);
-        _isLoading = false;
+
         SceneManager.UnloadSceneAsync("Loading");
     }
 }

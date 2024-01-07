@@ -45,12 +45,13 @@ public class CompBotController : IControllableOnGround
     private bool _toShoot;
 
     private RaycastHit2D _groundHit;
-    private RaycastHit2D _grapplerHit;
+    public RaycastHit2D GrapplerHit { get; private set; }
+
     private RaycastHit2D grapplerHitObject;
 
     private Vector2 _hookDirection;
     private Vector2 _hookPosition;
-    private bool _isOnHook;
+    public bool IsOnHook { get; private set; }
     private bool _isHit;
 
     private float _shootAngle;
@@ -93,7 +94,11 @@ public class CompBotController : IControllableOnGround
 
         if (!IsControlling) _FreezeCompBot();
 
-        if (!CompBotManager.Instance.IsControlCompBot || !IsControlling) return;
+        if (!CompBotManager.Instance.IsControlCompBot || !IsControlling)
+        {
+            _ResetBools();
+            return;
+        }
 
         _FreezeRotation();
 
@@ -164,7 +169,8 @@ public class CompBotController : IControllableOnGround
                         direction: _gravityDirection, distance: castDistance,
                         layerMask: groundLayer
                    );
-        _grapplerHit = Physics2D.Raycast(
+
+        GrapplerHit = Physics2D.Raycast(
                     origin: transform.position,
                     direction: _aimingController.AimingCircleDirection.normalized * maxGrapplingDistance,
                     distance: maxGrapplingDistance,
@@ -206,15 +212,15 @@ public class CompBotController : IControllableOnGround
  
     private void HandleShootHook()
     {
-        if (_isShootHold && !_grapplerHit) return;
+        if (_isShootHold && !GrapplerHit) return;
 
-        if (_isShootHold && !_isOnHook) 
+        if (_isShootHold && !IsOnHook) 
         {
-            _isOnHook = true;
-            grapplerHitObject = _grapplerHit;
+            IsOnHook = true;
+            grapplerHitObject = GrapplerHit;
         }
 
-        if (_isShootHold && _isOnHook)
+        if (_isShootHold && IsOnHook)
         {
             _enableInput = false;
 
@@ -230,10 +236,10 @@ public class CompBotController : IControllableOnGround
             );
         }
 
-        if (!_isShootHold && _isOnHook)
+        if (!_isShootHold && IsOnHook)
         {
             _enableInput = true;
-            _isOnHook = false;
+            IsOnHook = false;
             _RemoveAndDisableLine();
         }
 
@@ -389,7 +395,15 @@ public class CompBotController : IControllableOnGround
         _compBotLineRenderer.SetPosition(0, transform.position);
         _compBotLineRenderer.SetPosition(1, target);
     }
-
+    private void _ResetBools()
+    {
+        _toJump = false;
+        _toShoot = false;
+        _isJumpPressed = false;
+        _isShootHold = false;
+        _isLandingNewGround = false;
+        _isHit = false;
+    }
     private void _FreezeCompBot()
     {
         _walkInput = 0f;

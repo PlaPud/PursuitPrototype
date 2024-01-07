@@ -12,6 +12,8 @@ public class PlateController : MonoBehaviour
 
     public bool IsPuzzleComplete;
 
+    private List<GameObject> _onPlateObjs = new List<GameObject>();
+
     [SerializeField] private DoorController targetDoor;
 
     public bool IsPressing { get; internal set; } = false;
@@ -51,11 +53,14 @@ public class PlateController : MonoBehaviour
         targetDoor.SetOpenDoor();
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        bool isPressing = 
+        bool isPressing =
             collision.gameObject.layer == PLAYER_LAYER || collision.CompareTag("Moveable");
         if (!isPressing) return;
+
+        _onPlateObjs.Add(collision.gameObject);
+        
         IsPressing = true;
     }
 
@@ -63,8 +68,12 @@ public class PlateController : MonoBehaviour
     {
         bool isObjectExit =
             collision.gameObject.layer == PLAYER_LAYER || collision.CompareTag("Moveable");
+
         if (!isObjectExit) return;
-        IsPressing = false;
+
+        _onPlateObjs.Remove(collision.gameObject);
+        
+        if (_onPlateObjs.Count <= 0) IsPressing = false;
     }
 
     private void _ChangeAnimationState(string newState) 

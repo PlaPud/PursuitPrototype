@@ -29,7 +29,6 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
     [field: Header("RopePoints")]
     [field: SerializeField] public float PlayerRopeRadius { get; private set; }
-    [SerializeField] private LayerMask ropePointLayer;
     [SerializeField] private float ropeBoxWidth;
     [SerializeField] private float swingForce;
     [SerializeField] private float maxSwingSpeed;
@@ -169,7 +168,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
                 angle: 0f,
                 direction: new Vector2(transform.localScale.x, 0f),
                 distance: PlayerRopeRadius,
-                layerMask: ropePointLayer
+                layerMask: groundLayer
             );
     }
     private void OnWalk()
@@ -192,7 +191,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         _coyoteTimer = IsGrounded ? coyoteJumpTime : _coyoteTimer - Time.deltaTime;
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
-        if (_isJumpPressed && !_toJump && (IsGrounded || IsTouchWall || _coyoteTimer > 0))
+        if (!IsCrouching && _isJumpPressed && !_toJump && (IsGrounded || IsTouchWall || _coyoteTimer > 0))
         {
             _toJump = true;
         }
@@ -201,7 +200,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     private void OnCrouch()
     {
         _isCrouchPressed = Input.GetKeyDown(KeyCode.LeftControl);
-        if (_isCrouchPressed && !_toToggleCrouch)
+        if (IsGrounded && _isCrouchPressed && !_toToggleCrouch && !_toJump)
         {
             _toToggleCrouch = true;
         }
@@ -318,10 +317,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
             );
 
 
-        if (IsTouchWall &&
-            !IsGrounded &&
-            _playerRB.velocity.y < -0.5
-            )
+        if (IsTouchWall && !IsGrounded && _playerRB.velocity.y < -0.5)
         {
             IsWallSliding = true;
         }

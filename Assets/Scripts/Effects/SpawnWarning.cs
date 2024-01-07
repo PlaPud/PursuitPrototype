@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SpawnWarning : MonoBehaviour
 {
+    private float _yOffset = 0.5f;
     private EnemySpawnPoint _enemySp;
 
     private Transform _spawnTransform;
@@ -34,7 +35,7 @@ public class SpawnWarning : MonoBehaviour
             return;
         }
 
-        warningEff.transform.position = _spawnTransform.position;
+        warningEff.transform.position = _spawnTransform.position + Vector3.up * _yOffset;
         warningEff.SetActive(true);
     }
 }

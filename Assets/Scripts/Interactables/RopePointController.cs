@@ -9,12 +9,15 @@ public class RopePoint : MonoBehaviour
 
     private PlayerController target;
     private Collider2D _playerNear;
+    private SpriteRenderer _outline;
 
     private bool _isUsing;
-
+    private bool _isPlayerAboveRopePoint => target.transform.position.y > transform.position.y;
+    private bool _isPlayerFacingThis => target.FrontRopePointHit && target.FrontRopePointHit.transform.position == transform.position;
     private void Awake()
     {
         target = GameObject.FindGameObjectsWithTag("PlayerCat")[0].GetComponent<PlayerController>();
+        _outline = GetComponentsInChildren<SpriteRenderer>()[1];
     }
 
     void Start()
@@ -30,6 +33,7 @@ public class RopePoint : MonoBehaviour
                 layerMask: playerLayer
             );
         
+        CheckEnableOutline();
         HandleRopePoint();
     }
 
@@ -39,12 +43,11 @@ public class RopePoint : MonoBehaviour
                             && target.PlayerRopeJoint
                             && !target.PlayerRopeJoint.enabled;
 
-        bool isPlayerFacingThis = target.FrontRopePointHit &&
-            target.FrontRopePointHit.transform.position == transform.position;
-
         if (target.IsSwingPressed && !target.IsGrounded)
         {
-            if (canShootRope && isPlayerFacingThis || _isUsing) 
+            if (!_isUsing && _isPlayerAboveRopePoint) return;
+
+            if (canShootRope && _isPlayerFacingThis || _isUsing) 
             {
                 _isUsing = true;
                 target.PlayerRopeJoint.connectedAnchor = transform.position;
@@ -63,6 +66,19 @@ public class RopePoint : MonoBehaviour
         }
 
     }
+
+    private void CheckEnableOutline() 
+    {
+
+        if (!_isPlayerAboveRopePoint && _isPlayerFacingThis || _isUsing)
+        {
+            _outline.enabled = true;
+            return;
+        }
+
+        _outline.enabled = false;   
+    }
+
     private void OnDrawGizmos()
     {
         //Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);

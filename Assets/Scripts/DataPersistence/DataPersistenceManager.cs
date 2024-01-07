@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DataPersistenceManager : MonoBehaviour
 {
@@ -18,26 +19,46 @@ public class DataPersistenceManager : MonoBehaviour
 
     private FileDataHandler _fileHandler;
 
+    public bool IsSaveDataExist => _gameData != null;
+
     public Action OnLoadedComplete;
 
     private void Awake()
     {
         if (Instance != null) 
         {
-            Debug.LogError("More Than One Instance of DataPersistenceManager Exist");
+            Debug.Log("Destroy new DataPersistenceManager gameObject. (Old one already exists)");
+            Destroy(gameObject);
             return;
         }
-        Instance = this;
-    }
 
-    private void Start()
-    {
+        Instance = this;
+
+        DontDestroyOnLoad(gameObject);
+
         _fileHandler = new FileDataHandler(
             fileDir: Application.persistentDataPath, 
             fileName: fileName
         );
+    }
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode) 
+    {
         _dataPersistObjs = GetAllDataPersistObjects();
         LoadGameData();
+    }
+
+    private void Start()
+    {
     }
 
 
@@ -50,9 +71,13 @@ public class DataPersistenceManager : MonoBehaviour
         }
     }
 
+
     public void NewGameData() 
     {
         _gameData = new GameData();
+
+        SaveGameData();
+
         OnLoadedComplete?.Invoke();
     }
 
@@ -63,13 +88,13 @@ public class DataPersistenceManager : MonoBehaviour
         if (_gameData == null)
         {
             Debug.Log("No save file found. Initialize new game data.");
-            NewGameData();
             return;
         }
 
         _dataPersistObjs.ForEach((dataPersistObj) => {
             dataPersistObj.LoadData(_gameData);
         });
+
         OnLoadedComplete?.Invoke();
 
     }
