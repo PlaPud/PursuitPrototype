@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
+[assembly: InternalsVisibleTo("EditMode")]
+[assembly: InternalsVisibleTo("PlayMode")]
 public class LevelController : MonoBehaviour, IDataPersistence
 {
     [Header("Level ID")]
@@ -10,9 +13,8 @@ public class LevelController : MonoBehaviour, IDataPersistence
 
     [Header("Level Config")]
     public bool IsLevelComplete;
-    [SerializeField] LayerMask playerMask;
-    [SerializeField] EnemyAreaController enemyAreaCtrl;
-    [SerializeField] LevelCompleteTrigger puzzleCompleteTrigger;
+    [SerializeField] internal EnemyAreaController enemyAreaCtrl;
+    [SerializeField] internal LevelCompleteTrigger puzzleCompleteTrigger;
 
     void Start()
     {
@@ -33,16 +35,15 @@ public class LevelController : MonoBehaviour, IDataPersistence
         CheckLevelElementComplete();
     }
 
-    private void CheckLevelElementComplete()
+    public void CheckLevelElementComplete()
     {
-
-        bool isPuzzleDone = _IsPuzzleDoneOrNull();
-        bool isEnemyAreaCleared = _IsEnemyAreaClearedOrNull();
+        bool isPuzzleDone = IsPuzzleDoneOrNull();
+        bool isEnemyAreaCleared = IsEnemyAreaClearedOrNull();
 
         IsLevelComplete = isPuzzleDone && isEnemyAreaCleared;
     }
 
-    private bool _IsPuzzleDoneOrNull() 
+    public bool IsPuzzleDoneOrNull() 
     {
         if (!puzzleCompleteTrigger) return true;
 
@@ -51,7 +52,7 @@ public class LevelController : MonoBehaviour, IDataPersistence
         return false;
     }
 
-    private bool _IsEnemyAreaClearedOrNull() 
+    public bool IsEnemyAreaClearedOrNull() 
     {
         if (!enemyAreaCtrl) return true;
 

@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("EditMode")]
+[assembly: InternalsVisibleTo("PlayMode")]
 
 public class PlateController : MonoBehaviour
 {
@@ -12,9 +16,9 @@ public class PlateController : MonoBehaviour
 
     public bool IsPuzzleComplete;
 
-    private List<GameObject> _onPlateObjs = new List<GameObject>();
+    public List<GameObject> OnPlateObjs { get; private set; } = new List<GameObject>();
 
-    [SerializeField] private DoorController targetDoor;
+    [SerializeField] internal DoorController targetDoor;
 
     public bool IsPressing { get; internal set; } = false;
 
@@ -57,9 +61,10 @@ public class PlateController : MonoBehaviour
     {
         bool isPressing =
             collision.gameObject.layer == PLAYER_LAYER || collision.CompareTag("Moveable");
+        
         if (!isPressing) return;
 
-        _onPlateObjs.Add(collision.gameObject);
+        OnPlateObjs.Add(collision.gameObject);
         
         IsPressing = true;
     }
@@ -71,13 +76,15 @@ public class PlateController : MonoBehaviour
 
         if (!isObjectExit) return;
 
-        _onPlateObjs.Remove(collision.gameObject);
+        OnPlateObjs.Remove(collision.gameObject);
         
-        if (_onPlateObjs.Count <= 0) IsPressing = false;
+        if (OnPlateObjs.Count <= 0) IsPressing = false;
     }
 
     private void _ChangeAnimationState(string newState) 
     {
+        if (!_plateAnim) return;
+
         if (newState == _plateAnim.name) return;
         _plateAnim.Play(newState);
     }

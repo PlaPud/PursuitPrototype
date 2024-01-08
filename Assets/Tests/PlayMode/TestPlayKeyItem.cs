@@ -64,4 +64,13 @@ public class TestPlayKeyItem
         mockPlayer.layer = 8;
         return mockPlayer;
     }
+
+    public IEnumerator TearDown()
+    {
+        foreach (GameObject obj in Object.FindObjectsOfType<GameObject>())
+        {
+            Object.Destroy(obj);
+        }
+        yield return null;
+    }
 }

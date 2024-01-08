@@ -1,18 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("EditMode")]
+[assembly: InternalsVisibleTo("PlayMode")]
 
 public class SwitchController : Interactable
 {
 
     public bool IsPuzzleComplete;
 
-    private const int PLAYER_LAYER = 8;
+    [SerializeField] internal List<DoorController> toggleDoorsTarget = new List<DoorController>();
 
-    [SerializeField] List<DoorController> toggleDoorsTarget = new List<DoorController>();
-
-    public bool IsPressed { get; private set; } = false;
-    private bool _canPress;
     void Start()
     {
         

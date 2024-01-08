@@ -28,6 +28,9 @@ public class TestPlayDetector
 
         Assert.IsTrue(detectorScript.IsUnlocked);
         Assert.AreEqual(totalItems - 1, inv.ItemCount);
+
+        Object.Destroy(testInv);
+        items.ForEach(item => Object.Destroy(item));    
     }
 
     [Test]
@@ -54,6 +57,12 @@ public class TestPlayDetector
 
         Assert.IsFalse(detectorScript.IsUnlocked);
         Assert.AreEqual(totalItems, inv.ItemCount);
+
+        // clean up all GameObjects
+        Object.Destroy(testInv);
+        items.ForEach(item => Object.Destroy(item));
+        Object.Destroy(targetObject);
+        Object.Destroy(detector);
     }
 
 
@@ -115,5 +124,15 @@ public class TestPlayDetector
     }
 
     private string _GeneratedRandomGUID => System.Guid.NewGuid().ToString();
+
+    [UnityTearDown]
+    public IEnumerator TearDown()
+    {
+        foreach (GameObject obj in Object.FindObjectsOfType<GameObject>())
+        {
+            Object.Destroy(obj);
+        }
+        yield return null;
+    }
 
 }

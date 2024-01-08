@@ -34,13 +34,24 @@ public class TestPlayDoor
         GameObject doorSprite = new GameObject();
         GameObject doorCollider = new GameObject();
 
+        doorCollider.AddComponent<BoxCollider2D>();
+
         DoorController doorScript = testDoorObject.AddComponent<DoorController>();
         doorScript.DoorBody = doorSprite.transform;
-        doorCollider.AddComponent<BoxCollider2D>();
 
         doorSprite.transform.parent = testDoorObject.transform;
         doorCollider.transform.parent = testDoorObject.transform;
 
         return testDoorObject;
+    }
+
+    [UnityTearDown]
+    public IEnumerator TearDown()
+    {
+        foreach (GameObject obj in Object.FindObjectsOfType<GameObject>())
+        {
+            Object.Destroy(obj);
+        }
+        yield return null;
     }
 }
