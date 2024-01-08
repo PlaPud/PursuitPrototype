@@ -2,14 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("EditMode")]
+[assembly: InternalsVisibleTo("PlayMode")]
 
 public class EnemyAreaController : MonoBehaviour
 {
     public bool IsAllSpawnsCleared;
 
-    private List<EnemySpawnPoint> _enemySpawns;
-    private List<DoorController> _lockedDoors;
+    private List<EnemySpawnPoint> _enemySpawns = new();
+    private List<DoorController> _lockedDoors = new();
 
     public Action OnEnemyAllCleared;
     public static Action OnCombatEnd;
@@ -70,8 +74,8 @@ public class EnemyAreaController : MonoBehaviour
         if (!IsAllSpawnsCleared || !IsLockedDown) return;
 
         _UnlockAllDoors();
-
     }
+
     private void _UnlockAllDoors()
     {
         IsLockedDown = false;

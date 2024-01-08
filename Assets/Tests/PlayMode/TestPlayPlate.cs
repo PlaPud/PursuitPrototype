@@ -17,8 +17,8 @@ public class TestPlayPlate
     [UnityTest]
     public IEnumerator EnterTrigger_PlateEmpty_DoorsClosed()
     {
-        GameObject testPlate = _SetUpPlate();
-        GameObject testDoors = _SetUpDoor();
+        GameObject testPlate = _GetPlate();
+        GameObject testDoors = _GetDoor();
 
         PlateController plateScript = testPlate.GetComponent<PlateController>();
         DoorController doorScript = testDoors.GetComponent<DoorController>();
@@ -34,9 +34,9 @@ public class TestPlayPlate
     [UnityTest]
     public IEnumerator EnterTrigger_ValidObjEntered_DoorOpen()
     {
-        GameObject testPlate = _SetUpPlate();
-        GameObject testDoors = _SetUpDoor();
-        GameObject testValidObject = _SetUpPlayerObject();
+        GameObject testPlate = _GetPlate();
+        GameObject testDoors = _GetDoor();
+        GameObject testValidObject = _GetPlayerObject();
 
         PlateController plateScript = testPlate.GetComponent<PlateController>();
         DoorController doorScript = testDoors.GetComponent<DoorController>();
@@ -54,8 +54,8 @@ public class TestPlayPlate
     [UnityTest]
     public IEnumerator EnterTrigger_InvalidObjEntered_DoorRemainClosed() 
     {
-        GameObject testPlate = _SetUpPlate();
-        GameObject testDoors = _SetUpDoor();
+        GameObject testPlate = _GetPlate();
+        GameObject testDoors = _GetDoor();
         GameObject testInvalidObject = new GameObject();
 
         PlateController plateScript = testPlate.GetComponent<PlateController>();
@@ -74,9 +74,9 @@ public class TestPlayPlate
     [UnityTest]
     public IEnumerator ExitTrigger_ObjExit_DoorClosed() 
     {
-        GameObject testPlate = _SetUpPlate();
-        GameObject testDoors = _SetUpDoor();
-        GameObject testValidObject = _SetUpPlayerObject();
+        GameObject testPlate = _GetPlate();
+        GameObject testDoors = _GetDoor();
+        GameObject testValidObject = _GetPlayerObject();
 
         PlateController plateScript = testPlate.GetComponent<PlateController>();
         DoorController doorScript = testDoors.GetComponent<DoorController>();
@@ -101,10 +101,10 @@ public class TestPlayPlate
 
     public IEnumerator EnterTrigger_OneFromTwoObjExit_DoorRemainOpen()
     {
-        GameObject testPlate = _SetUpPlate();
-        GameObject testDoors = _SetUpDoor();
-        GameObject testValidObject = _SetUpPlayerObject();
-        GameObject testValidObject2 = _SetUpPlayerObject();
+        GameObject testPlate = _GetPlate();
+        GameObject testDoors = _GetDoor();
+        GameObject testValidObject = _GetPlayerObject();
+        GameObject testValidObject2 = _GetPlayerObject();
 
         PlateController plateScript = testPlate.GetComponent<PlateController>();
         DoorController doorScript = testDoors.GetComponent<DoorController>();
@@ -126,7 +126,7 @@ public class TestPlayPlate
         Assert.IsTrue(doorScript.IsOpen);
     }
 
-    private GameObject _SetUpPlayerObject() 
+    private GameObject _GetPlayerObject() 
     {
         GameObject testObject = new GameObject();
         
@@ -139,7 +139,7 @@ public class TestPlayPlate
         return testObject;
     }
 
-    private GameObject _SetUpDoor()
+    private GameObject _GetDoor()
     {
         GameObject testDoorObject = new GameObject();
         GameObject doorSprite = new GameObject();
@@ -155,7 +155,7 @@ public class TestPlayPlate
         return testDoorObject;
     }
 
-    private GameObject _SetUpPlate()
+    private GameObject _GetPlate()
     {
         GameObject testPlate = new GameObject();
 

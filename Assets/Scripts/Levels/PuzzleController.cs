@@ -1,13 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("EditMode")]
+[assembly: InternalsVisibleTo("PlayMode")]
 
 public class PuzzleController : MonoBehaviour
 {
 
-    [SerializeField] private List<PlateController> plates;
-    [SerializeField] private List<SwitchController> switches;
+    [SerializeField] internal List<PlateController> plates = new();
+    [SerializeField] internal List<SwitchController> switches = new();
 
     private LevelCompleteTrigger _puzzleDest;
 
@@ -22,13 +26,20 @@ public class PuzzleController : MonoBehaviour
 
     void Update()
     {
-        foreach (PlateController plateScript in plates) 
+
+        if (plates.Count > 0) 
         {
-            plateScript.IsPuzzleComplete = _puzzleDest.IsPlayerReached;
+            plates.ForEach(
+                (plate) => plate.IsPuzzleComplete = _puzzleDest.IsPlayerReached
+            );
         }
-        foreach (SwitchController switchScript in switches) 
+
+        if (switches.Count > 0)
         {
-            switchScript.IsPuzzleComplete = _puzzleDest.IsPlayerReached;
+            switches.ForEach(
+               (switchScript) => switchScript.IsPuzzleComplete = _puzzleDest.IsPlayerReached
+            );
         }
+        
     }
 }

@@ -127,8 +127,26 @@ public class TestPlayLevelControl
         yield return null;
     }
 
+    [UnityTest]
+    public IEnumerator PuzzleController_PlayerReachPuzzleDest_IsPuzzleComplete()
+    {
+        PuzzleController puzzleCtrl = new GameObject().AddComponent<PuzzleController>();
+        LevelCompleteTrigger puzzleDest = new GameObject().AddComponent<LevelCompleteTrigger>();
+        GameObject player = new GameObject();
+
+        player.layer = LayerMask.NameToLayer("Player");
+
+        puzzleDest.IsPlayerReached = true;
+
+        puzzleDest.transform.parent = puzzleCtrl.transform; 
+
+        yield return new WaitForSeconds(.1f);
+
+        Assert.IsTrue(puzzleDest.IsPlayerReached);
+    }
+
     [TearDown]
-    public void AfterEveryTest()
+    public void TearDown()
     {
         foreach (var gameObject in GameObject.FindObjectsOfType<GameObject>())
         {

@@ -49,36 +49,42 @@ public class PlayerHealth : MonoBehaviour, IDataPersistence
     {
        _invincibleTimer -= _invincibleTimer > 0f ? Time.deltaTime : 0;
     }
-    private void CheckHealthRegen() 
+    private void CheckHealthRegen()
     {
         if (CurrentHealth >= MaxHealth) return;
 
-        if (_avoidDmgTimer > 0f) 
+        if (_avoidDmgTimer > 0f)
         {
             _avoidDmgTimer -= Time.deltaTime;
             return;
         }
 
-        if (_regenTimer > 0f) 
+        if (_regenTimer > 0f)
         {
             _regenTimer -= Time.deltaTime;
             OnCountDownRegen?.Invoke(_regenTimer / regenTime);
             return;
         }
-        
+
         OnHealthRegen?.Invoke(regenAmount);
-        _regenTimer = regenTime;
-        CurrentHealth += regenAmount;
+        HealPlayer(regenAmount);
     }
+
+    
 
     private void CheckAndHandleDeath() 
     {
         if (CurrentHealth > 0) return;
         _playerGO.gameObject.SetActive(false);
         OnPlayerDied?.Invoke();
-
     }
 
+    public void HealPlayer(int regenAmount)
+    {
+        _regenTimer = regenTime;
+        CurrentHealth += CurrentHealth + regenAmount > MaxHealth ? MaxHealth - CurrentHealth : regenAmount;
+    }
+     
     public void DamagePlayer(int damage)
     {
         if (_invincibleTimer > 0f) return;
