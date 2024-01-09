@@ -100,8 +100,8 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 7
-  m_LinearDrag: 3
+  m_Mass: 6
+  m_LinearDrag: 2.5
   m_AngularDrag: 0
   m_GravityScale: 4
   m_Material: {fileID: 6200000, guid: d799c6cfa4a1351488479e5c17f75757, type: 2}
@@ -191,7 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0311ba9a660fdc94a96d0bc816d94998, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxid: 
+  boxid: B-f4e2c36d-dc36-424b-a7fa-88be2f565f2f
   groundLayer:
     serializedVersion: 2
     m_Bits: 64

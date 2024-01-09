@@ -176,8 +176,8 @@ MonoBehaviour:
   DEBUG: 0
   walkSpeedLower: 3
   walkSpeedUpper: 6
-  chaseSpeedLower: 12
-  chaseSpeedUpper: 16
+  chaseSpeedLower: 10
+  chaseSpeedUpper: 14
   changeChaseSpeedTime: 2
   jumpForce: 6
   waitForTeleportTimeLower: 1

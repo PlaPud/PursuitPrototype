@@ -13,6 +13,12 @@ public class SwitchController : Interactable
 
     [SerializeField] internal List<DoorController> toggleDoorsTarget = new List<DoorController>();
 
+    private SpriteRenderer _switchSR;
+
+    void Awake()
+    {
+        _switchSR = GetComponent<SpriteRenderer>();
+    }
     void Start()
     {
         
@@ -38,6 +44,8 @@ public class SwitchController : Interactable
         {
             _ToggleDoor(target);
         }
+
+        StartCoroutine(_ToggleSwitchColor());
     }
 
     private void _ToggleDoor(DoorController targetDoor)
@@ -50,5 +58,13 @@ public class SwitchController : Interactable
         {
             targetDoor.SetOpenDoor();
         }
+    }
+
+    private IEnumerator _ToggleSwitchColor()
+    {
+        _switchSR.color = Color.gray;
+        yield return new WaitForSeconds(.25f);
+        _switchSR.color = Color.white;
+
     }
 }

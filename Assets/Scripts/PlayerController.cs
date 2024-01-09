@@ -223,7 +223,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
                 : walkSpeed
             );
         
-        float accel = (Mathf.Abs(resultSpeed) > .01f ? maxAccelerate : maxDeccelerate);
+        float accel = (Mathf.Abs(WalkInput) > .01f ? maxAccelerate : maxDeccelerate);
         float speedDif = resultSpeed - _playerRB.velocity.x;
 
         float movement = Mathf.Pow(
@@ -350,11 +350,11 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         if (_playerPushPull.IsGrabbing) return;
 
-        if (_playerRB.velocity.x > 0.5f)
+        if (_playerRB.velocity.x > 0.5f && WalkInput > .001f)
         {
             transform.localScale = Vector3.one;
         }
-        if (_playerRB.velocity.x < -0.5f)
+        if (_playerRB.velocity.x < -0.5f && WalkInput < -.001f)
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
