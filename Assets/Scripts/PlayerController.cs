@@ -86,6 +86,8 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     private string _currentAnimationState = PLAYER_IDLE;
     private float _coyoteTimer;
 
+    public Action OnPlayerFlipped;
+
     private void Awake()
     {
         _playerRB = GetComponent<Rigidbody2D>();
@@ -120,7 +122,6 @@ public class PlayerController : IControllableOnGround, IDataPersistence
             _FreezePlayer();
         }
 
-        HandleFlipSprite();
 
         AnimationStateMachineHandler();
 
@@ -145,6 +146,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
         HandleGravity();
         HandleFriction();
         HandleOnSwing();
+        HandleFlipSprite();
     }
 
     private void BoolAndRayCheck()
@@ -167,7 +169,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
                 origin: transform.position,
                 size: new Vector2(ropeBoxWidth, 2 * PlayerRopeRadius),
                 angle: 0f,
-                direction: new Vector2(transform.localScale.x, 0f),
+                direction: transform.right,
                 distance: PlayerRopeRadius,
                 layerMask: ropePointLayer
             );
@@ -289,7 +291,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
         {
             _playerRB.AddForce(
                 new Vector2(
-                        -transform.localScale.x
+                        -transform.right.x
                         * wallJumpForceX,
                         wallJumpForceY
                     ),
@@ -302,7 +304,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
     private void HandleWallSlide()
     {
-        bool isFacingRight = transform.localScale.x == 1;
+        bool isFacingRight = transform.right.x == 1;
 
         RaycastHit2D hitGround = Physics2D.Raycast(
                 transform.position,
@@ -350,14 +352,22 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         if (_playerPushPull.IsGrabbing) return;
 
-        if (_playerRB.velocity.x > 0.5f && WalkInput > .001f)
+        if (transform.rotation.y != 0f && _playerRB.velocity.x > 0.5f && WalkInput > .001f)
         {
-            transform.localScale = Vector3.one;
+            //Debug.Log("Flip To Right");
+            transform.rotation = Quaternion.Euler(0, 0, 0);
+            OnPlayerFlipped?.Invoke();
+            return;
         }
-        if (_playerRB.velocity.x < -0.5f && WalkInput < -.001f)
+
+        if (transform.rotation.y == 0f && _playerRB.velocity.x < -0.5f && WalkInput < -.001f)
         {
-            transform.localScale = new Vector3(-1, 1, 1);
+            //Debug.Log("Flip To Left");
+            transform.rotation = Quaternion.Euler(0, 180f, 0);
+            OnPlayerFlipped?.Invoke();
+            return;
         }
+
     }
 
     private void HandleFriction()
@@ -515,7 +525,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
         Gizmos.DrawWireCube(transform.position + Vector3.down * castDistance, boxSize);
         Gizmos.DrawWireCube(transform.position + Vector3.up * aboveCastDistance, boxSizeAbove);
         Gizmos.DrawWireCube(
-                    center: transform.position + new Vector3(transform.localScale.x, 0f, 0f) * (PlayerRopeRadius),
+                    center: transform.position + transform.right * (PlayerRopeRadius),
                     size: new Vector2(ropeBoxWidth, 2 * PlayerRopeRadius)
                 );
     }

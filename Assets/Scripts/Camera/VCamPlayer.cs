@@ -8,6 +8,7 @@ public class VCamPlayer : MonoBehaviour
 {
     private CinemachineVirtualCamera _playerCam;
 
+    [SerializeField] private Transform playerFollowObj;
     [SerializeField] private float normalOrthSize = 9;
     [SerializeField] private float zoomedOrthSize = 6;
 
@@ -39,7 +40,7 @@ public class VCamPlayer : MonoBehaviour
 
     private void SetCamCat() 
     {
-        _playerCam.Follow = ControllingManager.Instance.CatController.transform;
+        _playerCam.Follow = playerFollowObj.transform;
         _playerCam.m_Lens.OrthographicSize = normalOrthSize;
     }
 
@@ -58,4 +59,6 @@ public class VCamPlayer : MonoBehaviour
         _playerCam.Follow = compBot.transform;
         _playerCam.m_Lens.OrthographicSize = zoomedOrthSize;
     }
+
+    
 }

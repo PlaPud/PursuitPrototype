@@ -27,7 +27,6 @@ public class PlayerPushPull : MonoBehaviour
     private bool _isKeyLock;
     private float _holdTimer = HOLD_DOWN_TIME;
 
-    private float _localScaleXSign => Mathf.Sign(transform.localScale.x);
     public bool IsGrabbing => _moveableObject != null;
     public bool IsFoundMoveable => _hitGroundForward && _hitGroundForward.collider.CompareTag("Moveable");
     private bool _isControllingMain => ControllingManager.Instance.IsControllingCat;
@@ -71,12 +70,25 @@ public class PlayerPushPull : MonoBehaviour
 
     private void RayCheck()
     {
-        _hitGroundForward = Physics2D.Raycast(
-            origin: transform.position,
-            direction: Vector2.right * _localScaleXSign,
-            distance: grabDistance,
-            layerMask: groundLayer
-        );
+        if (player is PlayerController) 
+        {
+            _hitGroundForward = Physics2D.Raycast(
+                origin: transform.position,
+                direction: transform.right,
+                distance: grabDistance,
+                layerMask: groundLayer
+            );
+        }
+
+        if (player is CompBotController) 
+        {
+            _hitGroundForward = Physics2D.Raycast(
+                origin: transform.position,
+                direction: Vector3.right * transform.localScale.x,
+                distance: grabDistance,
+                layerMask: groundLayer
+            );
+        }
 
         if (!IsFoundMoveable) 
         {
@@ -151,7 +163,16 @@ public class PlayerPushPull : MonoBehaviour
     protected void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position, (Vector2) transform.position + Vector2.right * transform.localScale.x * grabDistance);
+
+        if (player is PlayerController) 
+        {
+            Gizmos.DrawLine(transform.position, (Vector2) transform.position + Vector2.right * transform.right.x * grabDistance);
+        }
+
+        if (player is CompBotController)
+        {
+            Gizmos.DrawLine(transform.position, (Vector2) transform.position + Vector2.right * transform.localScale.x * grabDistance);
+        }
     }
 
     
