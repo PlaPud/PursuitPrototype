@@ -6,7 +6,7 @@ public class CameraFollowObj : MonoBehaviour
 {
 
     [SerializeField] private float flipTime = 0.5f;
-
+    [SerializeField] private float smoothTime = 0.05f;
     private bool _isCatFacingRight;
 
     private PlayerController _playerCat;
@@ -24,7 +24,12 @@ public class CameraFollowObj : MonoBehaviour
     void FixedUpdate()
     {
         //transform.position = _playerCat.transform.position;
-        transform.position = Vector3.SmoothDamp(transform.position, _playerCat.transform.position, ref velocity, 0.03f);
+        transform.position = Vector3.SmoothDamp(
+                transform.position,
+                _playerCat.transform.position, 
+                ref velocity, 
+                smoothTime
+            );
     }
 
     private void _FlipCamLerp()
