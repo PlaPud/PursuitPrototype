@@ -103,6 +103,13 @@ MonoBehaviour:
   compBotInteractable: 0
   IsPuzzleComplete: 0
   toggleDoorsTarget: []
+  switchPressed:
+    Guid:
+      Data1: -53135976
+      Data2: 1215094509
+      Data3: -1074144878
+      Data4: -528366163
+    Path: event:/ButtonPressed
 --- !u!61 &3369651281167011996
 BoxCollider2D:
   m_ObjectHideFlags: 0

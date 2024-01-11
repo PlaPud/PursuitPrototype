@@ -64,9 +64,15 @@ public class PlateController : MonoBehaviour
         
         if (!isPressing) return;
 
+        if (OnPlateObjs.Count <= 0 && !FMODEvents.Instance.PlateActed.IsNull)
+        {       
+            AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PlateActed, targetDoor.transform.position);
+        }
+
         OnPlateObjs.Add(collision.gameObject);
         
         IsPressing = true;
+        
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -78,7 +84,11 @@ public class PlateController : MonoBehaviour
 
         OnPlateObjs.Remove(collision.gameObject);
         
-        if (OnPlateObjs.Count <= 0) IsPressing = false;
+        if (OnPlateObjs.Count <= 0)
+        {
+            IsPressing = false;
+            if (!FMODEvents.Instance.PlateActed.IsNull) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PlateActed, targetDoor.transform.position);
+        }
     }
 
     private void _ChangeAnimationState(string newState) 

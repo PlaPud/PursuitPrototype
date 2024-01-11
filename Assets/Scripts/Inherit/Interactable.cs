@@ -8,6 +8,7 @@ abstract public class Interactable : MonoBehaviour
 
     public enum Interact { HoldToInteract, PressToInteract }
 
+    [Header("Interaction")]
     [SerializeField] private KeyCode interactKey = KeyCode.E;
     [SerializeField] private Interact typeOfInteract = Interact.PressToInteract;
     [SerializeField] private bool compBotInteractable = false;

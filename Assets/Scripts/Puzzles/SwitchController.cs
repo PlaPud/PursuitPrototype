@@ -1,3 +1,4 @@
+using FMODUnity;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -9,9 +10,13 @@ using UnityEngine;
 public class SwitchController : Interactable
 {
 
-    public bool IsPuzzleComplete;
+    [Header("Switch Control")]
 
+    [field: SerializeField] public bool IsPuzzleComplete;
     [SerializeField] internal List<DoorController> toggleDoorsTarget = new List<DoorController>();
+
+    [Header("Sound")]
+    [SerializeField] private EventReference switchPressed;
 
     private SpriteRenderer _switchSR;
 
@@ -45,7 +50,10 @@ public class SwitchController : Interactable
             _ToggleDoor(target);
         }
 
-        StartCoroutine(_ToggleSwitchColor());
+
+        if (_switchSR) StartCoroutine(_ToggleSwitchColor());
+
+        if (!FMODEvents.Instance.SwitchPressed.IsNull) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.SwitchPressed, transform.position);
     }
 
     private void _ToggleDoor(DoorController targetDoor)

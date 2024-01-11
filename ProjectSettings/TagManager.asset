@@ -13,6 +13,7 @@ TagManager:
   - ControlPanel
   - Elevator
   - ClawMachineRail
+  - FixedCam
   layers:
   - Default
   - TransparentFX
