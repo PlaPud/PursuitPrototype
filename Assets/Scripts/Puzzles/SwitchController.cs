@@ -53,7 +53,7 @@ public class SwitchController : Interactable
 
         if (_switchSR) StartCoroutine(_ToggleSwitchColor());
 
-        if (!FMODEvents.Instance.SwitchPressed.IsNull) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.SwitchPressed, transform.position);
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.SwitchPressed, transform.position);
     }
 
     private void _ToggleDoor(DoorController targetDoor)

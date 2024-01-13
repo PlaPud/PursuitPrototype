@@ -74,15 +74,26 @@ public class PlayerCombatController : MonoBehaviour
 
         OnPlayerShootBomb?.Invoke();
 
-        bombRB.AddForce(
-                force: _aiming.AimingCircleDirection * firingForce,
-                mode: ForceMode2D.Impulse
-            );
+        //bombRB.AddForce(
+        //        force: _aiming.AimingCircleDirection * firingForce,
+        //        mode: ForceMode2D.Impulse
+        //    );
+       
+        StartCoroutine(_ShootBomb(bombRB));
 
         StartCoroutine(_EnableCoolDown());
 
         CurrentInField.Add(bomb);
         _toShoot = false;
+    }
+
+    private IEnumerator _ShootBomb(Rigidbody2D bombRB) 
+    {
+        bombRB.velocity = Vector2.zero;
+        
+        yield return new WaitForSeconds(0.02f);
+
+        bombRB.velocity = _aiming.AimingCircleDirection.normalized * firingForce;
     }
 
     private void _ClearDisabledBomb() 

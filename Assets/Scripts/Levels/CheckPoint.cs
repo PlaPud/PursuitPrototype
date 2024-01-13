@@ -22,6 +22,7 @@ public class CheckPoint : MonoBehaviour, IDataPersistence
         _trigger.enabled = false;
         OnSave?.Invoke();
         DataPersistenceManager.Instance.SaveGameData();
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.SavedLevelComplete, transform.position);
     }
 
     public void LoadData(GameData data)

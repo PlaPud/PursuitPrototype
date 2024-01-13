@@ -64,11 +64,6 @@ public class PlateController : MonoBehaviour
         
         if (!isPressing) return;
 
-        if (OnPlateObjs.Count <= 0 && !FMODEvents.Instance.PlateActed.IsNull)
-        {       
-            AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PlateActed, targetDoor.transform.position);
-        }
-
         OnPlateObjs.Add(collision.gameObject);
         
         IsPressing = true;
@@ -87,7 +82,6 @@ public class PlateController : MonoBehaviour
         if (OnPlateObjs.Count <= 0)
         {
             IsPressing = false;
-            if (!FMODEvents.Instance.PlateActed.IsNull) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PlateActed, targetDoor.transform.position);
         }
     }
 

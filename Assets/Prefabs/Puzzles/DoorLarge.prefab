@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a960cad9f3e530f42963575a04cb7dc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  doorType: 1
   doorOpenDirection: 0
   DoorBody: {fileID: 2534372483504216723}
   IsOpen: 0

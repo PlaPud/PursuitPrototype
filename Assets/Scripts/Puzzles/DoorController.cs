@@ -8,11 +8,16 @@ using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
+    public enum DoorType 
+    {
+        Pressure, Toggle
+    }
     public enum DoorOpenDir
     {
         Upward, Downward, Horizontal
     }
 
+    [SerializeField] private DoorType doorType = DoorType.Pressure;
     [SerializeField] private DoorOpenDir doorOpenDirection = DoorOpenDir.Upward;
 
     public Transform DoorBody;
@@ -81,6 +86,8 @@ public class DoorController : MonoBehaviour
     {
         _doorCD.enabled = false;
         if (!_isTransitioning) StartCoroutine(SetDoorTransitionTimer());
+
+        if (!IsOpen) _PlayDoorSoundByType();
         IsOpen = true;
     }
 
@@ -88,6 +95,9 @@ public class DoorController : MonoBehaviour
     {
         _doorCD.enabled = true;
         if (!_isTransitioning) StartCoroutine(SetDoorTransitionTimer());
+
+        if (IsOpen) _PlayDoorSoundByType();
+        
         IsOpen = false;
     }
 
@@ -111,6 +121,19 @@ public class DoorController : MonoBehaviour
                 return Vector2.right * _doorCD.size.x;
             default:
                 return Vector2.up * _doorCD.size.y;
+        }
+    }
+
+    private void _PlayDoorSoundByType()
+    {
+        switch (doorType)
+        {
+            case DoorType.Pressure:
+                AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.PressureDoorMoved, transform.position);
+                break;
+            case DoorType.Toggle:
+                AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.ToggleDoorMoved, transform.position);
+                break;
         }
     }
 
