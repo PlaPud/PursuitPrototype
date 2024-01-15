@@ -1,3 +1,4 @@
+using FMOD.Studio;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -55,10 +56,10 @@ public class ClawMachineController : MonoBehaviour
     const string CLAW_HOLD = "ClawHold";
 
     public bool IsControlling => panel.IsControllingThis;
-
     private bool _leftStuckOnHold => _holdingObject && _holdingSideHitLeft && !_holdingSideHitLeft.CompareTag("Moveable");
     private bool _rightStuckOnHold => _holdingObject && _holdingSideHitRight && !_holdingSideHitRight.CompareTag("Moveable");
 
+    private EventInstance _clawMoveSound;
 
     private void Awake()
     {
@@ -70,7 +71,7 @@ public class ClawMachineController : MonoBehaviour
 
     void Start()
     {
-        
+        _clawMoveSound = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.ClawMove);
     }
 
     void Update()
@@ -78,10 +79,15 @@ public class ClawMachineController : MonoBehaviour
         RayCheck();
         FilteringMoveable();
 
-        if (ClawMachineManager.Instance.IsControlClaw && panel.IsControllingThis) 
+        if (ClawMachineManager.Instance.IsControlClaw && panel.IsControllingThis && !GameManager.Instance.IsPaused)
         {
+            _clawBodyRB.constraints = RigidbodyConstraints2D.FreezeRotation;  
             OnMove();
             OnToggleHold();
+        }
+        else 
+        {
+            _FreezeClawMachine();
         }
 
         SetWireLength();
@@ -92,6 +98,8 @@ public class ClawMachineController : MonoBehaviour
         HandleIdle();
         HandleMove();
         HandleHolding();
+
+        UpdateSound();
     }
 
     private void OnMove() 
@@ -228,6 +236,11 @@ public class ClawMachineController : MonoBehaviour
 
     }
 
+    private void _FreezeClawMachine()
+    {
+        _clawBodyRB.constraints = RigidbodyConstraints2D.FreezeAll;
+    }
+
     private Collider2D _NearestMovable() 
     {
         Collider2D closestMoveable = _filteredMoveables[0];
@@ -267,6 +280,8 @@ public class ClawMachineController : MonoBehaviour
         Rigidbody2D holdingRB = closestMovable.GetComponent<Rigidbody2D>();
         _objectGravityScale = holdingRB.gravityScale;
         holdingRB.gravityScale = 0;
+
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.ItemCollected, transform.position);
     }
     private void SetWireLength()
     {
@@ -280,5 +295,34 @@ public class ClawMachineController : MonoBehaviour
             return;
         }
         _wireLR.enabled = false;
+    }
+
+    private void UpdateSound()
+    {
+        if (!ControllingManager.Instance.IsControllingClawMachine) 
+        {
+            PLAYBACK_STATE playbackState;
+            _clawMoveSound.getPlaybackState(out playbackState);
+            if (playbackState.Equals(PLAYBACK_STATE.PLAYING) || playbackState.Equals(PLAYBACK_STATE.STARTING))
+            {
+                _clawMoveSound.stop(STOP_MODE.ALLOWFADEOUT);
+            }
+            return;
+        }
+
+        if (_clawBodyRB.velocity.magnitude > 0.5f)
+        {
+            PLAYBACK_STATE playbackState;
+            _clawMoveSound.getPlaybackState(out playbackState);
+
+            if (playbackState.Equals(PLAYBACK_STATE.STOPPED))
+            {
+                _clawMoveSound.start();
+            }
+
+            return;
+        }
+
+        _clawMoveSound.stop(STOP_MODE.ALLOWFADEOUT);
     }
 }

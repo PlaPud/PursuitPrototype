@@ -1,3 +1,4 @@
+using FMOD.Studio;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,25 +19,33 @@ public class BoxController : MonoBehaviour, IDataPersistence
 
     public bool IsGrounded => _hitGround;
 
-    void Start()
+    private EventInstance _boxMoveSound;
+
+    private void Start()
     {
         _boxRB = GetComponent<Rigidbody2D>();
         _boxFJ = GetComponent<FixedJoint2D>();
+        _boxMoveSound = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.BoxMove);
     }
 
-    void Update()
+    private void Update()
     {
         RayGroundCheck();
         HandleFreezePosition();
         HandleOffGround();
     }
 
+    private void FixedUpdate()
+    {
+        UpdateSound();
+    }
+
     private void HandleFreezePosition()
     {
         if (!_boxFJ.enabled && IsGrounded)
         {
-            _boxRB.constraints = 
-                  RigidbodyConstraints2D.FreezePositionX 
+            _boxRB.constraints =
+                  RigidbodyConstraints2D.FreezePositionX
                 | RigidbodyConstraints2D.FreezeRotation;
             return;
         }
@@ -56,10 +65,39 @@ public class BoxController : MonoBehaviour, IDataPersistence
             );
     }
 
-    private void HandleOffGround() 
+    private void HandleOffGround()
     {
         if (_hitGround) return;
         _boxFJ.enabled = false;
+    }
+
+    private void UpdateSound() 
+    {
+        if (!_boxFJ.enabled) 
+        {
+            PLAYBACK_STATE playbackState;
+            _boxMoveSound.getPlaybackState(out playbackState);
+            if (playbackState.Equals(PLAYBACK_STATE.PLAYING) || playbackState.Equals(PLAYBACK_STATE.STARTING))
+            {
+                _boxMoveSound.stop(STOP_MODE.ALLOWFADEOUT);
+            }
+            return;
+        }
+
+        if (Mathf.Abs(_boxRB.velocity.x) > 0.5f && IsGrounded) 
+        {
+            PLAYBACK_STATE playbackState;
+            _boxMoveSound.getPlaybackState(out playbackState);
+            
+            if (playbackState.Equals(PLAYBACK_STATE.STOPPED))
+            {
+                _boxMoveSound.start();
+            }
+
+            return;
+        }
+
+        _boxMoveSound.stop(STOP_MODE.ALLOWFADEOUT);
     }
 
     private void OnDrawGizmos()

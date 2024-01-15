@@ -4,12 +4,20 @@ using UnityEngine.UI;
 
 public class HealthBarUI : MonoBehaviour
 {
-
     [SerializeField] GameObject healthPiecePrefab;
     [SerializeField] Sprite healthPieceEmpty;
     [SerializeField] Sprite healthPieceFull;
 
     private List<GameObject> _healthBarDisplay = new List<GameObject>();
+
+    private Image _healtBarImg;
+
+    private CombatUIController _combatUI;
+
+    private void Awake()
+    {
+        _combatUI = GetComponentInParent<CombatUIController>();
+    }
     void Start()
     {
         PlayerHealth.Instance.OnDamageTaken += DecreaseHealthBar;
@@ -56,6 +64,8 @@ public class HealthBarUI : MonoBehaviour
     {
         int currentHealth = PlayerHealth.Instance.CurrentHealth;
 
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.PlayerHit, transform.position);
+
         _decreaseHealthFromTo(
                 fromIndex: currentHealth - 1, 
                 toIndexExclude: currentHealth - amount - 1
@@ -77,6 +87,10 @@ public class HealthBarUI : MonoBehaviour
             if (!healthImg) return;
             healthImg.sprite = healthPieceFull;
         }
+
+        if (!_combatUI.IsUIEnabled) return;
+
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.PlayerHealed, transform.position);
     }
 
     private void _decreaseHealthFromTo(int fromIndex, int toIndexExclude) 

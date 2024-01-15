@@ -52,6 +52,8 @@ public class FileDataHandler
 
     public void SaveToFile(GameData data) 
     {
+        if (GameManager.Instance) GameManager.Instance.IsSaving = true;
+
         try
         {
             Directory.CreateDirectory(
@@ -72,5 +74,7 @@ public class FileDataHandler
                 "File Saving ERROR to Path " + FullPath + "\nError : " + err.Message
             );
         }
+
+        if (GameManager.Instance) GameManager.Instance.IsSaving = false;
     }
 }

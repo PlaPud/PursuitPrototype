@@ -73,11 +73,6 @@ public class PlayerCombatController : MonoBehaviour
         bomb.SetActive(true);
 
         OnPlayerShootBomb?.Invoke();
-
-        //bombRB.AddForce(
-        //        force: _aiming.AimingCircleDirection * firingForce,
-        //        mode: ForceMode2D.Impulse
-        //    );
        
         StartCoroutine(_ShootBomb(bombRB));
 
@@ -94,6 +89,8 @@ public class PlayerCombatController : MonoBehaviour
         yield return new WaitForSeconds(0.02f);
 
         bombRB.velocity = _aiming.AimingCircleDirection.normalized * firingForce;
+
+        AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PlayerShoot, transform.position);
     }
 
     private void _ClearDisabledBomb() 

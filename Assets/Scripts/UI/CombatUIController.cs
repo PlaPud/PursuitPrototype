@@ -14,6 +14,8 @@ public class CombatUIController : MonoBehaviour
     private HealthBarUI _healthBarUI;
     private RegenCircle _regenCircleUI;
 
+    public bool IsUIEnabled { get; private set; } = false;
+
     private void Awake()
     {
         _playerHeadImage = GetComponentInChildren<Image>();
@@ -47,6 +49,8 @@ public class CombatUIController : MonoBehaviour
         _healthBarUI.DisableUI();
         _ammoUI.DisableUI();
         _regenCircleUI.DisableUI();   
+
+        IsUIEnabled = false;
     }
 
     private void EnableEveryUI()
@@ -55,6 +59,8 @@ public class CombatUIController : MonoBehaviour
         _healthBarUI.EnableUI();
         _ammoUI.EnableUI();
         _regenCircleUI.EnableUI();
+
+        IsUIEnabled = true;
     }
 
     private void OnDestroy()

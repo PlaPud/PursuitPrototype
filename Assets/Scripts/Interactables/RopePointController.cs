@@ -49,6 +49,7 @@ public class RopePoint : MonoBehaviour
 
             if (canShootRope && _isPlayerFacingThis || _isUsing) 
             {
+                if (!_isUsing) AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.PlayerSwingEnable, transform.position);
                 _isUsing = true;
                 target.PlayerRopeJoint.connectedAnchor = transform.position;
                 target.PlayerRopeJoint.enabled = true;

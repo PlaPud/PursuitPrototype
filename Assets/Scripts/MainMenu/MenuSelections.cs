@@ -10,14 +10,19 @@ using UnityEngine.UI;
 public class MenuSelections : MonoBehaviour
 {
 
+    [Header("Menu Options")]
     [SerializeField] private Button contBtn;
-    
-    private List<Button> btns = new List<Button>();
+    [SerializeField] private List<Button> menuBtns = new();
 
+    [Header("Confirm Start Options")]
+    [SerializeField] private List<TMP_Text> confirmTexts;
+    [SerializeField] private List<Button> startConfirmsBtn = new();
+
+    private List<Button> _allBtns = new List<Button>();
 
     private void Awake()
     {
-        GetComponentsInChildren<Button>().ToList().ForEach((btn) => btns.Add(btn));
+        GetComponentsInChildren<Button>().ToList().ForEach((btn) => _allBtns.Add(btn));
     }
 
     void Start()
@@ -33,8 +38,13 @@ public class MenuSelections : MonoBehaviour
 
     public void OnPressNewGame() 
     {
-        DataPersistenceManager.Instance.NewGameData();
-        _LoadingScreen();
+        if (!DataPersistenceManager.Instance.IsSaveDataExist)
+        {
+            _StartNewGame();
+            return;
+        }
+
+        _DisplayConfirm();
     }
 
     public void OnPressContinue() 
@@ -47,15 +57,109 @@ public class MenuSelections : MonoBehaviour
         Application.Quit();
     }
 
+    public void OnPressConfirmNewGame()
+    {
+        _StartNewGame();
+    }
+
+    public void OnPressCancel() 
+    {
+        startConfirmsBtn.ForEach((btn) => btn.interactable = false);
+
+        StartCoroutine(_FadeBtns(
+                fadeOut: true, 
+                btns: startConfirmsBtn
+            ));
+
+        startConfirmsBtn.ForEach((btn) => btn.gameObject.SetActive(false));
+        confirmTexts.ForEach((text) => text.gameObject.SetActive(false));
+
+        menuBtns.ForEach((btn) => btn.gameObject.SetActive(true));
+
+        StartCoroutine(_FadeBtns(
+                fadeOut: false,
+                btns: menuBtns
+            ));
+
+        menuBtns.ForEach((btn) => btn.interactable = true);
+    }
+
+    private void _StartNewGame()
+    {
+        DataPersistenceManager.Instance.NewGameData();
+        _LoadingScreen();
+    }
+
+    private void _DisplayConfirm()
+    {
+        menuBtns.ForEach((btn) => btn.interactable = false);
+
+        StartCoroutine(_FadeBtns(
+                fadeOut: true, btns: menuBtns
+            ));
+
+        menuBtns.ForEach((btn) => btn.gameObject.SetActive(false));
+
+        startConfirmsBtn.ForEach((btn) => btn.gameObject.SetActive(true));
+        confirmTexts.ForEach((text) => text.gameObject.SetActive(true));
+
+        StartCoroutine(_FadeBtns(
+                fadeOut: false, 
+                btns: startConfirmsBtn, 
+                confirmTexts: confirmTexts
+            ));
+
+        startConfirmsBtn.ForEach((btn) => btn.interactable = true);
+    }
+
     private async void _LoadingScreen()
     {
         AsyncOperation gameScene = SceneManager.LoadSceneAsync("Loading");
         gameScene.allowSceneActivation = false;
 
-        btns.ForEach((btn) => btn.interactable = false);
+        _allBtns.ForEach((btn) => btn.interactable = false);
 
         do { await Task.Delay(100); } while (gameScene.progress < 0.9f);
 
         gameScene.allowSceneActivation = true;
     }
+
+    private IEnumerator _FadeBtns(bool fadeOut, List<Button> btns, List<TMP_Text> confirmTexts = null)
+    {
+        float fadeTime = 0.5f;
+        float fadeSpeed = 1 / fadeTime;
+        float fadeStart = fadeOut ? 1 : 0;
+        float fadeEnd = fadeOut ? 0 : 1;
+
+        float t = 0;
+
+        while (t < 1)
+        {
+            t += Time.deltaTime * fadeSpeed;
+
+            // lerp text color in btn
+            btns.ForEach(
+                (btn) => {
+                    TMP_Text btn_text = btn.GetComponentInChildren<TMP_Text>();
+                    btn_text.color = new Color(
+                        btn_text.color.r,
+                        btn_text.color.g,
+                        btn_text.color.b,
+                        Mathf.Lerp(fadeStart, fadeEnd, t
+                    ));
+                }
+            );
+
+            confirmTexts?.ForEach(
+                (text) => text.color = new Color(
+                    text.color.r, 
+                    text.color.g, 
+                    text.color.b, 
+                    Mathf.Lerp(fadeStart, fadeEnd, t * 2)
+            ));
+
+            yield return null;
+        }
+    }
+
 }

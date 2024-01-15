@@ -8,8 +8,29 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
+    [Header("Volume")]
+
+    [Range(0, 1)]
+    [SerializeField] public float MasterVolume = 1;
+
+    [Range(0, 1)]
+    [SerializeField] public float MusicVolume = 1;
+
+    [Range(0, 1)]
+    [SerializeField] public float AmbienceVolume = 1;
+
+    [Range(0, 1)]
+    [SerializeField] public float SFXVolume = 1;
+
+    private Bus _masterBus;
+    private Bus _musicBus;
+    private Bus _ambienceBus;
+    private Bus _sfxBus;
+
     private EventInstance _ambienceInstance;
     private EventInstance _musicInstance;
+
+    public StageAudioAreaType CurrentAreaType { get; private set; }
 
     private void Awake()
     {
@@ -20,19 +41,55 @@ public class AudioManager : MonoBehaviour
         }
 
         Instance = this;
+
+        _masterBus = RuntimeManager.GetBus("bus:/");
+        _musicBus = RuntimeManager.GetBus("bus:/Music");
+        _ambienceBus = RuntimeManager.GetBus("bus:/Ambience");
+        _sfxBus = RuntimeManager.GetBus("bus:/SFX");
+
     }
 
     private void Start()
     {
         InitializeAmbience(FMODEvents.Instance.Ambience);
         InitializeMusic(FMODEvents.Instance.MainMusic);
+    }
 
+    private void Update()
+    {
+        _SetVolumeBuses();
+    }
+
+    public void PlayOneShot(EventReference sound, Vector3 worldPos)
+    {
+        if (sound.IsNull) return;
+
+        RuntimeManager.PlayOneShot(sound, worldPos);
     }
 
     public void SetAmbienceByArea(StageAudioAreaType areaType) 
     {
         _ambienceInstance.setParameterByName("stageArea", (float) areaType);
+        CurrentAreaType = areaType;
     } 
+
+    public void SetMusicByArea(StageAudioAreaType areaType)
+    {
+        _musicInstance.setParameterByName("stageArea", (float) areaType);
+        CurrentAreaType = areaType;
+        _musicInstance.start();
+    }
+
+    public void SetInteruptMusic(StageAudioAreaType audioType)
+    {
+        _musicInstance.setParameterByName("stageArea", (float) audioType);
+        _musicInstance.start();
+    }
+
+    public void StopMusic() 
+    {
+        _musicInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+    }
 
     public void InitializeAmbience(EventReference ambienceEventRef) 
     {
@@ -50,12 +107,19 @@ public class AudioManager : MonoBehaviour
         _musicInstance.start();
     }
 
-    public void PlayOneShot(EventReference sound, Vector3 worldPos) 
+    public EventInstance CreateEventInstance(EventReference eventRef)
     {
-        if (sound.IsNull) return;
+        EventInstance eInstance = RuntimeManager.CreateInstance(eventRef);
+        return eInstance;
+    }
 
-        RuntimeManager.PlayOneShot(sound, worldPos);
-    } 
+    private void _SetVolumeBuses()
+    {
+        _masterBus.setVolume(MasterVolume);
+        _musicBus.setVolume(MusicVolume);
+        _ambienceBus.setVolume(AmbienceVolume);
+        _sfxBus.setVolume(SFXVolume);
+    }
 
     private void OnDestroy()
     {

@@ -52,6 +52,7 @@ public class EnemyAreaController : MonoBehaviour
 
         if (!anyTriggerGoesOff || IsLockedDown) return;
         _LockDownDoors();
+        AudioManager.Instance?.SetInteruptMusic(StageAudioAreaType.COMBAT);
     }
 
     private void _LockDownDoors() 
@@ -74,6 +75,8 @@ public class EnemyAreaController : MonoBehaviour
         if (!IsAllSpawnsCleared || !IsLockedDown) return;
 
         _UnlockAllDoors();
+        AudioManager.Instance?.SetMusicByArea(AudioManager.Instance.CurrentAreaType);
+
     }
 
     private void _UnlockAllDoors()
@@ -83,6 +86,7 @@ public class EnemyAreaController : MonoBehaviour
             door.SetOpenDoor();
         });
         OnCombatEnd?.Invoke();
+
     }
 
 }

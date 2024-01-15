@@ -46,8 +46,8 @@ public class KeyItemController : MonoBehaviour, IDataPersistence
     {
         if (collision.gameObject.layer != 8 || InventoryManager.Instance.IsFull) return;
         
-        Debug.Log("Collected");
         InventoryManager.Instance.AddItem(this);
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.ItemCollected, transform.position);
         _isCollected = true;
     }
 

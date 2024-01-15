@@ -27,7 +27,6 @@ public class LoadingScreen : MonoBehaviour
 
         do
         {
-            Debug.Log(gameScene.progress);
             await Task.Delay(100);
 
         } while (gameScene.progress < 0.9f);

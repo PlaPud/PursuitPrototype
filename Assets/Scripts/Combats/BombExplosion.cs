@@ -40,5 +40,7 @@ public class BombExplosion : MonoBehaviour
                 position: _bomb.transform.position + SPRITE_POS_OFFSET,
                 rotation: Quaternion.identity
             );
+
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.BombExplode, transform.position);
     }
 }

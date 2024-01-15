@@ -18,14 +18,12 @@ public class CombatAiming : AimingController
 
     private void EnableAiming() 
     {
-        Debug.Log("Invoked");
         List<SpriteRenderer> _allSprite = arrow.GetComponentsInChildren<SpriteRenderer>().ToList();
         _allSprite.ForEach(sprite => { sprite.enabled = true; });  
     }
 
     private void DisableAiming() 
     {
-        Debug.Log("Invoked");
         List<SpriteRenderer> _allSprite = arrow.GetComponentsInChildren<SpriteRenderer>().ToList();
         _allSprite.ForEach(sprite => { sprite.enabled = false; });
     }

@@ -356,6 +356,8 @@ public class EnemyController : MonoBehaviour
         float targetDir = Mathf.Sign(diffDist.x);
         _enemyRB.AddForce(new Vector2(attackLeapForce * targetDir, attackLeapForce), ForceMode2D.Impulse);
 
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.EnemyAttack, transform.position); 
+
         yield return new WaitForSeconds(.2f);
 
         yield return new WaitUntil(() => IsGrounded);

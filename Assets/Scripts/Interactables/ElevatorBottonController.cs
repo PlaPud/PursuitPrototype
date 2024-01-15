@@ -34,7 +34,6 @@ public class ElevatorBottonController : Interactable
 
     public override void HandleInteract() 
     {
-
         switch (buttonRole) 
         {
             case ButtonRole.Top:
@@ -53,6 +52,8 @@ public class ElevatorBottonController : Interactable
                 _SetStateInside();
                 break;
         }
+
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.SwitchPressed, transform.position);
     }
 
     private void _SetStateInside()

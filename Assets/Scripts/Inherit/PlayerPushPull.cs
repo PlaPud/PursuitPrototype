@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayerPushPull : MonoBehaviour
 {
-    private const float HOLD_DOWN_TIME = 0.8f;
+    private const float HOLD_DOWN_TIME = 0.6f;
     private const KeyCode KEY_TO_HOLD = KeyCode.E;
 
     [Header("Check Moveable")]

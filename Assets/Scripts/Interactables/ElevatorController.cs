@@ -1,3 +1,4 @@
+using FMOD.Studio;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,14 +28,16 @@ public class ElevatorController : MonoBehaviour
 
     private Animator _anim;
 
+    private EventInstance _elevatorSound;
+
     void Start()
     {
         _anim = GetComponent<Animator>();
+        _elevatorSound = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.ElevatorMove);
     }
 
     void Update()
     {
-
         switch (CurrentState) 
         {
             case ElevatorState.Ready:
@@ -47,6 +50,8 @@ public class ElevatorController : MonoBehaviour
                 HandleGoingDown();
                 break;
         }
+
+        UpdateSound();
     }
 
     private void HandleReady() 
@@ -80,6 +85,8 @@ public class ElevatorController : MonoBehaviour
 
         if (!isReach) return;
 
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.ElevatorArrive, transform.position);
+        
         CurrentState = ElevatorState.Ready;
         CurrentPos = pos;
     }
@@ -87,6 +94,7 @@ public class ElevatorController : MonoBehaviour
     private void _RepositionElevator() 
     {
         if (CurrentState != ElevatorState.Ready) return;
+
         switch (CurrentPos) 
         {
             case ElevatorIdlePos.Top:
@@ -103,6 +111,24 @@ public class ElevatorController : MonoBehaviour
         if (newAnimState == currentAnimationState) return;
         currentAnimationState = newAnimState;
         _anim.Play(currentAnimationState);
+    }
+
+    private void UpdateSound() 
+    {
+        if (CurrentState == ElevatorState.Ready) 
+        {
+            _elevatorSound.stop(STOP_MODE.ALLOWFADEOUT);
+            return;
+        }
+
+        PLAYBACK_STATE playbackState;
+        _elevatorSound.getPlaybackState(out playbackState);
+
+        if (playbackState.Equals(PLAYBACK_STATE.STOPPED))
+        {
+            _elevatorSound.start();
+        }
+        return;
     }
 
 }

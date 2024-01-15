@@ -71,7 +71,6 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     private Rigidbody2D _playerRB;
     private Animator _playerAnimator;
 
-    //TODO: Keep Animation String in ScriptableObject
     private const string PLAYER_IDLE = "PlayerIdle";
     private const string PLAYER_WALK = "PlayerWalk";
     private const string PLAYER_JUMP = "PlayerJump";
@@ -108,7 +107,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         BoolAndRayCheck();
 
-        if (ControllingManager.Instance.IsControllingCat)
+        if (ControllingManager.Instance.IsControllingCat && !GameManager.Instance.IsPaused)
         {
             _playerRB.constraints = RigidbodyConstraints2D.FreezeRotation;
             OnWalk();
@@ -122,19 +121,11 @@ public class PlayerController : IControllableOnGround, IDataPersistence
             _FreezePlayer();
         }
 
-
-        AnimationStateMachineHandler();
+        if (!GameManager.Instance.IsPaused) AnimationStateMachineHandler();
 
         HandleDisable();
     }
 
-    private void _FreezePlayer()
-    {
-        WalkInput = 0f;
-        _playerRB.constraints = 
-              RigidbodyConstraints2D.FreezeRotation 
-            | RigidbodyConstraints2D.FreezePositionX;
-    }
 
     private void FixedUpdate()
     {
@@ -194,7 +185,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         _coyoteTimer = IsGrounded ? coyoteJumpTime : _coyoteTimer - Time.deltaTime;
         _isJumpPressed = Input.GetKeyDown(KeyCode.Space);
-        if (!IsCrouching && _isJumpPressed && !_toJump && (IsGrounded || IsTouchWall || _coyoteTimer > 0))
+        if (!_playerPushPull.IsGrabbing && !IsCrouching && _isJumpPressed && !_toJump && (IsGrounded || IsTouchWall || _coyoteTimer > 0))
         {
             _toJump = true;
         }
@@ -203,7 +194,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     private void OnCrouch()
     {
         _isCrouchPressed = Input.GetKeyDown(KeyCode.LeftControl);
-        if (IsGrounded && _isCrouchPressed && !_toToggleCrouch && !_toJump)
+        if (!_playerPushPull.IsGrabbing && IsGrounded && _isCrouchPressed && !_toToggleCrouch && !_toJump)
         {
             _toToggleCrouch = true;
         }
@@ -277,7 +268,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
     private void HandleJump()
     {
-        if ((IsGrounded || _coyoteTimer > 0) && _toJump && !IsCrouching)
+        if ((IsGrounded || _coyoteTimer > 0) && _toJump && !IsCrouching && !_playerPushPull.IsGrabbing)
         {
             _playerRB.velocity = new Vector2 (_playerRB.velocity.x, 0f);
             _playerRB.AddForce(
@@ -285,6 +276,8 @@ public class PlayerController : IControllableOnGround, IDataPersistence
                 ForceMode2D.Impulse
             );
             _coyoteTimer = 0;
+
+            AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.PlayerJump, transform.position);
             _toJump = false;
         }
         else if (_toJump && IsWallSliding)
@@ -297,6 +290,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
                     ),
                 ForceMode2D.Impulse
             );
+            AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.PlayerJump, transform.position);
             _toJump = false;
         }
         
@@ -340,7 +334,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     }
     private void HandleCrouching()
     {
-        if (IsGrounded && !IsSprinting && _toToggleCrouch)
+        if (!_playerPushPull.IsGrabbing && IsGrounded && !IsSprinting && _toToggleCrouch)
         {
             _toToggleCrouch = false;
             if (!IsSpaceAbove) return;
@@ -393,6 +387,20 @@ public class PlayerController : IControllableOnGround, IDataPersistence
         yield return new WaitForSeconds(.02f);
         _playerRB.AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
     }
+    private void _FreezePlayer()
+    {
+        WalkInput = 0f;
+
+        if (GameManager.Instance.IsPaused)
+        {
+            _playerRB.constraints = RigidbodyConstraints2D.FreezeAll;
+            return;
+        }
+
+        _playerRB.constraints =
+              RigidbodyConstraints2D.FreezeRotation
+            | RigidbodyConstraints2D.FreezePositionX;
+    }
 
     private void ChangeAnimationState(string newAnimationState) 
     {
@@ -407,6 +415,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         gameObject.SetActive(!isDisable);
     }
+
     private void AnimationStateMachineHandler()
     {
         if (IsGrounded)

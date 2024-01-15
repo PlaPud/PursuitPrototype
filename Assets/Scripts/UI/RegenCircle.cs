@@ -40,7 +40,6 @@ public class RegenCircle : MonoBehaviour
 
     public void EnableUI()
     {
-        Debug.Log(_circleImg);
         _circleImg.enabled = true;
     }
 

@@ -28,5 +28,6 @@ public class EnemyExplode : MonoBehaviour
 
         explodeEff.transform.position = transform.position;
         explodeEff.SetActive(true);
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.EnemyDestroyed, transform.position);
     }
 }

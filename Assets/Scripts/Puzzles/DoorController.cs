@@ -29,6 +29,9 @@ public class DoorController : MonoBehaviour
     public Vector2 DoorOpenPos { get; private set; }
     public Vector2 DoorClosePos { get; private set; }
 
+    public bool IsDoorNotOpenYet => IsOpen && (Vector2) DoorBody.position != DoorOpenPos;
+    public bool IsDoorNotCloseYet => !IsOpen && (Vector2) DoorBody.position != DoorOpenPos;
+
     internal void Start()
     {
         _doorCD = GetComponentInChildren<BoxCollider2D>();
@@ -70,12 +73,13 @@ public class DoorController : MonoBehaviour
 
     internal void SetDoorPositionIdle()
     {
-        if (IsOpen)
+        if (IsDoorNotOpenYet)
         {
             DoorBody.position = DoorOpenPos;
             _doorCD.enabled = false;
         }
-        else
+
+        if (IsDoorNotCloseYet)
         {
             DoorBody.position = DoorClosePos;
             _doorCD.enabled = true;
@@ -126,6 +130,8 @@ public class DoorController : MonoBehaviour
 
     private void _PlayDoorSoundByType()
     {
+        if (!AudioManager.Instance) return;
+
         switch (doorType)
         {
             case DoorType.Pressure:

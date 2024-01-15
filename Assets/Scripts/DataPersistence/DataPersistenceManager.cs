@@ -27,7 +27,6 @@ public class DataPersistenceManager : MonoBehaviour
     {
         if (Instance != null) 
         {
-            Debug.Log("Destroy new DataPersistenceManager gameObject. (Old one already exists)");
             Destroy(gameObject);
             return;
         }

@@ -16,6 +16,8 @@ public class ItemDetectorController : Interactable, IDataPersistence
 
     public delegate void UnlockHandler();
     public event UnlockHandler OnUnlock;
+    public delegate void DenyItemHandler();
+    public event DenyItemHandler OnDenyItem;
 
     private SpriteRenderer _detectorSR;
     private Collider2D _detectorCD;
@@ -54,9 +56,14 @@ public class ItemDetectorController : Interactable, IDataPersistence
         bool isExistToRemove = InventoryManager.Instance.TryRemoveItem(reqItem);
         IsUnlocked = isExistToRemove ? true : IsUnlocked;
 
-        if (!IsUnlocked) return;
-        OnUnlock?.Invoke();
+        if (!IsUnlocked) {
+            OnDenyItem?.Invoke();
+            AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.DetectorDeny, transform.position);
+            return; 
+        }
 
+        AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.DetectorAccept, transform.position);
+        OnUnlock?.Invoke();
     }
 
     [ContextMenu("Generate GUID for This Key Item")]

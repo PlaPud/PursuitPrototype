@@ -1,3 +1,4 @@
+using FMOD.Studio;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -39,10 +40,8 @@ public class CompBotController : IControllableOnGround
     private float _walkInput;
     private bool _isJumpPressed;
     private bool _isShootHold;
-    private bool _isLandingNewGround;
 
     private bool _toJump;
-    private bool _toShoot;
 
     private RaycastHit2D _groundHit;
     public RaycastHit2D GrapplerHit { get; private set; }
@@ -52,7 +51,6 @@ public class CompBotController : IControllableOnGround
     private Vector2 _hookDirection;
     private Vector2 _hookPosition;
     public bool IsOnHook { get; private set; }
-    private bool _isHit;
 
     private float _shootAngle;
 
@@ -71,6 +69,8 @@ public class CompBotController : IControllableOnGround
 
     private ClimbPlane _currentPlane = ClimbPlane.Ground;
 
+    private EventInstance _shootHookSound;
+
     public bool IsControlling => panel.IsControllingThis;
 
     private void Awake()
@@ -86,15 +86,17 @@ public class CompBotController : IControllableOnGround
         _gravityScale = _compBotRB.gravityScale;
         _compBotRB.gravityScale = 0;
         _currentPlane = ClimbPlane.Ground;
+
+        _shootHookSound = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.CompBotShootHook);
     }
 
     void Update()
     {
         RayCheck();
 
-        if (!IsControlling) _FreezeCompBot();
+        if (!IsControlling || GameManager.Instance.IsPaused) _FreezeCompBot();
 
-        if (!CompBotManager.Instance.IsControlCompBot || !IsControlling)
+        if (!CompBotManager.Instance.IsControlCompBot || !IsControlling || GameManager.Instance.IsPaused)
         {
             _ResetBools();
             return;
@@ -120,6 +122,8 @@ public class CompBotController : IControllableOnGround
         HandleJump();
         HandleShootHook();
         HandleGravity();
+
+        UpdateSound();
     }
 
     private void CheckGravityState()
@@ -398,11 +402,8 @@ public class CompBotController : IControllableOnGround
     private void _ResetBools()
     {
         _toJump = false;
-        _toShoot = false;
         _isJumpPressed = false;
         _isShootHold = false;
-        _isLandingNewGround = false;
-        _isHit = false;
     }
     private void _FreezeCompBot()
     {
@@ -415,6 +416,33 @@ public class CompBotController : IControllableOnGround
     private void _FreezeRotation() => _compBotRB.constraints = RigidbodyConstraints2D.FreezeRotation;
     
     private bool _IsRayHitWall(RaycastHit2D hit) => hit && hit.collider && !hit.collider.CompareTag("Moveable");
+
+    private void UpdateSound() 
+    {
+        if (!ControllingManager.Instance.IsControllingCompBot)
+        {
+            PLAYBACK_STATE playbackState;
+            _shootHookSound.getPlaybackState(out playbackState);
+            if (playbackState.Equals(PLAYBACK_STATE.PLAYING) || playbackState.Equals(PLAYBACK_STATE.STARTING))
+            {
+                _shootHookSound.stop(STOP_MODE.ALLOWFADEOUT);
+            }
+            return;
+        }
+
+        if (_isShootHold && IsOnHook) 
+        {
+            PLAYBACK_STATE playbackState;
+            _shootHookSound.getPlaybackState(out playbackState);
+            if (playbackState.Equals(PLAYBACK_STATE.STOPPED))
+            {
+                _shootHookSound.start();
+            }
+            return;
+        }
+
+        _shootHookSound.stop(STOP_MODE.ALLOWFADEOUT);
+    }
 
     private void OnDrawGizmos()
     {

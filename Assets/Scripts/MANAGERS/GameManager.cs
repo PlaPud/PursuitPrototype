@@ -8,6 +8,11 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public bool IsPaused = false;
+    public bool IsSaving = false;
+    public bool IsLoaded { get; private set; } = false;
+
+
     private PlayerController _playerCat;
 
     private void Awake()
@@ -25,11 +30,24 @@ public class GameManager : MonoBehaviour
     {
         _playerCat = ControllingManager.Instance.CatController;
         PlayerHealth.Instance.OnPlayerDied += HandlePlayerDeath;
+
+        StartCoroutine(_WaitForLoad());
     }
 
     void Update()
     {
+        if (!IsSaving && IsLoaded && Input.GetKeyDown(KeyCode.Escape))
+        {
+            IsPaused = !IsPaused;
+        }
+        
+        HandleOnPause();
+    }
 
+    private IEnumerator _WaitForLoad()
+    {
+        yield return new WaitForSeconds(5f);
+        IsLoaded = true;
     }
 
     private void HandlePlayerDeath() 
@@ -39,6 +57,6 @@ public class GameManager : MonoBehaviour
 
     private void HandleOnPause() 
     {
-        
+        Time.timeScale = IsPaused ? 0 : 1;
     }
 }
