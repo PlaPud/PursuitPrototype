@@ -87,7 +87,7 @@ public class MenuSelections : MonoBehaviour
 
     private void _StartNewGame()
     {
-        //DataPersistenceManager.Instance.NewGameData();
+        DataPersistenceManager.Instance.NewGameData();
         _LoadingScreen();
     }
 
