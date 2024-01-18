@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using FMODUnity;
 using FMOD.Studio;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -11,16 +12,16 @@ public class AudioManager : MonoBehaviour
     [Header("Volume")]
 
     [Range(0, 1)]
-    [SerializeField] public float MasterVolume = 1;
+    [SerializeField] public float MasterVolume = 0.8f;
 
     [Range(0, 1)]
-    [SerializeField] public float MusicVolume = 1;
+    [SerializeField] public float MusicVolume = 0.5f;
 
     [Range(0, 1)]
-    [SerializeField] public float AmbienceVolume = 1;
+    [SerializeField] public float AmbienceVolume = 0.5f;
 
     [Range(0, 1)]
-    [SerializeField] public float SFXVolume = 1;
+    [SerializeField] public float SFXVolume = 0.75f;
 
     private Bus _masterBus;
     private Bus _musicBus;
@@ -30,7 +31,9 @@ public class AudioManager : MonoBehaviour
     private EventInstance _ambienceInstance;
     private EventInstance _musicInstance;
 
-    public StageAudioAreaType CurrentAreaType { get; private set; }
+    private bool _isMuteAtStart = true;
+
+    public StageAudioAreaType CurrentMusic { get; private set; }
 
     private void Awake()
     {
@@ -49,14 +52,36 @@ public class AudioManager : MonoBehaviour
 
     }
 
+    private void OnEnable()
+    {
+        SceneManager.sceneUnloaded += OnSceneUnLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneUnloaded -= OnSceneUnLoaded;
+    }
+
     private void Start()
     {
+        StartCoroutine(_MuteForSeconds(2f));
+        _LoadVolumeSettingPref();
         InitializeAmbience(FMODEvents.Instance.Ambience);
         InitializeMusic(FMODEvents.Instance.MainMusic);
     }
 
+    
+    private IEnumerator _MuteForSeconds(float seconds)
+    {
+        _isMuteAtStart = true;
+        _masterBus.setVolume(0f);
+        yield return new WaitForSeconds(seconds);
+        _isMuteAtStart = false;
+    }
+
     private void Update()
     {
+        if (_isMuteAtStart) return;
         _SetVolumeBuses();
     }
 
@@ -70,13 +95,19 @@ public class AudioManager : MonoBehaviour
     public void SetAmbienceByArea(StageAudioAreaType areaType) 
     {
         _ambienceInstance.setParameterByName("stageArea", (float) areaType);
-        CurrentAreaType = areaType;
-    } 
+    }
 
-    public void SetMusicByArea(StageAudioAreaType areaType)
+    public void SetMusicByArea(StageAudioAreaType areaType, bool isRandomDelay = false)
     {
+        CurrentMusic = areaType;
+        
+        if (isRandomDelay)
+        {
+            StartCoroutine(_RandomDelayStartMusic(areaType));
+            return;
+        }
+
         _musicInstance.setParameterByName("stageArea", (float) areaType);
-        CurrentAreaType = areaType;
         _musicInstance.start();
     }
 
@@ -113,6 +144,16 @@ public class AudioManager : MonoBehaviour
         return eInstance;
     }
 
+    private void OnSceneUnLoaded(Scene scene)
+    {
+        Debug.Log("Scene Unloaded. Save Setting To Prefs");
+    }
+
+    private void OnApplicationQuit()
+    {
+        _SaveVolumeSettingPref();
+    }
+
     private void _SetVolumeBuses()
     {
         _masterBus.setVolume(MasterVolume);
@@ -121,8 +162,39 @@ public class AudioManager : MonoBehaviour
         _sfxBus.setVolume(SFXVolume);
     }
 
+    private void _SaveVolumeSettingPref()
+    {
+        float masterVol, musicVol, ambienceVol, sfxVol;
+
+        _masterBus.getVolume(out masterVol);
+        _musicBus.getVolume(out musicVol);
+        _ambienceBus.getVolume(out ambienceVol);
+        _sfxBus.getVolume(out sfxVol);
+
+        PlayerPrefs.SetFloat("MasterVolume", masterVol);
+        PlayerPrefs.SetFloat("MusicVolume", musicVol);
+        PlayerPrefs.SetFloat("AmbienceVolume", ambienceVol);
+        PlayerPrefs.SetFloat("SFXVolume", sfxVol);
+    }
+
+    private void _LoadVolumeSettingPref()
+    {
+        MasterVolume = PlayerPrefs.GetFloat("MasterVolume", MasterVolume);
+        MusicVolume = PlayerPrefs.GetFloat("MusicVolume", MusicVolume);
+        AmbienceVolume = PlayerPrefs.GetFloat("AmbienceVolume", AmbienceVolume);
+        SFXVolume = PlayerPrefs.GetFloat("SFXVolume", SFXVolume);
+    }
+    private IEnumerator _RandomDelayStartMusic(StageAudioAreaType areaType)
+    {
+        yield return new WaitForSeconds(Random.Range(0, 5));
+        _musicInstance.setParameterByName("stageArea", (float)areaType);
+        _musicInstance.start();
+    }
+
     private void OnDestroy()
     {
+        _SaveVolumeSettingPref();
+
         _ambienceInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         _ambienceInstance.release();
 

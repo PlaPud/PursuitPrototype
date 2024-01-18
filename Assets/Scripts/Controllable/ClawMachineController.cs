@@ -88,6 +88,7 @@ public class ClawMachineController : MonoBehaviour
         else 
         {
             _FreezeClawMachine();
+            _ResetVar();
         }
 
         SetWireLength();
@@ -263,6 +264,13 @@ public class ClawMachineController : MonoBehaviour
         }
         return closestMoveable;
     }
+
+    private void _ResetVar()
+    {
+        _moveX = 0;
+        _moveY = 0;
+    }
+
     private void _ReleaseMovable()
     {
         _clawBodyCD.enabled = true;

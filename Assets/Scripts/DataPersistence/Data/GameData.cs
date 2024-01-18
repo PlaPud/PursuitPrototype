@@ -5,7 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class GameData
 {
-
     public int DeathCount;
     public Vector3Serialize PlayerPos;
     public Dictionary<string, Vector3Serialize> SavedMoveablePos;

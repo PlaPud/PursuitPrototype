@@ -20,7 +20,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     [Header("Force and Accelaration")]
     [SerializeField] private float frictionAmount;
     [SerializeField] private float maxAccelerate;
-    [SerializeField] private float maxDeccelerate;
+    [SerializeField] private float maxDecelerate;
     [SerializeField] private float velocityPower;
 
     [Header("BoxCast Ceiling")]
@@ -49,7 +49,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
     public LineRenderer PlayerRopeRenderer { get; private set; }
     public DistanceJoint2D PlayerRopeJoint { get; private set; }
-    public RaycastHit2D FrontRopePointHit { get; private set; }
+    public RaycastHit2D IsSeeFrontRope { get; private set; }
 
     public float WalkInput { get; private set; } = 0f;
     public bool IsTryGetDown { get; private set; } = false;
@@ -59,6 +59,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     public bool IsSprinting { get; private set; } = false;
     public bool IsSpaceAbove { get; private set; } = true;
     public bool IsTouchWall { get; private set; } = false;
+    public bool IsJumpFromWall { get; private set; } = false;
 
     private bool _disableX = false;
     private bool _isJumpPressed = false;
@@ -156,9 +157,9 @@ public class PlayerController : IControllableOnGround, IDataPersistence
                 layerMask: groundLayer
             );
 
-        FrontRopePointHit = Physics2D.BoxCast(
+        IsSeeFrontRope = Physics2D.BoxCast(
                 origin: transform.position,
-                size: new Vector2(ropeBoxWidth, 2 * PlayerRopeRadius),
+                size: new Vector2(ropeBoxWidth, 4 * PlayerRopeRadius),
                 angle: 0f,
                 direction: transform.right,
                 distance: PlayerRopeRadius,
@@ -172,7 +173,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
     private void OnSprint()
     {
-        if (_playerPushPull.IsFoundMoveable) 
+        if (_playerPushPull.IsFoundMoveable || IsJumpFromWall) 
         {
             _isSprintPressed = false;
             return;
@@ -211,12 +212,12 @@ public class PlayerController : IControllableOnGround, IDataPersistence
         if (_disableX || PlayerRopeJoint.enabled) return;
 
         float resultSpeed = WalkInput * (
-                IsSprinting ? sprintSpeed
+                IsSprinting || IsJumpFromWall ? sprintSpeed
                 : IsCrouching ? crouchSpeed
                 : walkSpeed
             );
         
-        float accel = (Mathf.Abs(WalkInput) > .01f ? maxAccelerate : maxDeccelerate);
+        float accel = (Mathf.Abs(WalkInput) > .01f ? maxAccelerate : maxDecelerate);
         float speedDif = resultSpeed - _playerRB.velocity.x;
 
         float movement = Mathf.Pow(
@@ -290,10 +291,20 @@ public class PlayerController : IControllableOnGround, IDataPersistence
                     ),
                 ForceMode2D.Impulse
             );
+
+            StartCoroutine(_CheckUntilGround());
+
             AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.PlayerJump, transform.position);
             _toJump = false;
         }
         
+    }
+
+    private IEnumerator _CheckUntilGround()
+    {
+        IsJumpFromWall = true;
+        yield return new WaitUntil(() => IsGrounded);
+        IsJumpFromWall = false;
     }
 
     private void HandleWallSlide()
@@ -348,7 +359,6 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
         if (transform.rotation.y != 0f && _playerRB.velocity.x > 0.5f && WalkInput > .001f)
         {
-            //Debug.Log("Flip To Right");
             transform.rotation = Quaternion.Euler(0, 0, 0);
             OnPlayerFlipped?.Invoke();
             return;
@@ -356,7 +366,6 @@ public class PlayerController : IControllableOnGround, IDataPersistence
 
         if (transform.rotation.y == 0f && _playerRB.velocity.x < -0.5f && WalkInput < -.001f)
         {
-            //Debug.Log("Flip To Left");
             transform.rotation = Quaternion.Euler(0, 180f, 0);
             OnPlayerFlipped?.Invoke();
             return;
@@ -385,7 +394,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         _playerRB.velocity = Vector3.zero;  
         yield return new WaitForSeconds(.02f);
-        _playerRB.AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
+        _playerRB.velocity = Vector2.up * 10f;
     }
     private void _FreezePlayer()
     {

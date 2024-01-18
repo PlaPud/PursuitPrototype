@@ -87,6 +87,7 @@ public class DataPersistenceManager : MonoBehaviour
         if (_gameData == null)
         {
             Debug.Log("No save file found. Initialize new game data.");
+            //NewGameData();
             return;
         }
 
@@ -99,6 +100,8 @@ public class DataPersistenceManager : MonoBehaviour
     }
     public void SaveGameData() 
     {
+        if (_gameData == null) _gameData = new GameData();
+
         _dataPersistObjs.ForEach((dataPersistObj) => {
             dataPersistObj.SaveData(_gameData);
         });

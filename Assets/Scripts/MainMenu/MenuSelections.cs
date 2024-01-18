@@ -23,6 +23,7 @@ public class MenuSelections : MonoBehaviour
     private void Awake()
     {
         GetComponentsInChildren<Button>().ToList().ForEach((btn) => _allBtns.Add(btn));
+        Cursor.visible = true;
     }
 
     void Start()
@@ -86,7 +87,7 @@ public class MenuSelections : MonoBehaviour
 
     private void _StartNewGame()
     {
-        DataPersistenceManager.Instance.NewGameData();
+        //DataPersistenceManager.Instance.NewGameData();
         _LoadingScreen();
     }
 

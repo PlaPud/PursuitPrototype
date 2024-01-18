@@ -13,7 +13,8 @@ public class RopePoint : MonoBehaviour
 
     private bool _isUsing;
     private bool _isPlayerAboveRopePoint => target.transform.position.y > transform.position.y;
-    private bool _isPlayerFacingThis => target.FrontRopePointHit && target.FrontRopePointHit.transform.position == transform.position;
+    private bool _isPlayerFacingThis => target.IsSeeFrontRope && target.IsSeeFrontRope.transform.position == transform.position;
+    
     private void Awake()
     {
         target = GameObject.FindGameObjectsWithTag("PlayerCat")[0].GetComponent<PlayerController>();

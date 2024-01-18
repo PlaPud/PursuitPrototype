@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 using UnityEngine;
@@ -12,7 +11,6 @@ public class GameManager : MonoBehaviour
     public bool IsSaving = false;
     public bool IsLoaded { get; private set; } = false;
 
-
     private PlayerController _playerCat;
 
     private void Awake()
@@ -24,6 +22,7 @@ public class GameManager : MonoBehaviour
         } 
         
         Instance = this;
+        Cursor.visible = false; 
     }
 
     void Start()
@@ -46,7 +45,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator _WaitForLoad()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(4f);
         IsLoaded = true;
     }
 
@@ -58,5 +57,6 @@ public class GameManager : MonoBehaviour
     private void HandleOnPause() 
     {
         Time.timeScale = IsPaused ? 0 : 1;
+        Cursor.visible = IsPaused;
     }
 }

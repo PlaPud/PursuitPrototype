@@ -75,7 +75,7 @@ public class EnemyAreaController : MonoBehaviour
         if (!IsAllSpawnsCleared || !IsLockedDown) return;
 
         _UnlockAllDoors();
-        AudioManager.Instance?.SetMusicByArea(AudioManager.Instance.CurrentAreaType);
+        AudioManager.Instance?.SetMusicByArea(AudioManager.Instance.CurrentMusic);
 
     }
 

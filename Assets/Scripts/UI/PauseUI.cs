@@ -7,11 +7,26 @@ using UnityEngine.UI;
 
 public class PauseUI : MonoBehaviour
 {
-    [Header("UI Components")]
+    public enum PauseMenuType
+    {
+        Pause,
+        Volume
+    }
+
+    [Header("UI Pause Menu")]
+    [SerializeField] private GameObject pauseMenu;
     [SerializeField] private TMP_Text pauseText;
     [SerializeField] private List<Button> buttons;
 
+    [Header("UI Volume Menu")]
+    [SerializeField] private GameObject volumeMenu;
+    [SerializeField] private List<TMP_Text> volumeTexts;
+    [SerializeField] private List<Slider> volumeSliders;
+    [SerializeField] private Button backToPauseMenu;
+
     private Image _pauseBG;
+
+    public PauseMenuType CurrentMenuType = PauseMenuType.Pause;
 
     private void Awake()
     {
@@ -24,22 +39,68 @@ public class PauseUI : MonoBehaviour
 
     void Update()
     {
-        if (!_pauseBG.enabled && GameManager.Instance.IsPaused) 
+        if (!_pauseBG.enabled && GameManager.Instance.IsPaused)
         {
-            StartCoroutine(_FadeIn());
-            pauseText.gameObject.SetActive(true);
-            buttons.ForEach((button) => button.gameObject.SetActive(true));
+            pauseMenu.SetActive(true);
+            StartCoroutine(_FadeInBackground());
+            _EnableAllMenuUI();
 
         }
         else if (_pauseBG.enabled && !GameManager.Instance.IsPaused)
         {
             _pauseBG.enabled = false;
-            pauseText.gameObject.SetActive(false);
-            buttons.ForEach((button) => button.gameObject.SetActive(false));
+            _DisableAllMenuUI();
+            _DisableAllVolumeUI();
+            pauseMenu.SetActive(false);
         }
     }
 
-    private IEnumerator _FadeIn()
+    public void HandleOnResume()
+    {
+        GameManager.Instance.IsPaused = false;
+    }
+
+    public void HandleVolumeSetting()
+    {
+        _DisableAllMenuUI();
+        _EnableAllVolumeUI();
+    }
+
+    public void HandleBackToPauseMenu()
+    {
+        _DisableAllVolumeUI();
+        _EnableAllMenuUI();
+    }
+
+    private void _EnableAllVolumeUI()
+    {
+        volumeMenu.SetActive(true);
+        volumeTexts.ForEach((text) => text.gameObject.SetActive(true));
+        volumeSliders.ForEach((slider) => slider.gameObject.SetActive(true));
+        backToPauseMenu.gameObject.SetActive(true);
+    }
+
+    private void _DisableAllVolumeUI()
+    {
+        volumeTexts.ForEach((text) => text.gameObject.SetActive(false));
+        volumeSliders.ForEach((slider) => slider.gameObject.SetActive(false));
+        volumeMenu.SetActive(false);
+        backToPauseMenu.gameObject.SetActive(false);
+    }
+
+    private void _DisableAllMenuUI()
+    {
+        pauseText.gameObject.SetActive(false);
+        buttons.ForEach((button) => button.gameObject.SetActive(false));
+    }
+
+    private void _EnableAllMenuUI()
+    {
+        pauseText.gameObject.SetActive(true);
+        buttons.ForEach((button) => button.gameObject.SetActive(true));
+    }
+
+    private IEnumerator _FadeInBackground()
     {
         _pauseBG.enabled = true;
         _pauseBG.color = new Color(0, 0, 0, 0);
@@ -50,11 +111,6 @@ public class PauseUI : MonoBehaviour
             _pauseBG.color = new Color(0, 0, 0, alpha);
             yield return new WaitForSecondsRealtime(0.025f);
         }
-    }
-
-    public void HandleOnResume()
-    {
-        GameManager.Instance.IsPaused = false;
     }
 
     public void HandleOnQuit()

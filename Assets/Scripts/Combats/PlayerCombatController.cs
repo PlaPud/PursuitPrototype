@@ -22,10 +22,13 @@ public class PlayerCombatController : MonoBehaviour
     public Action OnPlayerShootBomb;
     public Action OnCheckReload;
 
+    private Rigidbody2D _playerRB;
+
     private void Awake()
     {
-
+        _playerRB = GetComponent<Rigidbody2D>();
     }
+
     private void Start()
     {
         CurrentInField = new List<GameObject>();
@@ -84,11 +87,11 @@ public class PlayerCombatController : MonoBehaviour
 
     private IEnumerator _ShootBomb(Rigidbody2D bombRB) 
     {
-        bombRB.velocity = Vector2.zero;
         
-        yield return new WaitForSeconds(0.02f);
+        yield return new WaitForSeconds(0.05f);
 
-        bombRB.velocity = _aiming.AimingCircleDirection.normalized * firingForce;
+        bombRB.velocity = Vector2.zero;
+        bombRB.velocity = _aiming.AimingCircleDirection.normalized * firingForce + (Vector3) _playerRB.velocity * 0.5f;
 
         AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PlayerShoot, transform.position);
     }

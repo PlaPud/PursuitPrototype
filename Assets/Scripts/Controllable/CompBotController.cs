@@ -39,9 +39,9 @@ public class CompBotController : IControllableOnGround
 
     private float _walkInput;
     private bool _isJumpPressed;
-    private bool _isShootHold;
 
     private bool _toJump;
+    private bool _isLockTilRelease;
 
     private RaycastHit2D _groundHit;
     public RaycastHit2D GrapplerHit { get; private set; }
@@ -50,6 +50,8 @@ public class CompBotController : IControllableOnGround
 
     private Vector2 _hookDirection;
     private Vector2 _hookPosition;
+
+    public bool IsShootHold { get; private set; }
     public bool IsOnHook { get; private set; }
 
     private float _shootAngle;
@@ -174,12 +176,15 @@ public class CompBotController : IControllableOnGround
                         layerMask: groundLayer
                    );
 
-        GrapplerHit = Physics2D.Raycast(
-                    origin: transform.position,
-                    direction: _aimingController.AimingCircleDirection.normalized * maxGrapplingDistance,
-                    distance: maxGrapplingDistance,
-                    layerMask: groundLayer
-                );
+        if (!IsOnHook) 
+        {
+            GrapplerHit = Physics2D.Raycast(
+                        origin: transform.position,
+                        direction: _aimingController.AimingCircleDirection.normalized,
+                        distance: maxGrapplingDistance,
+                        layerMask: groundLayer
+                    );
+        }
 
         IsGrounded = _groundHit;
     }
@@ -209,22 +214,36 @@ public class CompBotController : IControllableOnGround
 
     private void OnShootHook()
     {
-        _isShootHold = Input.GetKey(KeyCode.Mouse0);
+        IsShootHold = Input.GetKey(KeyCode.Mouse0);
+        _LockIfNotHit();
+    }
+
+    private void _LockIfNotHit()
+    {
+        if (IsShootHold && !GrapplerHit)
+        {
+            _isLockTilRelease = true;
+        }
+
+        if (_isLockTilRelease && !IsShootHold)
+        {
+            _isLockTilRelease = false;
+        }
     }
 
     private void HandleGravity() => _compBotRB.AddForce(_gravityDirection * _gravityScale);
  
     private void HandleShootHook()
     {
-        if (_isShootHold && !GrapplerHit) return;
+        if (_isLockTilRelease) return;
 
-        if (_isShootHold && !IsOnHook) 
+        if (IsShootHold && !IsOnHook) 
         {
             IsOnHook = true;
             grapplerHitObject = GrapplerHit;
         }
 
-        if (_isShootHold && IsOnHook)
+        if (IsShootHold && IsOnHook)
         {
             _enableInput = false;
 
@@ -240,7 +259,7 @@ public class CompBotController : IControllableOnGround
             );
         }
 
-        if (!_isShootHold && IsOnHook)
+        if (!IsShootHold && IsOnHook)
         {
             _enableInput = true;
             IsOnHook = false;
@@ -403,7 +422,7 @@ public class CompBotController : IControllableOnGround
     {
         _toJump = false;
         _isJumpPressed = false;
-        _isShootHold = false;
+        IsShootHold = false;
     }
     private void _FreezeCompBot()
     {
@@ -430,7 +449,7 @@ public class CompBotController : IControllableOnGround
             return;
         }
 
-        if (_isShootHold && IsOnHook) 
+        if (IsShootHold && IsOnHook) 
         {
             PLAYBACK_STATE playbackState;
             _shootHookSound.getPlaybackState(out playbackState);

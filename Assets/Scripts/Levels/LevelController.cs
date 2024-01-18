@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -16,9 +17,11 @@ public class LevelController : MonoBehaviour, IDataPersistence
     [SerializeField] internal EnemyAreaController enemyAreaCtrl;
     [SerializeField] internal LevelCompleteTrigger puzzleCompleteTrigger;
 
+    public Action<bool> OnLevelStatusLoaded;
+
     void Start()
     {
-       
+
     }
 
     void Update()
@@ -37,6 +40,7 @@ public class LevelController : MonoBehaviour, IDataPersistence
 
     public void CheckLevelElementComplete()
     {
+        bool oldStatus = IsLevelComplete;
         bool isPuzzleDone = IsPuzzleDoneOrNull();
         bool isEnemyAreaCleared = IsEnemyAreaClearedOrNull();
 
@@ -64,7 +68,9 @@ public class LevelController : MonoBehaviour, IDataPersistence
     public void LoadData(GameData data)
     {
         if (!data.SavedLevelComplete.ContainsKey(levelId)) return;
+        bool oldStatus = IsLevelComplete;
         IsLevelComplete = data.SavedLevelComplete[levelId];
+        OnLevelStatusLoaded?.Invoke(IsLevelComplete);
     }
 
     public void SaveData(GameData data)
