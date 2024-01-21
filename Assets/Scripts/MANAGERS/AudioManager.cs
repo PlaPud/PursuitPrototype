@@ -49,17 +49,6 @@ public class AudioManager : MonoBehaviour
         _musicBus = RuntimeManager.GetBus("bus:/Music");
         _ambienceBus = RuntimeManager.GetBus("bus:/Ambience");
         _sfxBus = RuntimeManager.GetBus("bus:/SFX");
-
-    }
-
-    private void OnEnable()
-    {
-        SceneManager.sceneUnloaded += OnSceneUnLoaded;
-    }
-
-    private void OnDisable()
-    {
-        SceneManager.sceneUnloaded -= OnSceneUnLoaded;
     }
 
     private void Start()
@@ -142,11 +131,6 @@ public class AudioManager : MonoBehaviour
     {
         EventInstance eInstance = RuntimeManager.CreateInstance(eventRef);
         return eInstance;
-    }
-
-    private void OnSceneUnLoaded(Scene scene)
-    {
-        Debug.Log("Scene Unloaded. Save Setting To Prefs");
     }
 
     private void OnApplicationQuit()

@@ -7,7 +7,8 @@ public class CheckPoint : MonoBehaviour, IDataPersistence
 {
     [SerializeField] string checkpointId;
 
-    public static Action OnSave;
+    public Action OnBeforeSave;
+    public static Action OnSaveAny;
 
     private Collider2D _trigger;
 
@@ -20,7 +21,8 @@ public class CheckPoint : MonoBehaviour, IDataPersistence
     {
         if (!collision.CompareTag("PlayerCat")) return;
         _trigger.enabled = false;
-        OnSave?.Invoke();
+        OnBeforeSave?.Invoke();
+        OnSaveAny?.Invoke();
         DataPersistenceManager.Instance.SaveGameData();
         AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.SavedLevelComplete, transform.position);
     }

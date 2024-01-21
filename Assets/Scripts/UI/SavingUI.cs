@@ -22,7 +22,7 @@ public class SavingUI : MonoBehaviour
 
     void Start()
     {
-        CheckPoint.OnSave += PlaySavingAnimation;
+        CheckPoint.OnSaveAny += PlaySavingAnimation;
         _anim.enabled = false;
     }
 
@@ -45,6 +45,6 @@ public class SavingUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        CheckPoint.OnSave -= PlaySavingAnimation;
+        CheckPoint.OnSaveAny -= PlaySavingAnimation;
     }
 }

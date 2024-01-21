@@ -101,6 +101,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
         PlayerRopeJoint.enabled = false;
         PlayerRopeRenderer.enabled = false;
         _coyoteTimer = coyoteJumpTime;
+        if (!PlayerHealth.Instance) return;
         PlayerHealth.Instance.OnDamageTaken += KnockBackPlayer;
     }
 
@@ -108,7 +109,7 @@ public class PlayerController : IControllableOnGround, IDataPersistence
     {
         BoolAndRayCheck();
 
-        if (ControllingManager.Instance.IsControllingCat && !GameManager.Instance.IsPaused)
+        if (ControllingManager.Instance.IsControllingCat && !GameManager.Instance.IsPaused && !GameManager.Instance.IsFreezeControl)
         {
             _playerRB.constraints = RigidbodyConstraints2D.FreezeRotation;
             OnWalk();

@@ -10,6 +10,7 @@ public class DataPersistenceManager : MonoBehaviour
     public static DataPersistenceManager Instance { get; private set; }
 
     [SerializeField] private bool turnOnDebug = false;
+    [SerializeField] private bool useEncryption = false;
 
     [Header("File Storage")]
     [SerializeField] private string fileName;
@@ -20,6 +21,8 @@ public class DataPersistenceManager : MonoBehaviour
     private FileDataHandler _fileHandler;
 
     public bool IsSaveDataExist => _gameData != null;
+
+    public bool IsAnyStageCleared => IsSaveDataExist && _gameData.SavedStagesCompleted > 0;
 
     public Action OnLoadedComplete;
 
@@ -37,7 +40,8 @@ public class DataPersistenceManager : MonoBehaviour
 
         _fileHandler = new FileDataHandler(
             fileDir: Application.persistentDataPath, 
-            fileName: fileName
+            fileName: fileName,
+            useEncryption: useEncryption
         );
     }
     private void OnEnable()
@@ -73,7 +77,10 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void NewGameData() 
     {
-        _gameData = new GameData();
+        _gameData = new GameData(
+                savedStageCompleted: 
+                _gameData == null ? 0 : _gameData.SavedStagesCompleted
+            );
 
         SaveGameData();
 

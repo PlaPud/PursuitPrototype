@@ -9,27 +9,43 @@ using UnityEngine.UI;
 
 public class MenuSelections : MonoBehaviour
 {
+    [Header("Background")]
+    [SerializeField] private Image backgroundImg;
 
     [Header("Menu Options")]
     [SerializeField] private Button contBtn;
+    [SerializeField] private Button extraMode;
     [SerializeField] private List<Button> menuBtns = new();
 
     [Header("Confirm Start Options")]
     [SerializeField] private List<TMP_Text> confirmTexts;
     [SerializeField] private List<Button> startConfirmsBtn = new();
 
+    [Header("Credit")]
+    [SerializeField] private GameObject creditList;
+
     private List<Button> _allBtns = new List<Button>();
+
 
     private void Awake()
     {
         GetComponentsInChildren<Button>().ToList().ForEach((btn) => _allBtns.Add(btn));
         Cursor.visible = true;
+        Time.timeScale = 1;
     }
 
     void Start()
     {
+        _SetInteractable();
+        StartCoroutine(_FadeInBackground());
+    }
+
+    private void _SetInteractable()
+    {
         contBtn.interactable = DataPersistenceManager.Instance.IsSaveDataExist;
+        extraMode.interactable = DataPersistenceManager.Instance.IsAnyStageCleared;
         contBtn.GetComponentInChildren<TMP_Text>().color = contBtn.interactable ? Color.white : Color.gray;
+        extraMode.GetComponentInChildren<TMP_Text>().color = extraMode.interactable ? Color.white : Color.gray;
     }
 
     void Update()
@@ -50,7 +66,18 @@ public class MenuSelections : MonoBehaviour
 
     public void OnPressContinue() 
     {
-        _LoadingScreen();
+        _LoadSceneAsync("Loading");
+    }
+
+    public void OnPressExtra() 
+    {
+        _LoadSceneAsync("ExtraModeMenu");
+    }
+
+    public void OnPressCredit() 
+    {
+        FadeOutMenu();
+        creditList.SetActive(true);
     }
 
     public void OnPressQuit() 
@@ -63,18 +90,43 @@ public class MenuSelections : MonoBehaviour
         _StartNewGame();
     }
 
-    public void OnPressCancel() 
+    public void OnPressCancel()
     {
         startConfirmsBtn.ForEach((btn) => btn.interactable = false);
 
         StartCoroutine(_FadeBtns(
-                fadeOut: true, 
+                fadeOut: true,
                 btns: startConfirmsBtn
             ));
 
         startConfirmsBtn.ForEach((btn) => btn.gameObject.SetActive(false));
         confirmTexts.ForEach((text) => text.gameObject.SetActive(false));
 
+        FadeInMenu();
+    }
+
+    private void _StartNewGame()
+    {
+        DataPersistenceManager.Instance.NewGameData();
+        _LoadSceneAsync("Loading");
+    }
+    private void _DisplayConfirm()
+    {
+        FadeOutMenu();
+
+        startConfirmsBtn.ForEach((btn) => btn.gameObject.SetActive(true));
+        confirmTexts.ForEach((text) => text.gameObject.SetActive(true));
+
+        StartCoroutine(_FadeBtns(
+                fadeOut: false,
+                btns: startConfirmsBtn,
+                confirmTexts: confirmTexts
+            ));
+
+        startConfirmsBtn.ForEach((btn) => btn.interactable = true);
+    }
+    public void FadeInMenu()
+    {
         menuBtns.ForEach((btn) => btn.gameObject.SetActive(true));
 
         StartCoroutine(_FadeBtns(
@@ -83,15 +135,11 @@ public class MenuSelections : MonoBehaviour
             ));
 
         menuBtns.ForEach((btn) => btn.interactable = true);
-    }
+        contBtn.interactable = DataPersistenceManager.Instance.IsSaveDataExist;
+        extraMode.interactable = DataPersistenceManager.Instance.IsAnyStageCleared;
 
-    private void _StartNewGame()
-    {
-        DataPersistenceManager.Instance.NewGameData();
-        _LoadingScreen();
     }
-
-    private void _DisplayConfirm()
+    public void FadeOutMenu()
     {
         menuBtns.ForEach((btn) => btn.interactable = false);
 
@@ -100,22 +148,11 @@ public class MenuSelections : MonoBehaviour
             ));
 
         menuBtns.ForEach((btn) => btn.gameObject.SetActive(false));
-
-        startConfirmsBtn.ForEach((btn) => btn.gameObject.SetActive(true));
-        confirmTexts.ForEach((text) => text.gameObject.SetActive(true));
-
-        StartCoroutine(_FadeBtns(
-                fadeOut: false, 
-                btns: startConfirmsBtn, 
-                confirmTexts: confirmTexts
-            ));
-
-        startConfirmsBtn.ForEach((btn) => btn.interactable = true);
     }
 
-    private async void _LoadingScreen()
+    private async void _LoadSceneAsync(string sceneName)
     {
-        AsyncOperation gameScene = SceneManager.LoadSceneAsync("Loading");
+        AsyncOperation gameScene = SceneManager.LoadSceneAsync(sceneName);
         gameScene.allowSceneActivation = false;
 
         _allBtns.ForEach((btn) => btn.interactable = false);
@@ -138,7 +175,6 @@ public class MenuSelections : MonoBehaviour
         {
             t += Time.deltaTime * fadeSpeed;
 
-            // lerp text color in btn
             btns.ForEach(
                 (btn) => {
                     TMP_Text btn_text = btn.GetComponentInChildren<TMP_Text>();
@@ -160,6 +196,20 @@ public class MenuSelections : MonoBehaviour
             ));
 
             yield return null;
+        }
+    }
+
+    private IEnumerator _FadeInBackground()
+    {
+        Debug.Log("Fade In");
+        Color tmpColor = backgroundImg.color;
+        backgroundImg.color = tmpColor;
+
+        while (tmpColor.b < 0.4f)
+        {
+            tmpColor += new Color(0.01f, 0.01f, 0.01f);
+            backgroundImg.color = tmpColor;
+            yield return new WaitForSeconds(0.01f);
         }
     }
 

@@ -401,30 +401,33 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  boxSize: {x: 1.64, y: 0.05}
-  castDistance: 0.98
+  boxSize: {x: 1.3, y: 0.05}
+  castDistance: 0.8
   isDisable: 0
-  walkSpeed: 10
-  sprintSpeed: 16
-  crouchSpeed: 5
-  jumpSpeed: 20
+  walkSpeed: 8
+  sprintSpeed: 14
+  crouchSpeed: 3
+  jumpSpeed: 17.5
   coyoteJumpTime: 0.08
-  frictionAmount: 2
-  maxAccelerate: 7
-  maxDeccelerate: 9
+  frictionAmount: 50
+  maxAccelerate: 14
+  maxDecelerate: 50
   velocityPower: 0.9
   boxSizeAbove: {x: 0.76, y: 0.41}
   aboveCastDistance: 0.71
+  ropePointLayer:
+    serializedVersion: 2
+    m_Bits: 128
   <PlayerRopeRadius>k__BackingField: 10
   ropeBoxWidth: 0.1
   swingForce: 5
   maxSwingSpeed: 20
   wallJumpTime: 0.2
   wallJumpForceX: 20
-  wallJumpForceY: 20
+  wallJumpForceY: 17
   wallSlideSpeed: 0.0025
   wallDistance: 1
-  fallMultiplier: 7
+  fallMultiplier: 5
   lowJumpMultiplier: 4
   _playerPushPull: {fileID: 1109923456580445299}
 --- !u!114 &1109923456580445299

@@ -8,7 +8,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     public bool IsPaused = false;
+    public bool IsFreezeControl = false;
     public bool IsSaving = false;
+    public bool CanPause = true;
     public bool IsLoaded { get; private set; } = false;
 
     private PlayerController _playerCat;
@@ -28,13 +30,19 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         _playerCat = ControllingManager.Instance.CatController;
-        PlayerHealth.Instance.OnPlayerDied += HandlePlayerDeath;
+        
+        if (PlayerHealth.Instance) 
+        {
+            PlayerHealth.Instance.OnPlayerDied += HandlePlayerDeath;
+        }
 
         StartCoroutine(_WaitForLoad());
     }
 
     void Update()
     {
+        if (!CanPause) return;
+
         if (!IsSaving && IsLoaded && Input.GetKeyDown(KeyCode.Escape))
         {
             IsPaused = !IsPaused;
@@ -45,7 +53,9 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator _WaitForLoad()
     {
-        yield return new WaitForSeconds(4f);
+        IsFreezeControl = true;
+        yield return new WaitForSeconds(3f);
+        IsFreezeControl = false;
         IsLoaded = true;
     }
 
@@ -57,6 +67,6 @@ public class GameManager : MonoBehaviour
     private void HandleOnPause() 
     {
         Time.timeScale = IsPaused ? 0 : 1;
-        Cursor.visible = IsPaused;
+        Cursor.visible = IsPaused ? true : ControllingManager.Instance.IsControllingCompBot ? true : false;
     }
 }

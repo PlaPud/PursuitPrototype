@@ -131,4 +131,9 @@ public class ElevatorController : MonoBehaviour
         return;
     }
 
+    private void OnDestroy()
+    {
+        _elevatorSound.stop(STOP_MODE.ALLOWFADEOUT);
+        _elevatorSound.release();
+    }
 }

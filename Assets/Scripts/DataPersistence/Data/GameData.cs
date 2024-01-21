@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class GameData
 {
-    public int DeathCount;
+    public int SavedStagesCompleted;
     public Vector3Serialize PlayerPos;
     public Dictionary<string, Vector3Serialize> SavedMoveablePos;
     public Dictionary<string, bool> SavedLevelComplete;
@@ -14,9 +14,9 @@ public class GameData
     public Dictionary<string, bool> SavedCheckpoints;
     public List<string> InventoryItems;
 
-    public GameData() 
+    public GameData(int savedStageCompleted) 
     {
-        DeathCount = 0;
+        SavedStagesCompleted = savedStageCompleted;
         PlayerPos = new Vector3Serialize(Vector3.zero);
         SavedMoveablePos = new Dictionary<string, Vector3Serialize>();
         SavedLevelComplete = new Dictionary<string, bool>();

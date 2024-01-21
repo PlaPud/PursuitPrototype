@@ -12,6 +12,8 @@ public class LoadingScreen : MonoBehaviour
     [SerializeField] TMP_Text loadingText;
     [SerializeField] Image loadingLogoImg;
 
+    public string StageToLoad { get; private set; }
+
     void Awake()
     {
         Cursor.visible = false; 
@@ -19,6 +21,7 @@ public class LoadingScreen : MonoBehaviour
 
     void Start()
     {
+        StageToLoad = PlayerPrefs.GetString("StageToLoad", "MainMenu");
         _LoadSavedGameScene();
     }
 
@@ -29,16 +32,16 @@ public class LoadingScreen : MonoBehaviour
 
     private async void _LoadSavedGameScene()
     {
-        AsyncOperation gameScene = SceneManager.LoadSceneAsync("Stage1", mode: LoadSceneMode.Additive);
-        gameScene.allowSceneActivation = false;
+        AsyncOperation stageScene = SceneManager.LoadSceneAsync(StageToLoad, mode: LoadSceneMode.Additive);
+        stageScene.allowSceneActivation = false;
 
         do
         {
             await Task.Delay(100);
 
-        } while (gameScene.progress < 0.9f);
+        } while (stageScene.progress < 0.9f);
 
-        gameScene.allowSceneActivation = true;
+        stageScene.allowSceneActivation = true;
 
         await Task.Delay(3000);
 

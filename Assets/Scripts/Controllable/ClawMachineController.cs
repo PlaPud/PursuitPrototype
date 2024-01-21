@@ -333,4 +333,10 @@ public class ClawMachineController : MonoBehaviour
 
         _clawMoveSound.stop(STOP_MODE.ALLOWFADEOUT);
     }
+
+    private void OnDestroy()
+    {
+        _clawMoveSound.stop(STOP_MODE.ALLOWFADEOUT);
+        _clawMoveSound.release();
+    }
 }

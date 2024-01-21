@@ -21,7 +21,10 @@ public class BGParallax : MonoBehaviour
 
     void Update()
     {
+        if (_mainCamBrain.ActiveVirtualCamera == null) return;
+
         if (_mainCamBrain && _mainCamBrain.ActiveVirtualCamera.VirtualCameraGameObject.CompareTag("FixedCam")) return;
+
         MoveParallax();
     }
 

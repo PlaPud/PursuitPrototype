@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour, IDataPersistence
+public class PlayerHealth : MonoBehaviour
 {
     public static PlayerHealth Instance;
     [field: SerializeField] public int MaxHealth { get; private set; } = 5;
@@ -92,24 +92,9 @@ public class PlayerHealth : MonoBehaviour, IDataPersistence
         OnDamageTaken?.Invoke(damage);
         CurrentHealth -= CurrentHealth - damage > 0 ? damage : CurrentHealth;
 
-        if (CurrentHealth <= 0) 
-        {
-            DeathCount += 1;
-        }
-
         _avoidDmgTimer = avoidToRegenTime;
         _invincibleTimer = invincibleTime;
         _regenTimer = regenTime;
         OnCountDownRegen?.Invoke(_regenTimer / regenTime);
-    }
-
-    public void LoadData(GameData gameData)
-    {
-        DeathCount = gameData.DeathCount;
-    }
-
-    public void SaveData(GameData gameData)
-    {
-        gameData.DeathCount = DeathCount;
     }
 }

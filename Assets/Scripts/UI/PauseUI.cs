@@ -72,6 +72,17 @@ public class PauseUI : MonoBehaviour
         _EnableAllMenuUI();
     }
 
+    public void HandleOnRestart()
+    {
+        SceneManager.LoadScene("Loading");
+    }
+
+    public void HandleOnQuit()
+    {
+        GameManager.Instance.IsPaused = false;
+        SceneManager.LoadScene("MainMenu");
+    }
+
     private void _EnableAllVolumeUI()
     {
         volumeMenu.SetActive(true);
@@ -113,9 +124,4 @@ public class PauseUI : MonoBehaviour
         }
     }
 
-    public void HandleOnQuit()
-    {
-        GameManager.Instance.IsPaused = false;
-        SceneManager.LoadScene("MainMenu");
-    }
 }

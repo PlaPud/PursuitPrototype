@@ -9,9 +9,9 @@ public class EnemyExplodeEffManager : MonoBehaviour
     public static EnemyExplodeEffManager Instance;
 
     [SerializeField] private GameObject enemyExplodeEffPrefab;
+    [SerializeField] private int poolAmount = 20;
 
     private List<GameObject> _enemyExplodeEffPool = new List<GameObject>();
-    private int _poolAmount = 20;
 
 
     private void Awake()
@@ -21,7 +21,7 @@ public class EnemyExplodeEffManager : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i < _poolAmount; i++)
+        for (int i = 0; i < poolAmount; i++)
         {
             GameObject newObj = Instantiate(enemyExplodeEffPrefab, transform);
             newObj.SetActive(false);

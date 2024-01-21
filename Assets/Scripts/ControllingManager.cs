@@ -98,6 +98,7 @@ public class ControllingManager : MonoBehaviour
                 break;
             case Control.CompBot:
                 CompBotControlled = _GetControlledCompBot();
+                Cursor.visible = true;
                 break;
             case Control.ClawMachine:
                 ClawMachineControlled = _GetControlledClawMachine();

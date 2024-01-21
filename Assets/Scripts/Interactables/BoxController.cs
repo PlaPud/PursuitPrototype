@@ -130,4 +130,10 @@ public class BoxController : MonoBehaviour, IDataPersistence
 
     [ContextMenu("Generate GUID for This Key Item")]
     private void _GenerateItemGuid() => boxid = "B-" + System.Guid.NewGuid().ToString();
+
+    private void OnDestroy()
+    {
+        _boxMoveSound.stop(STOP_MODE.ALLOWFADEOUT);
+        _boxMoveSound.release();
+    }
 }

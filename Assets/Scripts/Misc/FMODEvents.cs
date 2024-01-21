@@ -44,6 +44,11 @@ public class FMODEvents : MonoBehaviour
     [field: SerializeField] public EventReference ElevatorMove { get; private set; }
     [field: SerializeField] public EventReference ElevatorArrive { get; private set; }
 
+    [field: Header("Extra Mode")]
+    [field: SerializeField] public EventReference ExtraModeStart { get; private set; }
+    [field: SerializeField] public EventReference ExtraModeFailed { get; private set; }
+    [field: SerializeField] public EventReference CoreCollect { get; private set; }
+
     public static FMODEvents Instance { get; private set; }
 
     private List<EventInstance> _eventInstances = new List<EventInstance>();

@@ -468,4 +468,10 @@ public class CompBotController : IControllableOnGround
         Gizmos.DrawWireSphere(transform.position, maxGrapplingDistance);
     }
 
+    private void OnDestroy()
+    {
+        _shootHookSound.stop(STOP_MODE.ALLOWFADEOUT);
+        _shootHookSound.release();
+    }
+
 }
