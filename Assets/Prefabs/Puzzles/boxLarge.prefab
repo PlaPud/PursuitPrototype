@@ -195,5 +195,8 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 256
   boxCastDistance: 1.1
   boxCastSize: {x: 1.8, y: 0.15}

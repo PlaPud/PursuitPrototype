@@ -15,7 +15,8 @@ public class PlayerCombatController : MonoBehaviour
 
     private bool _toShoot;
     private bool _isInCoolDown;
-    private bool _isInCombat;
+
+    public bool IsInCombat { get; private set; }
 
     public List<GameObject> CurrentInField { get; private set; }
 
@@ -38,7 +39,7 @@ public class PlayerCombatController : MonoBehaviour
 
     private void Update()
     {
-        if (!_isInCombat) return;
+        if (!IsInCombat) return;
         GetInputShoot();
     }
 
@@ -60,7 +61,7 @@ public class PlayerCombatController : MonoBehaviour
 
     private void HandleShoot() 
     {
-        if (!_isInCombat || !_toShoot || CurrentInField.Count == MaxInField || _isInCoolDown) return;
+        if (!IsInCombat || !_toShoot || CurrentInField.Count == MaxInField || _isInCoolDown) return;
 
         GameObject bomb = BombPoolingManager.Instance.GetBombFromPool();
 
@@ -105,12 +106,12 @@ public class PlayerCombatController : MonoBehaviour
 
     private void EnableCombat() 
     {
-        _isInCombat = true;
+        IsInCombat = true;
     }
 
     private void DisableCombat() 
     {
-        _isInCombat = false;
+        IsInCombat = false;
         _toShoot = false ;
         _isInCoolDown = false;
     }

@@ -119,7 +119,7 @@ public class ClawMachineController : MonoBehaviour
     {
         bool cantMoveRight = (_hitRailRight && !_hitRailRight.collider.CompareTag("ClawMachineRail") || _rightStuckOnHold) && _moveX > 0;
         bool cantMoveLeft = (_hitRailLeft && !_hitRailLeft.collider.CompareTag("ClawMachineRail") || _leftStuckOnHold) && _moveX < 0;
-        bool cantMoveDown = _holdingObject && _holdingObject.GetComponent<BoxController>().IsGrounded && _moveY < 00;
+        bool cantMoveDown = _holdingObject && (_holdingObject.GetComponent<BoxController>().IsGrounded) && _moveY < 0;
 
         float appliedX = (cantMoveLeft || cantMoveRight) ? 0 : _moveX * moveSpeed;
         float appliedY =  (cantMoveDown) ? 0 : _moveY * moveSpeed;

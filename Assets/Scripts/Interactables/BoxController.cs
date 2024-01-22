@@ -10,14 +10,17 @@ public class BoxController : MonoBehaviour, IDataPersistence
 
     [Header("Ground Check")]
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask playerLayer;
     [SerializeField] private float boxCastDistance;
     [SerializeField] private Vector2 boxCastSize;
 
     private Rigidbody2D _boxRB;
     private FixedJoint2D _boxFJ;
     private RaycastHit2D _hitGround;
+    private RaycastHit2D _hitPlayer;
 
     public bool IsGrounded => _hitGround;
+    public bool IsHitPlayer => _hitPlayer;
 
     private EventInstance _boxMoveSound;
 

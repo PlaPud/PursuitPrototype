@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public bool IsLoaded { get; private set; } = false;
 
     private PlayerController _playerCat;
+    private PlayerCombatController _catCombat;
 
     private void Awake()
     {
@@ -30,6 +31,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         _playerCat = ControllingManager.Instance.CatController;
+        _catCombat = _playerCat.GetComponent<PlayerCombatController>();
         
         if (PlayerHealth.Instance) 
         {
@@ -67,6 +69,26 @@ public class GameManager : MonoBehaviour
     private void HandleOnPause() 
     {
         Time.timeScale = IsPaused ? 0 : 1;
-        Cursor.visible = IsPaused ? true : ControllingManager.Instance.IsControllingCompBot ? true : false;
+
+        if (IsPaused) 
+        {
+            Cursor.visible = true;
+            return;
+        }
+
+        if (ControllingManager.Instance.IsControllingCompBot) 
+        {
+            Cursor.visible = true;
+            return;
+        }
+
+        if (ControllingManager.Instance.IsControllingCat && _catCombat.IsInCombat) 
+        {
+            Cursor.visible = true;
+            return;
+        }
+
+        Cursor.visible = false;
+
     }
 }
