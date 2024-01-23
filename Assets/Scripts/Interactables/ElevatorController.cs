@@ -1,14 +1,18 @@
 using FMOD.Studio;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("PlayMode")]
+[assembly: InternalsVisibleTo("EditMode")]
 
 public class ElevatorController : MonoBehaviour
 {
     [Header("Elevator Control")]
-    [SerializeField] private Transform lowerPos;
-    [SerializeField] private Transform upperPos;
-    [SerializeField] private float moveSpeed;
+    [SerializeField] internal Transform lowerPos;
+    [SerializeField] internal Transform upperPos;
+    [SerializeField] internal float moveSpeed;
 
     public enum ElevatorState { Ready, GoingUp, GoingDown }
     public enum ElevatorIdlePos { Top, Bottom }
@@ -32,8 +36,15 @@ public class ElevatorController : MonoBehaviour
 
     void Start()
     {
-        _anim = GetComponent<Animator>();
-        _elevatorSound = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.ElevatorMove);
+        if (_anim != null) 
+        {
+            _anim = GetComponent<Animator>();
+        }
+
+        if (AudioManager.Instance != null) 
+        {
+            _elevatorSound = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.ElevatorMove);
+        }
     }
 
     void Update()
@@ -62,7 +73,11 @@ public class ElevatorController : MonoBehaviour
 
     private void HandleGoingDown() 
     {
-        if (CurrentPos == ElevatorIdlePos.Bottom) return;
+        if (CurrentPos == ElevatorIdlePos.Bottom) 
+        {
+            CurrentState = ElevatorState.Ready;
+            return;
+        }
 
         _ChangeAnimationState(ELEVATOR_DOWN);
         _MoveElevator(to: lowerPos, isReach: IsReachedBottom, pos: ElevatorIdlePos.Bottom);
@@ -70,7 +85,10 @@ public class ElevatorController : MonoBehaviour
 
     private void HandleGoingUp() 
     {
-        if (CurrentPos == ElevatorIdlePos.Top) return;
+        if (CurrentPos == ElevatorIdlePos.Top) { 
+            CurrentState = ElevatorState.Ready;
+            return; 
+        }
         _ChangeAnimationState(ELEVATOR_UP);
         _MoveElevator(to: upperPos, isReach: IsReachedTop, pos: ElevatorIdlePos.Top);
     }
@@ -110,7 +128,7 @@ public class ElevatorController : MonoBehaviour
     {
         if (newAnimState == currentAnimationState) return;
         currentAnimationState = newAnimState;
-        _anim.Play(currentAnimationState);
+        _anim?.Play(currentAnimationState);
     }
 
     private void UpdateSound() 

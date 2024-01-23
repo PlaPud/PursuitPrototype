@@ -1,14 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-public class ElevatorBottonController : Interactable
-{
-    enum ButtonRole { Top, Bottom, Inside }
+[assembly: InternalsVisibleTo("PlayMode")]
+[assembly: InternalsVisibleTo("EditMode")]
 
-    [SerializeField] ElevatorController controlledElevator;
-    [SerializeField] ButtonRole buttonRole;
+public class ElevatorButtonController : Interactable
+{
+    public enum ButtonRole { Top, Bottom, Inside }
+
+    [SerializeField] internal ElevatorController controlledElevator;
+    [SerializeField] internal ButtonRole buttonRole;
 
     private Collider2D _buttonCD;
 
