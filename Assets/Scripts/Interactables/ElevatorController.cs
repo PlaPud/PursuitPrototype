@@ -36,10 +36,7 @@ public class ElevatorController : MonoBehaviour
 
     void Start()
     {
-        if (_anim != null) 
-        {
-            _anim = GetComponent<Animator>();
-        }
+        _anim = GetComponent<Animator>();
 
         if (AudioManager.Instance != null) 
         {
@@ -128,7 +125,7 @@ public class ElevatorController : MonoBehaviour
     {
         if (newAnimState == currentAnimationState) return;
         currentAnimationState = newAnimState;
-        _anim?.Play(currentAnimationState);
+        if (_anim) _anim.Play(currentAnimationState);
     }
 
     private void UpdateSound() 

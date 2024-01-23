@@ -82,7 +82,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (ControllingManager.Instance.IsControllingCat && _catCombat.IsInCombat) 
+        if (ControllingManager.Instance.IsControllingCat && _catCombat && _catCombat.IsInCombat) 
         {
             Cursor.visible = true;
             return;

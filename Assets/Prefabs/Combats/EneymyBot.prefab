@@ -176,11 +176,11 @@ MonoBehaviour:
   DEBUG: 0
   walkSpeedLower: 3
   walkSpeedUpper: 6
-  chaseSpeedLower: 10
-  chaseSpeedUpper: 14
+  chaseSpeedLower: 8
+  chaseSpeedUpper: 12
   changeChaseSpeedTime: 2
   jumpForce: 6
-  waitForTeleportTimeLower: 1
+  waitForTeleportTimeLower: 1.5
   waitForTeleportTimeUpper: 3
   rangeToAttack: 1.25
   damageRadius: 0.65
