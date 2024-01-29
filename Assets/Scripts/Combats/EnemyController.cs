@@ -273,7 +273,6 @@ public class EnemyController : MonoBehaviour
 
         if (_chargeToAttackTimer > 0f)
         {
-            _enemySR.color = Color.red;
             _enemyRB.velocity = new Vector2(0f, _enemyRB.velocity.y);
             _chargeToAttackTimer -= Time.deltaTime;
             return;
@@ -354,6 +353,7 @@ public class EnemyController : MonoBehaviour
         _isAttacking = true;
         Vector2 diffDist = _target.transform.position - transform.position;
         float targetDir = Mathf.Sign(diffDist.x);
+        _enemySR.color = Color.red;
         _enemyRB.AddForce(new Vector2(attackLeapForce * targetDir, attackLeapForce), ForceMode2D.Impulse);
 
         AudioManager.Instance?.PlayOneShot(FMODEvents.Instance.EnemyAttack, transform.position); 

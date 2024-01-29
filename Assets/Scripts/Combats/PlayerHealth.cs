@@ -1,16 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("PlayMode")]
+[assembly: InternalsVisibleTo("EditMode")]
 
 public class PlayerHealth : MonoBehaviour
 {
     public static PlayerHealth Instance;
-    [field: SerializeField] public int MaxHealth { get; private set; } = 5;
-    [SerializeField] private int regenAmount = 1;
-    [SerializeField] private float invincibleTime = 1f;
-    [SerializeField] private float avoidToRegenTime = 10f;
-    [SerializeField] private float regenTime = 5f;
+    [field: SerializeField] public int MaxHealth { get; internal set; } = 5;
+    [SerializeField] internal int regenAmount = 1;
+    [SerializeField] internal float invincibleTime = 1f;
+    [SerializeField] internal float avoidToRegenTime = 10f;
+    [SerializeField] internal float regenTime = 5f;
 
     public int CurrentHealth = 5;
     public int DeathCount { get; private set; } = 0;

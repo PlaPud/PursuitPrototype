@@ -26,13 +26,19 @@ public class BombController : MonoBehaviour
 
     void Update()
     {
-        HandleExplosion();
+        HandleExplosionTimer();
+
     }
 
-    private void HandleExplosion() 
+    private void HandleExplosionTimer() 
     {
         _timer -= _timer - Time.deltaTime > 0f ? Time.deltaTime : _timer;
-        if (_timer > 0f) return;
+        if (_timer > 0f) 
+        {
+            _bombSR.color = Color.Lerp(Color.white, Color.red, 1f - (_timer / explodeTime));
+            return;
+        };
+
         RaycastHit2D[] hitEnemies = Physics2D.CircleCastAll(
                 origin: transform.position,
                 radius: explodeRadius,
@@ -49,6 +55,7 @@ public class BombController : MonoBehaviour
             enemyScript.KillEnemy();
         }
 
+        _bombSR.color = Color.white;
         StartCoroutine(_WaitForExplosion());
     }
 
